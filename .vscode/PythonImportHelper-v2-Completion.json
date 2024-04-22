@@ -1,146 +1,1567 @@
 [
     {
-        "label": "absolute_import",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "exit",
+        "importPath": "sys",
+        "description": "sys",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "sys",
         "documentation": {}
     },
     {
-        "label": "division",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "exit",
+        "importPath": "sys",
+        "description": "sys",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "sys",
         "documentation": {}
     },
     {
-        "label": "print_function",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "exit",
+        "importPath": "sys",
+        "description": "sys",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "sys",
         "documentation": {}
     },
     {
-        "label": "absolute_import",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "version_info",
+        "importPath": "sys",
+        "description": "sys",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "sys",
         "documentation": {}
     },
     {
-        "label": "division",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "version",
+        "importPath": "sys",
+        "description": "sys",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "sys",
         "documentation": {}
     },
     {
-        "label": "print_function",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Session",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "absolute_import",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Session",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "division",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Request",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "print_function",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Session",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "absolute_import",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Request",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "division",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Session",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "print_function",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Request",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "absolute_import",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Session",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "division",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Request",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "print_function",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Session",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "absolute_import",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Request",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "division",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Session",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
         "documentation": {}
     },
     {
-        "label": "print_function",
-        "importPath": "__future__",
-        "description": "__future__",
+        "label": "Request",
+        "importPath": "requests",
+        "description": "requests",
         "isExtraImport": true,
-        "detail": "__future__",
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "requests",
+        "description": "requests",
+        "isExtraImport": true,
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "Request",
+        "importPath": "requests",
+        "description": "requests",
+        "isExtraImport": true,
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "Session",
+        "importPath": "requests",
+        "description": "requests",
+        "isExtraImport": true,
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "Request",
+        "importPath": "requests",
+        "description": "requests",
+        "isExtraImport": true,
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "JSONDecodeError",
+        "importPath": "json.decoder",
+        "description": "json.decoder",
+        "isExtraImport": true,
+        "detail": "json.decoder",
+        "documentation": {}
+    },
+    {
+        "label": "JSONDecodeError",
+        "importPath": "json.decoder",
+        "description": "json.decoder",
+        "isExtraImport": true,
+        "detail": "json.decoder",
+        "documentation": {}
+    },
+    {
+        "label": "ArgumentParser",
+        "importPath": "argparse",
+        "description": "argparse",
+        "isExtraImport": true,
+        "detail": "argparse",
+        "documentation": {}
+    },
+    {
+        "label": "ArgumentParser",
+        "importPath": "argparse",
+        "description": "argparse",
+        "isExtraImport": true,
+        "detail": "argparse",
+        "documentation": {}
+    },
+    {
+        "label": "RawTextHelpFormatter",
+        "importPath": "argparse",
+        "description": "argparse",
+        "isExtraImport": true,
+        "detail": "argparse",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "access",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "R_OK",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "stat",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "remove",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "makedirs",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "W_OK",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "access",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "environ",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "environ",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "access",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "R_OK",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "getenv",
+        "importPath": "os",
+        "description": "os",
+        "isExtraImport": true,
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "isdir",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "abspath",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "dirname",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "join",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "abspath",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "join",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "basename",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "isdir",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "join",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "exists",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "isdir",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "abspath",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "dirname",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "join",
+        "importPath": "os.path",
+        "description": "os.path",
+        "isExtraImport": true,
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "StreamHandler",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "Formatter",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "DEBUG",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "Filter",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "DEBUG",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "INFO",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "Formatter",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "StreamHandler",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "getLogger",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "StreamHandler",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "Formatter",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "DEBUG",
+        "importPath": "logging",
+        "description": "logging",
+        "isExtraImport": true,
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "INIParser",
+        "importPath": "varken.iniparser",
+        "description": "varken.iniparser",
+        "isExtraImport": true,
+        "detail": "varken.iniparser",
+        "documentation": {}
+    },
+    {
+        "label": "INIParser",
+        "importPath": "varken.iniparser",
+        "description": "varken.iniparser",
+        "isExtraImport": true,
+        "detail": "varken.iniparser",
+        "documentation": {}
+    },
+    {
+        "label": "DBManager",
+        "importPath": "varken.dbmanager",
+        "description": "varken.dbmanager",
+        "isExtraImport": true,
+        "detail": "varken.dbmanager",
+        "documentation": {}
+    },
+    {
+        "label": "DBManager",
+        "importPath": "varken.dbmanager",
+        "description": "varken.dbmanager",
+        "isExtraImport": true,
+        "detail": "varken.dbmanager",
+        "documentation": {}
+    },
+    {
+        "label": "GeoIPHandler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "clean_sid_check",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "rfc1918_ip_check",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "boolcheck",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "hashit",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "connection_handler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "connection_handler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "hashit",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "connection_handler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "hashit",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "hashit",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "connection_handler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "hashit",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "connection_handler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "hashit",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "connection_handler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "hashit",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "connection_handler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "itemgetter_with_default",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "connection_handler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "mkdir_p",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "GeoIPHandler",
+        "importPath": "varken.helpers",
+        "description": "varken.helpers",
+        "isExtraImport": true,
+        "detail": "varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "TautulliAPI",
+        "importPath": "varken.tautulli",
+        "description": "varken.tautulli",
+        "isExtraImport": true,
+        "detail": "varken.tautulli",
+        "documentation": {}
+    },
+    {
+        "label": "TautulliAPI",
+        "importPath": "varken.tautulli",
+        "description": "varken.tautulli",
+        "isExtraImport": true,
+        "detail": "varken.tautulli",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "match",
+        "importPath": "re",
+        "description": "re",
+        "isExtraImport": true,
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "compile",
+        "importPath": "re",
+        "description": "re",
+        "isExtraImport": true,
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "IGNORECASE",
+        "importPath": "re",
+        "description": "re",
+        "isExtraImport": true,
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "influxdb_client",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "influxdb_client",
+        "description": "influxdb_client",
+        "detail": "influxdb_client",
+        "documentation": {}
+    },
+    {
+        "label": "InfluxDBClient",
+        "importPath": "influxdb_client",
+        "description": "influxdb_client",
+        "isExtraImport": true,
+        "detail": "influxdb_client",
+        "documentation": {}
+    },
+    {
+        "label": "BucketRetentionRules",
+        "importPath": "influxdb_client",
+        "description": "influxdb_client",
+        "isExtraImport": true,
+        "detail": "influxdb_client",
+        "documentation": {}
+    },
+    {
+        "label": "InfluxDBClient",
+        "importPath": "influxdb_client",
+        "description": "influxdb_client",
+        "isExtraImport": true,
+        "detail": "influxdb_client",
+        "documentation": {}
+    },
+    {
+        "label": "SYNCHRONOUS",
+        "importPath": "influxdb_client.client.write_api",
+        "description": "influxdb_client.client.write_api",
+        "isExtraImport": true,
+        "detail": "influxdb_client.client.write_api",
+        "documentation": {}
+    },
+    {
+        "label": "SYNCHRONOUS",
+        "importPath": "influxdb_client.client.write_api",
+        "description": "influxdb_client.client.write_api",
+        "isExtraImport": true,
+        "detail": "influxdb_client.client.write_api",
+        "documentation": {}
+    },
+    {
+        "label": "InfluxDBError",
+        "importPath": "influxdb_client.client.exceptions",
+        "description": "influxdb_client.client.exceptions",
+        "isExtraImport": true,
+        "detail": "influxdb_client.client.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InfluxDBError",
+        "importPath": "influxdb_client.client.exceptions",
+        "description": "influxdb_client.client.exceptions",
+        "isExtraImport": true,
+        "detail": "influxdb_client.client.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "NewConnectionError",
+        "importPath": "urllib3.exceptions",
+        "description": "urllib3.exceptions",
+        "isExtraImport": true,
+        "detail": "urllib3.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "InsecureRequestWarning",
+        "importPath": "urllib3.exceptions",
+        "description": "urllib3.exceptions",
+        "isExtraImport": true,
+        "detail": "urllib3.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "md5",
+        "importPath": "hashlib",
+        "description": "hashlib",
+        "isExtraImport": true,
+        "detail": "hashlib",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "datetime",
+        "description": "datetime",
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timedelta",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "sleep",
+        "importPath": "time",
+        "description": "time",
+        "isExtraImport": true,
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "sleep",
+        "importPath": "time",
+        "description": "time",
+        "isExtraImport": true,
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "IPv4Address",
+        "importPath": "ipaddress",
+        "description": "ipaddress",
+        "isExtraImport": true,
+        "detail": "ipaddress",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPError",
+        "importPath": "urllib.error",
+        "description": "urllib.error",
+        "isExtraImport": true,
+        "detail": "urllib.error",
+        "documentation": {}
+    },
+    {
+        "label": "URLError",
+        "importPath": "urllib.error",
+        "description": "urllib.error",
+        "isExtraImport": true,
+        "detail": "urllib.error",
+        "documentation": {}
+    },
+    {
+        "label": "Reader",
+        "importPath": "geoip2.database",
+        "description": "geoip2.database",
+        "isExtraImport": true,
+        "detail": "geoip2.database",
+        "documentation": {}
+    },
+    {
+        "label": "open",
+        "importPath": "tarfile",
+        "description": "tarfile",
+        "isExtraImport": true,
+        "detail": "tarfile",
+        "documentation": {}
+    },
+    {
+        "label": "disable_warnings",
+        "importPath": "urllib3",
+        "description": "urllib3",
+        "isExtraImport": true,
+        "detail": "urllib3",
+        "documentation": {}
+    },
+    {
+        "label": "urlretrieve",
+        "importPath": "urllib.request",
+        "description": "urllib.request",
+        "isExtraImport": true,
+        "detail": "urllib.request",
+        "documentation": {}
+    },
+    {
+        "label": "InvalidSchema",
+        "importPath": "requests.exceptions",
+        "description": "requests.exceptions",
+        "isExtraImport": true,
+        "detail": "requests.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "SSLError",
+        "importPath": "requests.exceptions",
+        "description": "requests.exceptions",
+        "isExtraImport": true,
+        "detail": "requests.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "ConnectionError",
+        "importPath": "requests.exceptions",
+        "description": "requests.exceptions",
+        "isExtraImport": true,
+        "detail": "requests.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "ChunkedEncodingError",
+        "importPath": "requests.exceptions",
+        "description": "requests.exceptions",
+        "isExtraImport": true,
+        "detail": "requests.exceptions",
+        "documentation": {}
+    },
+    {
+        "label": "copyfile",
+        "importPath": "shutil",
+        "description": "shutil",
+        "isExtraImport": true,
+        "detail": "shutil",
+        "documentation": {}
+    },
+    {
+        "label": "ConfigParser",
+        "importPath": "configparser",
+        "description": "configparser",
+        "isExtraImport": true,
+        "detail": "configparser",
+        "documentation": {}
+    },
+    {
+        "label": "NoOptionError",
+        "importPath": "configparser",
+        "description": "configparser",
+        "isExtraImport": true,
+        "detail": "configparser",
+        "documentation": {}
+    },
+    {
+        "label": "NoSectionError",
+        "importPath": "configparser",
+        "description": "configparser",
+        "isExtraImport": true,
+        "detail": "configparser",
+        "documentation": {}
+    },
+    {
+        "label": "BlacklistFilter",
+        "importPath": "varken.varkenlogger",
+        "description": "varken.varkenlogger",
+        "isExtraImport": true,
+        "detail": "varken.varkenlogger",
+        "documentation": {}
+    },
+    {
+        "label": "VarkenLogger",
+        "importPath": "varken.varkenlogger",
+        "description": "varken.varkenlogger",
+        "isExtraImport": true,
+        "detail": "varken.varkenlogger",
+        "documentation": {}
+    },
+    {
+        "label": "SickChillServer",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "UniFiServer",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrServer",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "RadarrServer",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiServer",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OverseerrServer",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "TautulliServer",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "InfluxServer",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "Influx2Server",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "LidarrQueue",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "LidarrAlbum",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiRequestCounts",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiIssuesCounts",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiMovieRequest",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiTVRequest",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OverseerrRequestCounts",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "QueuePages",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "RadarrMovie",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "RadarrQueue",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SickChillTVShow",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrEpisode",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrTVShow",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrQueue",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "QueuePages",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "TautulliStream",
+        "importPath": "varken.structures",
+        "description": "varken.structures",
+        "isExtraImport": true,
+        "detail": "varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "NamedTuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
         "documentation": {}
     },
     {
@@ -256,60 +1677,350 @@
         "documentation": {}
     },
     {
-        "label": "AnsibleModule",
-        "importPath": "ansible.module_utils.basic",
-        "description": "ansible.module_utils.basic",
+        "label": "AddressNotFoundError",
+        "importPath": "geoip2.errors",
+        "description": "geoip2.errors",
         "isExtraImport": true,
-        "detail": "ansible.module_utils.basic",
+        "detail": "geoip2.errors",
         "documentation": {}
     },
     {
-        "label": "AnsibleModule",
-        "importPath": "ansible.module_utils.basic",
-        "description": "ansible.module_utils.basic",
+        "label": "RotatingFileHandler",
+        "importPath": "logging.handlers",
+        "description": "logging.handlers",
         "isExtraImport": true,
-        "detail": "ansible.module_utils.basic",
+        "detail": "logging.handlers",
         "documentation": {}
     },
     {
-        "label": "AnsibleModule",
-        "importPath": "ansible.module_utils.basic",
-        "description": "ansible.module_utils.basic",
-        "isExtraImport": true,
-        "detail": "ansible.module_utils.basic",
-        "documentation": {}
-    },
-    {
-        "label": "AnsibleModule",
-        "importPath": "ansible.module_utils.basic",
-        "description": "ansible.module_utils.basic",
-        "isExtraImport": true,
-        "detail": "ansible.module_utils.basic",
-        "documentation": {}
-    },
-    {
-        "label": "AnsibleModule",
-        "importPath": "ansible.module_utils.basic",
-        "description": "ansible.module_utils.basic",
-        "isExtraImport": true,
-        "detail": "ansible.module_utils.basic",
-        "documentation": {}
-    },
-    {
-        "label": "AnsibleModule",
-        "importPath": "ansible.module_utils.basic",
-        "description": "ansible.module_utils.basic",
-        "isExtraImport": true,
-        "detail": "ansible.module_utils.basic",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
+        "label": "platform",
         "kind": 6,
         "isExtraImport": true,
-        "importPath": "datetime",
-        "description": "datetime",
-        "detail": "datetime",
+        "importPath": "platform",
+        "description": "platform",
+        "detail": "platform",
+        "documentation": {}
+    },
+    {
+        "label": "schedule",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "schedule",
+        "description": "schedule",
+        "detail": "schedule",
+        "documentation": {}
+    },
+    {
+        "label": "distro",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "distro",
+        "description": "distro",
+        "detail": "distro",
+        "documentation": {}
+    },
+    {
+        "label": "Queue",
+        "importPath": "queue",
+        "description": "queue",
+        "isExtraImport": true,
+        "detail": "queue",
+        "documentation": {}
+    },
+    {
+        "label": "Thread",
+        "importPath": "threading",
+        "description": "threading",
+        "isExtraImport": true,
+        "detail": "threading",
+        "documentation": {}
+    },
+    {
+        "label": "structures",
+        "importPath": "varken",
+        "description": "varken",
+        "isExtraImport": true,
+        "detail": "varken",
+        "documentation": {}
+    },
+    {
+        "label": "VERSION",
+        "importPath": "varken",
+        "description": "varken",
+        "isExtraImport": true,
+        "detail": "varken",
+        "documentation": {}
+    },
+    {
+        "label": "BRANCH",
+        "importPath": "varken",
+        "description": "varken",
+        "isExtraImport": true,
+        "detail": "varken",
+        "documentation": {}
+    },
+    {
+        "label": "BUILD_DATE",
+        "importPath": "varken",
+        "description": "varken",
+        "isExtraImport": true,
+        "detail": "varken",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiAPI",
+        "importPath": "varken.ombi",
+        "description": "varken.ombi",
+        "isExtraImport": true,
+        "detail": "varken.ombi",
+        "documentation": {}
+    },
+    {
+        "label": "OverseerrAPI",
+        "importPath": "varken.overseerr",
+        "description": "varken.overseerr",
+        "isExtraImport": true,
+        "detail": "varken.overseerr",
+        "documentation": {}
+    },
+    {
+        "label": "UniFiAPI",
+        "importPath": "varken.unifi",
+        "description": "varken.unifi",
+        "isExtraImport": true,
+        "detail": "varken.unifi",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrAPI",
+        "importPath": "varken.sonarr",
+        "description": "varken.sonarr",
+        "isExtraImport": true,
+        "detail": "varken.sonarr",
+        "documentation": {}
+    },
+    {
+        "label": "RadarrAPI",
+        "importPath": "varken.radarr",
+        "description": "varken.radarr",
+        "isExtraImport": true,
+        "detail": "varken.radarr",
+        "documentation": {}
+    },
+    {
+        "label": "LidarrAPI",
+        "importPath": "varken.lidarr",
+        "description": "varken.lidarr",
+        "isExtraImport": true,
+        "detail": "varken.lidarr",
+        "documentation": {}
+    },
+    {
+        "label": "InfluxDB2Manager",
+        "importPath": "varken.influxdb2manager",
+        "description": "varken.influxdb2manager",
+        "isExtraImport": true,
+        "detail": "varken.influxdb2manager",
+        "documentation": {}
+    },
+    {
+        "label": "SickChillAPI",
+        "importPath": "varken.sickchill",
+        "description": "varken.sickchill",
+        "isExtraImport": true,
+        "detail": "varken.sickchill",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
         "documentation": {}
     },
     {
@@ -319,24 +2030,6 @@
         "importPath": "json",
         "description": "json",
         "detail": "json",
-        "documentation": {}
-    },
-    {
-        "label": "os",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "os",
-        "description": "os",
-        "detail": "os",
-        "documentation": {}
-    },
-    {
-        "label": "time",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "time",
-        "description": "time",
-        "detail": "time",
         "documentation": {}
     },
     {
@@ -418,6 +2111,672 @@
         "description": "doc.source.conf",
         "peekOfCode": "html_static_path = [\"_static\"]",
         "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "docker",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "docker = True  # True if using a docker container, False if not\nhost_ip = '127.0.0.1'  # Only relevant if docker = False\nusername = 'admin'  # Grafana username\npassword = 'admin'  # Grafana password\ngrafana_url = 'http://grafana:3000'\nverify = False  # Verify SSL\n# Do not remove any of these, just change the ones you use\nmovies_library = 'Movies'\nfourk_movies_library = 'Movies 4K'\ntv_shows_library = 'TV Shows'",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "host_ip",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "host_ip = '127.0.0.1'  # Only relevant if docker = False\nusername = 'admin'  # Grafana username\npassword = 'admin'  # Grafana password\ngrafana_url = 'http://grafana:3000'\nverify = False  # Verify SSL\n# Do not remove any of these, just change the ones you use\nmovies_library = 'Movies'\nfourk_movies_library = 'Movies 4K'\ntv_shows_library = 'TV Shows'\nfourk_tv_shows_library = 'TV Shows 4K'",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "username",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "username = 'admin'  # Grafana username\npassword = 'admin'  # Grafana password\ngrafana_url = 'http://grafana:3000'\nverify = False  # Verify SSL\n# Do not remove any of these, just change the ones you use\nmovies_library = 'Movies'\nfourk_movies_library = 'Movies 4K'\ntv_shows_library = 'TV Shows'\nfourk_tv_shows_library = 'TV Shows 4K'\nmusic_library = 'Music'",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "password",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "password = 'admin'  # Grafana password\ngrafana_url = 'http://grafana:3000'\nverify = False  # Verify SSL\n# Do not remove any of these, just change the ones you use\nmovies_library = 'Movies'\nfourk_movies_library = 'Movies 4K'\ntv_shows_library = 'TV Shows'\nfourk_tv_shows_library = 'TV Shows 4K'\nmusic_library = 'Music'\nusg_name = 'Gateway'",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "grafana_url",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "grafana_url = 'http://grafana:3000'\nverify = False  # Verify SSL\n# Do not remove any of these, just change the ones you use\nmovies_library = 'Movies'\nfourk_movies_library = 'Movies 4K'\ntv_shows_library = 'TV Shows'\nfourk_tv_shows_library = 'TV Shows 4K'\nmusic_library = 'Music'\nusg_name = 'Gateway'\nombi_url = 'https://yourdomain.com/ombi'",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "verify",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "verify = False  # Verify SSL\n# Do not remove any of these, just change the ones you use\nmovies_library = 'Movies'\nfourk_movies_library = 'Movies 4K'\ntv_shows_library = 'TV Shows'\nfourk_tv_shows_library = 'TV Shows 4K'\nmusic_library = 'Music'\nusg_name = 'Gateway'\nombi_url = 'https://yourdomain.com/ombi'\ntautulli_url = 'https://yourdomain.com/tautulli'",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "movies_library",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "movies_library = 'Movies'\nfourk_movies_library = 'Movies 4K'\ntv_shows_library = 'TV Shows'\nfourk_tv_shows_library = 'TV Shows 4K'\nmusic_library = 'Music'\nusg_name = 'Gateway'\nombi_url = 'https://yourdomain.com/ombi'\ntautulli_url = 'https://yourdomain.com/tautulli'\nsonarr_url = 'https://yourdomain.com/sonarr'\nradarr_url = 'https://yourdomain.com/radarr'",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "fourk_movies_library",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "fourk_movies_library = 'Movies 4K'\ntv_shows_library = 'TV Shows'\nfourk_tv_shows_library = 'TV Shows 4K'\nmusic_library = 'Music'\nusg_name = 'Gateway'\nombi_url = 'https://yourdomain.com/ombi'\ntautulli_url = 'https://yourdomain.com/tautulli'\nsonarr_url = 'https://yourdomain.com/sonarr'\nradarr_url = 'https://yourdomain.com/radarr'\nsickchill_url = 'https://yourdomain.com/sickchill'",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "tv_shows_library",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "tv_shows_library = 'TV Shows'\nfourk_tv_shows_library = 'TV Shows 4K'\nmusic_library = 'Music'\nusg_name = 'Gateway'\nombi_url = 'https://yourdomain.com/ombi'\ntautulli_url = 'https://yourdomain.com/tautulli'\nsonarr_url = 'https://yourdomain.com/sonarr'\nradarr_url = 'https://yourdomain.com/radarr'\nsickchill_url = 'https://yourdomain.com/sickchill'\nlidarr_url = 'https://yourdomain.com/lidarr'",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "fourk_tv_shows_library",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "fourk_tv_shows_library = 'TV Shows 4K'\nmusic_library = 'Music'\nusg_name = 'Gateway'\nombi_url = 'https://yourdomain.com/ombi'\ntautulli_url = 'https://yourdomain.com/tautulli'\nsonarr_url = 'https://yourdomain.com/sonarr'\nradarr_url = 'https://yourdomain.com/radarr'\nsickchill_url = 'https://yourdomain.com/sickchill'\nlidarr_url = 'https://yourdomain.com/lidarr'\n# Do not edit past this line #",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "music_library",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "music_library = 'Music'\nusg_name = 'Gateway'\nombi_url = 'https://yourdomain.com/ombi'\ntautulli_url = 'https://yourdomain.com/tautulli'\nsonarr_url = 'https://yourdomain.com/sonarr'\nradarr_url = 'https://yourdomain.com/radarr'\nsickchill_url = 'https://yourdomain.com/sickchill'\nlidarr_url = 'https://yourdomain.com/lidarr'\n# Do not edit past this line #\nsession = Session()",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "usg_name",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "usg_name = 'Gateway'\nombi_url = 'https://yourdomain.com/ombi'\ntautulli_url = 'https://yourdomain.com/tautulli'\nsonarr_url = 'https://yourdomain.com/sonarr'\nradarr_url = 'https://yourdomain.com/radarr'\nsickchill_url = 'https://yourdomain.com/sickchill'\nlidarr_url = 'https://yourdomain.com/lidarr'\n# Do not edit past this line #\nsession = Session()\nauth = (username, password)",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "ombi_url",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "ombi_url = 'https://yourdomain.com/ombi'\ntautulli_url = 'https://yourdomain.com/tautulli'\nsonarr_url = 'https://yourdomain.com/sonarr'\nradarr_url = 'https://yourdomain.com/radarr'\nsickchill_url = 'https://yourdomain.com/sickchill'\nlidarr_url = 'https://yourdomain.com/lidarr'\n# Do not edit past this line #\nsession = Session()\nauth = (username, password)\nurl_base = f\"{grafana_url.rstrip('/')}/api\"",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "tautulli_url",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "tautulli_url = 'https://yourdomain.com/tautulli'\nsonarr_url = 'https://yourdomain.com/sonarr'\nradarr_url = 'https://yourdomain.com/radarr'\nsickchill_url = 'https://yourdomain.com/sickchill'\nlidarr_url = 'https://yourdomain.com/lidarr'\n# Do not edit past this line #\nsession = Session()\nauth = (username, password)\nurl_base = f\"{grafana_url.rstrip('/')}/api\"\nvarken_datasource = []",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "sonarr_url",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "sonarr_url = 'https://yourdomain.com/sonarr'\nradarr_url = 'https://yourdomain.com/radarr'\nsickchill_url = 'https://yourdomain.com/sickchill'\nlidarr_url = 'https://yourdomain.com/lidarr'\n# Do not edit past this line #\nsession = Session()\nauth = (username, password)\nurl_base = f\"{grafana_url.rstrip('/')}/api\"\nvarken_datasource = []\ndatasource_name = \"Varken-Script\"",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "radarr_url",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "radarr_url = 'https://yourdomain.com/radarr'\nsickchill_url = 'https://yourdomain.com/sickchill'\nlidarr_url = 'https://yourdomain.com/lidarr'\n# Do not edit past this line #\nsession = Session()\nauth = (username, password)\nurl_base = f\"{grafana_url.rstrip('/')}/api\"\nvarken_datasource = []\ndatasource_name = \"Varken-Script\"\ntry:",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "sickchill_url",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "sickchill_url = 'https://yourdomain.com/sickchill'\nlidarr_url = 'https://yourdomain.com/lidarr'\n# Do not edit past this line #\nsession = Session()\nauth = (username, password)\nurl_base = f\"{grafana_url.rstrip('/')}/api\"\nvarken_datasource = []\ndatasource_name = \"Varken-Script\"\ntry:\n    datasources = session.get(url_base + '/datasources', auth=auth, verify=verify).json()",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "lidarr_url",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "lidarr_url = 'https://yourdomain.com/lidarr'\n# Do not edit past this line #\nsession = Session()\nauth = (username, password)\nurl_base = f\"{grafana_url.rstrip('/')}/api\"\nvarken_datasource = []\ndatasource_name = \"Varken-Script\"\ntry:\n    datasources = session.get(url_base + '/datasources', auth=auth, verify=verify).json()\n    varken_datasource = [source for source in datasources if source['database'] == 'varken']",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "session",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "session = Session()\nauth = (username, password)\nurl_base = f\"{grafana_url.rstrip('/')}/api\"\nvarken_datasource = []\ndatasource_name = \"Varken-Script\"\ntry:\n    datasources = session.get(url_base + '/datasources', auth=auth, verify=verify).json()\n    varken_datasource = [source for source in datasources if source['database'] == 'varken']\n    if varken_datasource:\n        print(f'varken datasource already exists with the name \"{varken_datasource[0][\"name\"]}\"')",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "auth",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "auth = (username, password)\nurl_base = f\"{grafana_url.rstrip('/')}/api\"\nvarken_datasource = []\ndatasource_name = \"Varken-Script\"\ntry:\n    datasources = session.get(url_base + '/datasources', auth=auth, verify=verify).json()\n    varken_datasource = [source for source in datasources if source['database'] == 'varken']\n    if varken_datasource:\n        print(f'varken datasource already exists with the name \"{varken_datasource[0][\"name\"]}\"')\n        datasource_name = varken_datasource[0][\"name\"]",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "url_base",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "url_base = f\"{grafana_url.rstrip('/')}/api\"\nvarken_datasource = []\ndatasource_name = \"Varken-Script\"\ntry:\n    datasources = session.get(url_base + '/datasources', auth=auth, verify=verify).json()\n    varken_datasource = [source for source in datasources if source['database'] == 'varken']\n    if varken_datasource:\n        print(f'varken datasource already exists with the name \"{varken_datasource[0][\"name\"]}\"')\n        datasource_name = varken_datasource[0][\"name\"]\nexcept JSONDecodeError:",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "varken_datasource",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "varken_datasource = []\ndatasource_name = \"Varken-Script\"\ntry:\n    datasources = session.get(url_base + '/datasources', auth=auth, verify=verify).json()\n    varken_datasource = [source for source in datasources if source['database'] == 'varken']\n    if varken_datasource:\n        print(f'varken datasource already exists with the name \"{varken_datasource[0][\"name\"]}\"')\n        datasource_name = varken_datasource[0][\"name\"]\nexcept JSONDecodeError:\n    exit(f\"Could not talk to grafana at {grafana_url}. Check URL/Username/Password\")",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "datasource_name",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "datasource_name = \"Varken-Script\"\ntry:\n    datasources = session.get(url_base + '/datasources', auth=auth, verify=verify).json()\n    varken_datasource = [source for source in datasources if source['database'] == 'varken']\n    if varken_datasource:\n        print(f'varken datasource already exists with the name \"{varken_datasource[0][\"name\"]}\"')\n        datasource_name = varken_datasource[0][\"name\"]\nexcept JSONDecodeError:\n    exit(f\"Could not talk to grafana at {grafana_url}. Check URL/Username/Password\")\nif not varken_datasource:",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "our_dashboard",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "our_dashboard = session.get(url_base + '/gnet/dashboards/9585', auth=auth, verify=verify).json()['json']\ndashboard_data = {\n    \"dashboard\": our_dashboard,\n    \"overwrite\": True,\n    \"inputs\": [\n        {\n            \"name\": \"DS_VARKEN\",\n            \"label\": \"varken\",\n            \"description\": \"\",\n            \"type\": \"datasource\",",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "dashboard_data",
+        "kind": 5,
+        "importPath": "include.Varken.utilities.grafana_build",
+        "description": "include.Varken.utilities.grafana_build",
+        "peekOfCode": "dashboard_data = {\n    \"dashboard\": our_dashboard,\n    \"overwrite\": True,\n    \"inputs\": [\n        {\n            \"name\": \"DS_VARKEN\",\n            \"label\": \"varken\",\n            \"description\": \"\",\n            \"type\": \"datasource\",\n            \"pluginId\": \"influxdb\",",
+        "detail": "include.Varken.utilities.grafana_build",
+        "documentation": {}
+    },
+    {
+        "label": "DBManager",
+        "kind": 6,
+        "importPath": "include.Varken.varken.dbmanager",
+        "description": "include.Varken.varken.dbmanager",
+        "peekOfCode": "class DBManager(object):\n    def __init__(self, server):\n        self.server = server\n        self.logger = getLogger()\n        self.bucket = \"varken\"\n        if self.server.url == \"influxdb.domain.tld\":\n            self.logger.critical(\"You have not configured your varken.ini. Please read Wiki page for configuration\")\n            exit()\n        url = self.server.url\n        if 'http' not in url:",
+        "detail": "include.Varken.varken.dbmanager",
+        "documentation": {}
+    },
+    {
+        "label": "GeoIPHandler",
+        "kind": 6,
+        "importPath": "include.Varken.varken.helpers",
+        "description": "include.Varken.varken.helpers",
+        "peekOfCode": "class GeoIPHandler(object):\n    def __init__(self, data_folder, maxmind_license_key):\n        self.data_folder = data_folder\n        self.maxmind_license_key = maxmind_license_key\n        self.dbfile = abspath(join(self.data_folder, 'GeoLite2-City.mmdb'))\n        self.logger = getLogger()\n        self.reader = None\n        self.reader_manager(action='open')\n        self.logger.info('Opening persistent connection to the MaxMind DB...')\n    def reader_manager(self, action=None):",
+        "detail": "include.Varken.varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "hashit",
+        "kind": 2,
+        "importPath": "include.Varken.varken.helpers",
+        "description": "include.Varken.varken.helpers",
+        "peekOfCode": "def hashit(string):\n    encoded = string.encode()\n    hashed = md5(encoded).hexdigest()\n    return hashed\ndef rfc1918_ip_check(ip):\n    rfc1918_ip = IPv4Address(ip).is_private\n    return rfc1918_ip\ndef connection_handler(session, request, verify, as_is_reply=False):\n    air = as_is_reply\n    s = session",
+        "detail": "include.Varken.varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "rfc1918_ip_check",
+        "kind": 2,
+        "importPath": "include.Varken.varken.helpers",
+        "description": "include.Varken.varken.helpers",
+        "peekOfCode": "def rfc1918_ip_check(ip):\n    rfc1918_ip = IPv4Address(ip).is_private\n    return rfc1918_ip\ndef connection_handler(session, request, verify, as_is_reply=False):\n    air = as_is_reply\n    s = session\n    r = request\n    v = verify\n    return_json = False\n    disable_warnings(InsecureRequestWarning)",
+        "detail": "include.Varken.varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "connection_handler",
+        "kind": 2,
+        "importPath": "include.Varken.varken.helpers",
+        "description": "include.Varken.varken.helpers",
+        "peekOfCode": "def connection_handler(session, request, verify, as_is_reply=False):\n    air = as_is_reply\n    s = session\n    r = request\n    v = verify\n    return_json = False\n    disable_warnings(InsecureRequestWarning)\n    try:\n        get = s.send(r, verify=v)\n        if get.status_code == 401:",
+        "detail": "include.Varken.varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "mkdir_p",
+        "kind": 2,
+        "importPath": "include.Varken.varken.helpers",
+        "description": "include.Varken.varken.helpers",
+        "peekOfCode": "def mkdir_p(path):\n    templogger = getLogger('temp')\n    try:\n        if not isdir(path):\n            templogger.info('Creating folder %s ', path)\n            makedirs(path, exist_ok=True)\n    except Exception as e:\n        templogger.error('Could not create folder %s : %s ', path, e)\ndef clean_sid_check(server_id_list, server_type=None):\n    t = server_type",
+        "detail": "include.Varken.varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "clean_sid_check",
+        "kind": 2,
+        "importPath": "include.Varken.varken.helpers",
+        "description": "include.Varken.varken.helpers",
+        "peekOfCode": "def clean_sid_check(server_id_list, server_type=None):\n    t = server_type\n    sid_list = server_id_list\n    cleaned_list = sid_list.replace(' ', '').split(',')\n    valid_sids = []\n    for sid in cleaned_list:\n        try:\n            valid_sids.append(int(sid))\n        except ValueError:\n            logger.error(\"%s is not a valid server id number\", sid)",
+        "detail": "include.Varken.varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "boolcheck",
+        "kind": 2,
+        "importPath": "include.Varken.varken.helpers",
+        "description": "include.Varken.varken.helpers",
+        "peekOfCode": "def boolcheck(var):\n    if var.lower() in ['true', 'yes']:\n        return True\n    else:\n        return False\ndef itemgetter_with_default(**defaults):\n    return lambda obj: tuple(obj.get(k, v) for k, v in defaults.items())",
+        "detail": "include.Varken.varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "itemgetter_with_default",
+        "kind": 2,
+        "importPath": "include.Varken.varken.helpers",
+        "description": "include.Varken.varken.helpers",
+        "peekOfCode": "def itemgetter_with_default(**defaults):\n    return lambda obj: tuple(obj.get(k, v) for k, v in defaults.items())",
+        "detail": "include.Varken.varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "include.Varken.varken.helpers",
+        "description": "include.Varken.varken.helpers",
+        "peekOfCode": "logger = getLogger()\nclass GeoIPHandler(object):\n    def __init__(self, data_folder, maxmind_license_key):\n        self.data_folder = data_folder\n        self.maxmind_license_key = maxmind_license_key\n        self.dbfile = abspath(join(self.data_folder, 'GeoLite2-City.mmdb'))\n        self.logger = getLogger()\n        self.reader = None\n        self.reader_manager(action='open')\n        self.logger.info('Opening persistent connection to the MaxMind DB...')",
+        "detail": "include.Varken.varken.helpers",
+        "documentation": {}
+    },
+    {
+        "label": "InfluxDB2Manager",
+        "kind": 6,
+        "importPath": "include.Varken.varken.influxdb2manager",
+        "description": "include.Varken.varken.influxdb2manager",
+        "peekOfCode": "class InfluxDB2Manager(object):\n    def __init__(self, server):\n        self.server = server\n        self.logger = getLogger()\n        if self.server.url == \"influxdb2.domain.tld\":\n            self.logger.critical(\"You have not configured your varken.ini. Please read Wiki page for configuration\")\n            exit()\n        self.influx = InfluxDBClient(url=self.server.url, token=self.server.token, org=self.server.org,\n                                     timeout=self.server.timeout, verify_ssl=self.server.verify_ssl,\n                                     ssl_ca_cert=self.server.ssl)",
+        "detail": "include.Varken.varken.influxdb2manager",
+        "documentation": {}
+    },
+    {
+        "label": "INIParser",
+        "kind": 6,
+        "importPath": "include.Varken.varken.iniparser",
+        "description": "include.Varken.varken.iniparser",
+        "peekOfCode": "class INIParser(object):\n    def __init__(self, data_folder):\n        self.config = None\n        self.data_folder = data_folder\n        self.filtered_strings = None\n        self.services = ['sonarr', 'radarr', 'lidarr', 'ombi', 'overseerr', 'tautulli', 'sickchill', 'unifi']\n        self.logger = getLogger()\n        self.influx_server = InfluxServer()\n        try:\n            self.parse_opts(read_file=True)",
+        "detail": "include.Varken.varken.iniparser",
+        "documentation": {}
+    },
+    {
+        "label": "LidarrAPI",
+        "kind": 6,
+        "importPath": "include.Varken.varken.lidarr",
+        "description": "include.Varken.varken.lidarr",
+        "peekOfCode": "class LidarrAPI(object):\n    def __init__(self, server, dbmanager):\n        self.dbmanager = dbmanager\n        self.server = server\n        # Create session to reduce server web thread load, and globally define pageSize for all requests\n        self.session = Session()\n        self.session.headers = {'X-Api-Key': self.server.api_key}\n        self.logger = getLogger()\n    def __repr__(self):\n        return f\"<lidarr-{self.server.id}>\"",
+        "detail": "include.Varken.varken.lidarr",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiAPI",
+        "kind": 6,
+        "importPath": "include.Varken.varken.ombi",
+        "description": "include.Varken.varken.ombi",
+        "peekOfCode": "class OmbiAPI(object):\n    def __init__(self, server, dbmanager):\n        self.dbmanager = dbmanager\n        self.server = server\n        # Create session to reduce server web thread load, and globally define pageSize for all requests\n        self.session = Session()\n        self.session.headers = {'Apikey': self.server.api_key}\n        self.logger = getLogger()\n    def __repr__(self):\n        return f\"<ombi-{self.server.id}>\"",
+        "detail": "include.Varken.varken.ombi",
+        "documentation": {}
+    },
+    {
+        "label": "OverseerrAPI",
+        "kind": 6,
+        "importPath": "include.Varken.varken.overseerr",
+        "description": "include.Varken.varken.overseerr",
+        "peekOfCode": "class OverseerrAPI(object):\n    def __init__(self, server, dbmanager):\n        self.dbmanager = dbmanager\n        self.server = server\n        # Create session to reduce server web thread load, and globally define pageSize for all requests\n        self.session = Session()\n        self.session.headers = {'X-Api-Key': self.server.api_key}\n        self.logger = getLogger()\n    def __repr__(self):\n        return f\"<overseerr-{self.server.id}>\"",
+        "detail": "include.Varken.varken.overseerr",
+        "documentation": {}
+    },
+    {
+        "label": "RadarrAPI",
+        "kind": 6,
+        "importPath": "include.Varken.varken.radarr",
+        "description": "include.Varken.varken.radarr",
+        "peekOfCode": "class RadarrAPI(object):\n    def __init__(self, server, dbmanager):\n        self.dbmanager = dbmanager\n        self.server = server\n        # Create session to reduce server web thread load, and globally define pageSize for all requests\n        self.session = Session()\n        self.session.headers = {'X-Api-Key': self.server.api_key}\n        self.logger = getLogger()\n    def __repr__(self):\n        return f\"<radarr-{self.server.id}>\"",
+        "detail": "include.Varken.varken.radarr",
+        "documentation": {}
+    },
+    {
+        "label": "SickChillAPI",
+        "kind": 6,
+        "importPath": "include.Varken.varken.sickchill",
+        "description": "include.Varken.varken.sickchill",
+        "peekOfCode": "class SickChillAPI(object):\n    def __init__(self, server, dbmanager):\n        self.dbmanager = dbmanager\n        self.server = server\n        # Create session to reduce server web thread load, and globally define pageSize for all requests\n        self.session = Session()\n        self.session.params = {'limit': 1000}\n        self.endpoint = f\"/api/{self.server.api_key}\"\n        self.logger = getLogger()\n    def __repr__(self):",
+        "detail": "include.Varken.varken.sickchill",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrAPI",
+        "kind": 6,
+        "importPath": "include.Varken.varken.sonarr",
+        "description": "include.Varken.varken.sonarr",
+        "peekOfCode": "class SonarrAPI(object):\n    def __init__(self, server, dbmanager):\n        self.dbmanager = dbmanager\n        self.server = server\n        # Create session to reduce server web thread load, and globally define pageSize for all requests\n        self.session = Session()\n        self.session.headers = {'X-Api-Key': self.server.api_key}\n        self.session.params = {'pageSize': 1000}\n        self.logger = getLogger()\n    def __repr__(self):",
+        "detail": "include.Varken.varken.sonarr",
+        "documentation": {}
+    },
+    {
+        "label": "InfluxServer",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class InfluxServer(NamedTuple):\n    password: str = 'root'\n    port: int = 8086\n    ssl: bool = False\n    url: str = 'localhost'\n    username: str = 'root'\n    verify_ssl: bool = False\n    org: str = '-'\nclass Influx2Server(NamedTuple):\n    url: str = 'localhost'",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "Influx2Server",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class Influx2Server(NamedTuple):\n    url: str = 'localhost'\n    org: str = 'server'\n    token: str = 'TOKEN'\n    bucket: str = 'varken'\n    timeout: int = 10000\n    ssl: bool = False\n    verify_ssl: bool = False\nclass SonarrServer(NamedTuple):\n    api_key: str = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrServer",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class SonarrServer(NamedTuple):\n    api_key: str = None\n    future_days: int = 0\n    future_days_run_seconds: int = 30\n    id: int = None\n    missing_days: int = 0\n    missing_days_run_seconds: int = 30\n    queue: bool = False\n    queue_run_seconds: int = 30\n    url: str = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "RadarrServer",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class RadarrServer(NamedTuple):\n    api_key: str = None\n    get_missing: bool = False\n    get_missing_run_seconds: int = 30\n    id: int = None\n    queue: bool = False\n    queue_run_seconds: int = 30\n    url: str = None\n    verify_ssl: bool = False\nclass OmbiServer(NamedTuple):",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiServer",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class OmbiServer(NamedTuple):\n    api_key: str = None\n    id: int = None\n    issue_status_counts: bool = False\n    issue_status_run_seconds: int = 30\n    request_total_counts: bool = False\n    request_total_run_seconds: int = 30\n    request_type_counts: bool = False\n    request_type_run_seconds: int = 30\n    url: str = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OverseerrServer",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class OverseerrServer(NamedTuple):\n    api_key: str = None\n    id: int = None\n    url: str = None\n    verify_ssl: bool = False\n    get_request_total_counts: bool = False\n    request_total_run_seconds: int = 30\n    num_latest_requests_to_fetch: int = 10\n    num_latest_requests_seconds: int = 30\nclass TautulliServer(NamedTuple):",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "TautulliServer",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class TautulliServer(NamedTuple):\n    api_key: str = None\n    fallback_ip: str = None\n    get_activity: bool = False\n    get_activity_run_seconds: int = 30\n    get_stats: bool = False\n    get_stats_run_seconds: int = 30\n    id: int = None\n    url: str = None\n    verify_ssl: bool = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SickChillServer",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class SickChillServer(NamedTuple):\n    api_key: str = None\n    get_missing: bool = False\n    get_missing_run_seconds: int = 30\n    id: int = None\n    url: str = None\n    verify_ssl: bool = False\nclass UniFiServer(NamedTuple):\n    get_usg_stats_run_seconds: int = 30\n    id: int = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "UniFiServer",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class UniFiServer(NamedTuple):\n    get_usg_stats_run_seconds: int = 30\n    id: int = None\n    password: str = 'ubnt'\n    site: str = None\n    url: str = 'unifi.domain.tld:8443'\n    username: str = 'ubnt'\n    usg_name: str = None\n    verify_ssl: bool = False\n# Shared",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "QueuePages",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class QueuePages(NamedTuple):\n    page: int = None\n    pageSize: int = None\n    sortKey: str = None\n    sortDirection: str = None\n    totalRecords: str = None\n    records: list = None\n# Ombi Structures\nclass OmbiRequestCounts(NamedTuple):\n    approved: int = 0",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiRequestCounts",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class OmbiRequestCounts(NamedTuple):\n    approved: int = 0\n    available: int = 0\n    pending: int = 0\nclass OmbiIssuesCounts(NamedTuple):\n    inProgress: int = 0\n    pending: int = 0\n    resolved: int = 0\nclass OmbiTVRequest(NamedTuple):\n    background: str = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiIssuesCounts",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class OmbiIssuesCounts(NamedTuple):\n    inProgress: int = 0\n    pending: int = 0\n    resolved: int = 0\nclass OmbiTVRequest(NamedTuple):\n    background: str = None\n    childRequests: list = None\n    denied: bool = None\n    deniedReason: None = None\n    externalProviderId: str = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiTVRequest",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class OmbiTVRequest(NamedTuple):\n    background: str = None\n    childRequests: list = None\n    denied: bool = None\n    deniedReason: None = None\n    externalProviderId: str = None\n    id: int = None\n    imdbId: str = None\n    languageProfile: str = None\n    markedAsDenied: str = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OmbiMovieRequest",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class OmbiMovieRequest(NamedTuple):\n    approved: bool = None\n    approved4K: bool = None\n    available: bool = None\n    available4K: bool = None\n    background: str = None\n    canApprove: bool = None\n    denied: bool = None\n    denied4K: None = None\n    deniedReason: None = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "OverseerrRequestCounts",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class OverseerrRequestCounts(NamedTuple):\n    pending: int = None\n    approved: int = None\n    processing: int = None\n    available: int = None\n    total: int = None\n    movie: int = None\n    tv: int = None\n    declined: int = None\n# Sonarr",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrTVShow",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class SonarrTVShow(NamedTuple):\n    added: str = None\n    airTime: str = None\n    alternateTitles: list = None\n    certification: str = None\n    cleanTitle: str = None\n    ended: bool = None\n    firstAired: str = None\n    genres: list = None\n    id: int = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrEpisode",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class SonarrEpisode(NamedTuple):\n    absoluteEpisodeNumber: int = None\n    airDate: str = None\n    airDateUtc: str = None\n    episodeFileId: int = None\n    episodeNumber: int = None\n    grabbed: bool = None\n    hasFile: bool = None\n    id: int = None\n    monitored: bool = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SonarrQueue",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class SonarrQueue(NamedTuple):\n    downloadClient: str = None\n    downloadId: str = None\n    episodeId: int = None\n    id: int = None\n    indexer: str = None\n    language: dict = None\n    protocol: str = None\n    quality: dict = None\n    size: float = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "RadarrMovie",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class RadarrMovie(NamedTuple):\n    added: str = None\n    alternateTitles: list = None\n    certification: str = None\n    cleanTitle: str = None\n    collection: dict = None\n    digitalRelease: str = None\n    folderName: str = None\n    genres: list = None\n    hasFile: bool = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "RadarrQueue",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class RadarrQueue(NamedTuple):\n    customFormats: list = None\n    downloadClient: str = None\n    downloadId: str = None\n    id: int = None\n    indexer: str = None\n    languages: list = None\n    movieId: int = None\n    protocol: str = None\n    quality: dict = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "SickChillTVShow",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class SickChillTVShow(NamedTuple):\n    airdate: str = None\n    airs: str = None\n    episode: int = None\n    ep_name: str = None\n    ep_plot: str = None\n    indexerid: int = None\n    network: str = None\n    paused: int = None\n    quality: str = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "TautulliStream",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class TautulliStream(NamedTuple):\n    actors: list = None\n    added_at: str = None\n    allow_guest: int = None\n    art: str = None\n    aspect_ratio: str = None\n    audience_rating: str = None\n    audience_rating_image: str = None\n    audio_bitrate: str = None\n    audio_bitrate_mode: str = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "LidarrQueue",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class LidarrQueue(NamedTuple):\n    artistId: int = None\n    albumId: int = None\n    language: dict = None\n    quality: dict = None\n    size: float = None\n    title: str = None\n    timeleft: str = None\n    sizeleft: float = None\n    status: str = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "LidarrAlbum",
+        "kind": 6,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "class LidarrAlbum(NamedTuple):\n    title: str = None\n    disambiguation: str = None\n    overview: str = None\n    artistId: int = None\n    foreignAlbumId: str = None\n    monitored: bool = None\n    anyReleaseOk: bool = None\n    profileId: int = None\n    duration: int = None",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "include.Varken.varken.structures",
+        "description": "include.Varken.varken.structures",
+        "peekOfCode": "logger = getLogger('temp')\n# Check for python3.6 or newer to resolve erroneous typing.NamedTuple issues\nif version_info < (3, 6, 2):\n    logger.error('Varken requires python3.6.2 or newer. You are on python%s.%s.%s - Exiting...',\n                 version_info.major, version_info.minor, version_info.micro)\n    exit(1)\n# Server Structures\nclass InfluxServer(NamedTuple):\n    password: str = 'root'\n    port: int = 8086",
+        "detail": "include.Varken.varken.structures",
+        "documentation": {}
+    },
+    {
+        "label": "TautulliAPI",
+        "kind": 6,
+        "importPath": "include.Varken.varken.tautulli",
+        "description": "include.Varken.varken.tautulli",
+        "peekOfCode": "class TautulliAPI(object):\n    def __init__(self, server, dbmanager, geoiphandler):\n        self.dbmanager = dbmanager\n        self.server = server\n        self.geoiphandler = geoiphandler\n        self.session = Session()\n        self.session.params = {'apikey': self.server.api_key}\n        self.endpoint = '/api/v2'\n        self.logger = getLogger()\n        self.my_ip = None",
+        "detail": "include.Varken.varken.tautulli",
+        "documentation": {}
+    },
+    {
+        "label": "UniFiAPI",
+        "kind": 6,
+        "importPath": "include.Varken.varken.unifi",
+        "description": "include.Varken.varken.unifi",
+        "peekOfCode": "class UniFiAPI(object):\n    def __init__(self, server, dbmanager):\n        self.dbmanager = dbmanager\n        self.server = server\n        self.site = self.server.site\n        # Create session to reduce server web thread load, and globally define pageSize for all requests\n        self.session = Session()\n        self.logger = getLogger()\n        self.get_retry = True\n        self.get_cookie()",
+        "detail": "include.Varken.varken.unifi",
+        "documentation": {}
+    },
+    {
+        "label": "BlacklistFilter",
+        "kind": 6,
+        "importPath": "include.Varken.varken.varkenlogger",
+        "description": "include.Varken.varken.varkenlogger",
+        "peekOfCode": "class BlacklistFilter(Filter):\n    \"\"\"\n    Log filter for blacklisted tokens and passwords\n    \"\"\"\n    filename = \"varken.log\"\n    max_size = 5000000  # 5 MB\n    max_files = 5\n    log_folder = 'logs'\n    blacklisted_strings = ['apikey',  'username',  'password', 'url']\n    def __init__(self, filteredstrings):",
+        "detail": "include.Varken.varken.varkenlogger",
+        "documentation": {}
+    },
+    {
+        "label": "VarkenLogger",
+        "kind": 6,
+        "importPath": "include.Varken.varken.varkenlogger",
+        "description": "include.Varken.varken.varkenlogger",
+        "peekOfCode": "class VarkenLogger(object):\n    def __init__(self, debug=None, data_folder=None):\n        self.data_folder = data_folder\n        self.log_level = debug\n        # Set log level\n        if self.log_level:\n            self.log_level = DEBUG\n        else:\n            self.log_level = INFO\n        # Make the log directory if it does not exist",
+        "detail": "include.Varken.varken.varkenlogger",
+        "documentation": {}
+    },
+    {
+        "label": "thread",
+        "kind": 2,
+        "importPath": "include.Varken.Varken",
+        "description": "include.Varken.Varken",
+        "peekOfCode": "def thread(job, **kwargs):\n    worker = Thread(target=job, kwargs=dict(**kwargs))\n    worker.start()\nif __name__ == \"__main__\":\n    parser = ArgumentParser(prog='varken',\n                            description='Command-line utility to aggregate data from the plex ecosystem into InfluxDB',\n                            formatter_class=RawTextHelpFormatter)\n    parser.add_argument(\"-d\", \"--data-folder\", help='Define an alternate data folder location')\n    parser.add_argument(\"-D\", \"--debug\", action='store_true', help='Use to enable DEBUG logging. (Depreciated)')\n    parser.add_argument(\"-ND\", \"--no_debug\", action='store_true', help='Use to disable DEBUG logging')",
+        "detail": "include.Varken.Varken",
+        "documentation": {}
+    },
+    {
+        "label": "PLATFORM_LINUX_DISTRO",
+        "kind": 5,
+        "importPath": "include.Varken.Varken",
+        "description": "include.Varken.Varken",
+        "peekOfCode": "PLATFORM_LINUX_DISTRO = ' '.join(distro.id() + distro.version() + distro.name())\ndef thread(job, **kwargs):\n    worker = Thread(target=job, kwargs=dict(**kwargs))\n    worker.start()\nif __name__ == \"__main__\":\n    parser = ArgumentParser(prog='varken',\n                            description='Command-line utility to aggregate data from the plex ecosystem into InfluxDB',\n                            formatter_class=RawTextHelpFormatter)\n    parser.add_argument(\"-d\", \"--data-folder\", help='Define an alternate data folder location')\n    parser.add_argument(\"-D\", \"--debug\", action='store_true', help='Use to enable DEBUG logging. (Depreciated)')",
+        "detail": "include.Varken.Varken",
         "documentation": {}
     },
     {
