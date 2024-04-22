@@ -1,0 +1,9 @@
+---
+- name: Set up user-specific packages/configs etc
+  hosts: all
+  become: false
+
+  tasks:
+    - name: Import user role
+      ansible.builtin.import_role:
+        name: user

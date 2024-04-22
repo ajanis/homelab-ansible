@@ -1,0 +1,80 @@
+---
+- name: Deploy Telegraf, InfluxDB, Chronograf, Kapacitor
+  hosts:
+    - metrics
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Base host configuraton
+      tags:
+        - base-setup
+      block:
+        - name: Add common role
+          ansible.builtin.import_role:
+            name: common
+          tags:
+            - common-role-import
+        - name: Add openldap role
+          ansible.builtin.import_role:
+            name: openldap
+          when: openldap_server_ip is defined and openldap_server_ip != None
+          tags:
+            - openldap-role-import
+        - name: Add ceph-fs role
+          ansible.builtin.import_role:
+            name: ceph-fs
+          when:
+            - shared_storage
+            - storage_backend == "cephfs"
+          tags: ceph-fs-role-import
+    - name: Metrics host configuration
+      tags:
+        - metrics-setup
+      block:
+        - name: Add influxdb role
+          ansible.builtin.import_role:
+            name: influxdb
+          when: "'influxdb' in group_names"
+          tags:
+            - influxdb-role-import
+        - name: Add chronograf role
+          ansible.builtin.import_role:
+            name: chronograf
+          when: "'chronograf' in group_names"
+          tags:
+            - chronograf-role-import
+        - name: Add kapacitor role
+          ansible.builtin.import_role:
+            name: kapacitor
+          when: "'kapacitor' in group_names"
+          tags:
+            - kapacitor-role-import
+        - name: Add grafana role
+          ansible.builtin.import_role:
+            name: grafana
+          when: "'grafana' in group_names"
+          tags:
+            - grafana-role-import
+    - name: Docker Installation, Configuration, Container/Compose creation
+      tags:
+        - docker-setup
+      block:
+        - name: Add docker role
+          ansible.builtin.import_role:
+            name: docker
+          tags:
+            - docker-role-import
+    - name: Telegraf installation and configuration
+      tags:
+        - telegraf-setup
+      block:
+        - name: Add telegraf role
+          ansible.builtin.import_role:
+            name: telegraf
+          when: "'telegraf' in group_names"
+          tags:
+            - telegraf-role-import

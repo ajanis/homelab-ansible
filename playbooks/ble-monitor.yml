@@ -1,0 +1,12 @@
+- name: Deploy Monitor.sh to target devices
+  hosts: ble_monitor
+  remote_user: root
+  #  gather_facts: yes
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add ble-monitor role
+      ansible.builtin.import_role:
+        name: ble-monitor

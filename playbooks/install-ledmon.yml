@@ -1,0 +1,15 @@
+- name: Install ledmon on all hardware hosts
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Install package on physical hosts only
+      ansible.builtin.package:
+        name: ledmon
+        state:
+          "{% if hostvars[inventory_hostname]['ansible_virtualization_role'] == 'guest' %}absent{%
+          else %}present{% endif %}"

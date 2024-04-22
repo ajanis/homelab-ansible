@@ -1,0 +1,50 @@
+---
+- name: Deploy Services
+  hosts: admin[0]
+  become: true
+  tags:
+    - cephadm-service-placement
+  gather_facts: false
+
+  tasks:
+    - name: Import ceph_defaults role
+      ansible.builtin.import_role:
+        name: ceph_defaults
+
+    - name: Adjust host labels
+      ceph_orch_host:
+        name: "{{ ansible_facts['hostname'] }}"
+        address: "{{ ansible_facts['default_ipv4']['address'] }}"
+        set_admin_label: "{{ True if inventory_hostname in groups.get('admin', []) else omit }}"
+        labels: "{{ labels }}"
+        state: present
+
+    - name: Update the placement of monitor hosts
+      ceph_orch_apply:
+        spec: |
+          service_type: mon
+          service_name: mon
+          placement:
+            host_pattern: '*'
+
+    - name: Waiting for the monitor to join the quorum
+      ansible.builtin.command:
+        cmd: cephadm shell ceph quorum_status --format json
+      register: ceph_health_raw
+      changed_when: false
+      until: (ceph_health_raw.stdout | from_json)['quorum_names'] | length == groups.get('mons', []) | length
+      retries: 300
+      delay: 1
+
+    - name: Enable modules
+      ansible.builtin.command:
+        cmd: "{{ item }}"
+      loop: "{{ cephadm_enables }}"
+      changed_when: false
+
+    - name: Update service placements
+      ceph_orch_apply:
+        spec: |
+          {{ cephadm_service_specs }}
+      tags:
+        - service-yaml

@@ -1,0 +1,59 @@
+---
+- name: Deploy grafanaservices01 test environment
+  hosts: grafanaservices
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+  vars:
+    prometheus_url: http://prometheus:9009/api/prom/push
+    loki_url: http://loki:3100/loki/api/v1/pus
+
+  tasks:
+    - name: Create config dirs
+      ansible.builtin.file:
+        state: directory
+        mode: "0755"
+        path: "{{ item.path | dirname }}"
+      loop: "{{ docker_config_files }}"
+      tags:
+        - docker-container
+      when: docker_config_files is defined
+
+    - name: Create config files
+      # Comment
+      ansible.builtin.copy:
+        dest: "{{ item.path }}"
+        mode: "0755"
+        content: "{{ item.config | string }}"
+      loop: "{{ docker_config_files }}"
+      tags:
+        - docker-container
+      when: docker_config_files is defined
+
+    # - name: Add common role
+    #   ansible.builtin.import_role:
+    #     name: common
+    # - name: Add OpenLDAP role
+    #   ansible.builtin.import_role:
+    #     name: openldap
+    # - name: Add CephFS role
+    #   ansible.builtin.import_role:
+    #     name: ceph-fs
+
+    - name: Add docker role
+      ansible.builtin.import_role:
+        name: docker
+
+    - name: Add rsyslog role
+      ansible.builtin.import_role:
+        name: rsyslog
+      tags:
+        - rsyslog
+
+    - name: Include telegraf
+      ansible.builtin.include_role:
+        name: telegraf
+      tags:
+        - telegraf

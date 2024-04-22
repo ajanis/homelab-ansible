@@ -1,0 +1,15 @@
+---
+- name: Configure NGINX high-performance webserver and reverse-proxy
+  hosts: nginx
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add nginx role
+      ansible.builtin.import_role:
+        name: nginx
+    # - name: Run setup
+    #   setup:

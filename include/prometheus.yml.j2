@@ -1,0 +1,91 @@
+global:
+  scrape_interval:     10s
+  evaluation_interval: 10s
+
+scrape_configs:
+  - job_name: 'node-exporter'
+    static_configs:
+    - targets:
+      - localhost:9100
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '.*'
+        target_label: instance
+        replacement: '{{ ansible_hostname }}'
+{% if has_gpu | default(False) %}
+  - job_name: 'nvidia-gpu-exporter'
+    static_configs:
+    - targets:
+      - localhost:9835
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '.*'
+        target_label: instance
+        replacement: '{{ ansible_hostname }}'
+{% endif %}
+{% if has_jellyfin | default(False) %}
+  - job_name: 'jellyfin-exporter'
+    metrics_path: '/metrics'
+    static_configs:
+    - targets:
+      - localhost:8096
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '.*'
+        target_label: instance
+        replacement: '{{ ansible_hostname }}'
+{% endif %}
+{% if has_proxmox | default(False) %}
+  - job_name: 'proxmox'
+    metrics_path: /pve
+    static_configs:
+    - targets:
+      - localhost:9221
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '.*'
+        target_label: instance
+        replacement: '{{ ansible_hostname }}'
+  - job_name: 'ceph'
+    honor_labels: true
+    static_configs:
+    - targets:
+      - localhost:9283
+      labels: {}
+  - job_name: 'ipmi-exporter'
+    static_configs:
+    - targets:
+      - localhost:9290
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '.*'
+        target_label: instance
+        replacement: '{{ ansible_hostname }}'
+{% endif %}
+{% if has_docker | default(False) %}
+  - job_name: 'docker'
+    static_configs:
+    - targets:
+      - localhost:9323
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '.*'
+        target_label: instance
+        replacement: '{{ ansible_hostname }}'
+{% endif %}
+{% if 'metrics' in group_names %}
+  - job_name: 'pihole'
+    static_configs:
+    - targets:
+      - localhost:9617
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '.*'
+        target_label: instance
+        replacement: 'pihole'
+{% endif %}
+remote_write:
+  - url: "http://10.0.10.8:9201/write"
+remote_read:
+  - url: "http://10.0.10.8:9201/read"
+    read_recent: true

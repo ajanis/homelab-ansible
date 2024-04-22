@@ -1,0 +1,293 @@
+---
+docker_install_nvidia: false
+docker_install_community_edition: true
+
+media_disk_mnt: /media
+queued_dir: "{{ data_mount_root }}/queued"
+transcoding_dir: "{{ data_mount_root }}/transcoding"
+complete_dir: "{{ data_mount_root }}/complete"
+incomplete_dir: "{{ data_mount_root }}/incomplete"
+logs_dir: "{{ data_mount_root }}/logs"
+
+bazarr:
+  version: latest
+  ports:
+    web_ui: 6767:6767/tcp
+
+mylar3:
+  version: latest
+  ports:
+    web_ui: 8090:8090/tcp
+
+sonarr:
+  version: develop
+  ports:
+    web_ui: 8989:8989/tcp
+
+radarr:
+  version: develop
+  ports:
+    web_ui: 7878:7878/tcp
+
+prowlarr:
+  version: develop
+  ports:
+    web_ui: 9696:9696/tcp
+
+tautulli:
+  version: latest
+  ports:
+    web_ui: 8181:8181/tcp
+
+overseerr:
+  version: latest
+  ports:
+    web_ui: 5055:5055/tcp
+
+varken:
+  version: influxdb2-dev
+
+docker_compose_projects:
+  - project_name: mediaservices
+    pull: "{{ docker_recreate | default(False) }}"
+    recreate: "{{ docker_recreate | default(False) }}"
+    definition:
+      version: "3.9"
+      x-logging: &default-logging
+        driver: journald
+      networks:
+        mediaservices:
+          name: mediaservices
+          driver: bridge
+      services:
+        tautulli:
+          hostname: tautulli
+          container_name: tautulli
+          image: linuxserver/tautulli:{{ tautulli.version }}
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/tautulli:/config
+            - "{{ logs_dir }}/plex:/plex_logs:ro"
+          networks:
+            mediaservices:
+              aliases:
+                - tautulli
+          ports:
+            - "{{ tautulli.ports.web_ui }}"
+          environment:
+            TZ: "{{ timezone }}"
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:tautulli
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: tautulli
+        varken:
+          hostname: varken
+          container_name: varken
+          networks:
+            mediaservices:
+              aliases:
+                - varken
+          image: ajanis/varken:influxdb2-dev
+          volumes:
+            - /opt/varken:/config
+          environment:
+            TZ: "{{ timezone }}"
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: varken
+        sonarr:
+          hostname: sonarr
+          container_name: sonarr
+          image: linuxserver/sonarr:{{ sonarr.version }}
+          networks:
+            mediaservices:
+              aliases:
+                - sonarr
+          ports:
+            - "{{ sonarr.ports.web_ui }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /dev/rtc:/dev/rtc:ro
+            - /opt/sonarr:/config
+            - "{{ data_mount_root }}:/library"
+          environment:
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            TZ: "{{ timezone }}"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:sonarr
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+            TP_ADDON: sonarr-4k-logo
+          sysctls:
+            net.ipv6.conf.all.disable_ipv6: 1
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: sonarr
+        radarr:
+          hostname: radarr
+          container_name: radarr
+          networks:
+            mediaservices:
+              aliases:
+                - radarr
+          ports:
+            - "{{ radarr.ports.web_ui }}"
+          image: linuxserver/radarr:{{ radarr.version }}
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /dev/rtc:/dev/rtc:ro
+            - /opt/radarr:/config
+            - "{{ data_mount_root }}:/library"
+          environment:
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            TZ: "{{ timezone }}"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:radarr
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+            TP_ADDON: radarr-4k-logo|radarr-alt-calendar
+          sysctls:
+            net.ipv6.conf.all.disable_ipv6: 1
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: radarr
+        overseerr:
+          hostname: overseerr
+          image: linuxserver/overseerr:{{ overseerr.version }}
+          container_name: overseerr
+          networks:
+            mediaservices:
+              aliases:
+                - overseerr
+          environment:
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            TZ: "{{ timezone }}"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:overseerr
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+          volumes:
+            - /opt/overseerr/config:/config
+          ports:
+            - "{{ overseerr.ports.web_ui }}"
+          sysctls:
+            net.ipv6.conf.all.disable_ipv6: 1
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: overseerr
+        bazarr:
+          hostname: bazarr
+          container_name: bazarr
+          networks:
+            mediaservices:
+              aliases:
+                - bazarr
+          image: linuxserver/bazarr:{{ bazarr.version }}
+          ports:
+            - "{{ bazarr.ports.web_ui }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /dev/rtc:/dev/rtc:ro
+            - /opt/bazarr:/config
+            - "{{ data_mount_root }}/tv:/tv"
+            - "{{ data_mount_root }}/movies:/movies"
+          environment:
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            TZ: "{{ timezone }}"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:bazarr
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+            TP_ADDON: bazarr-4k-logo
+          sysctls:
+            net.ipv6.conf.all.disable_ipv6: 1
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: bazarr
+        prowlarr:
+          hostname: prowlarr
+          container_name: prowlarr
+          networks:
+            mediaservices:
+              aliases:
+                - prowlarr
+          image: linuxserver/prowlarr:{{ prowlarr.version }}
+          ports:
+            - "{{ prowlarr.ports.web_ui }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /dev/rtc:/dev/rtc:ro
+            - /opt/prowlarr:/config
+          environment:
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            TZ: "{{ timezone }}"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:prowlarr
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+          sysctls:
+            net.ipv6.conf.all.disable_ipv6: 1
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: prowlarr
+        mylar3:
+          image: linuxserver/mylar3:{{ mylar3.version }}
+          container_name: mylar3
+          hostname: mylar3
+          privileged: true
+          networks:
+            mediaservices:
+              aliases:
+                - mylar3
+          environment:
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            TZ: "{{ timezone }}"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:mylar3
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+          volumes:
+            - /opt/mylar3/config:/config
+            - "{{ data_mount_root }}/comics:/comics"
+            - "{{ complete_dir }}:/downloads"
+          ports:
+            - "{{ mylar3.ports.web_ui }}"
+          sysctls:
+            net.ipv6.conf.all.disable_ipv6: 1
+          logging:
+            <<: *default-logging
+            options:
+              tag: mylar3
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"

@@ -1,0 +1,25 @@
+---
+- name: "[SSL] :: Generate new SSL certificates through LetsEncrypt and push to servers/containers"
+  hosts: webservices
+  become: true
+  tasks:
+    - name: Install SSL Key
+      ansible.builtin.copy:
+        content: "{{ ssl_privkey }}"
+        dest: "/data/configs/{{ item }}/ssl/{{ www_domain }}.key"
+        owner: media
+        group: media
+        mode: 0640
+      loop:
+        - plex
+        - tautulli
+    - name: Install SSL Certificate Chain
+      ansible.builtin.copy:
+        content: "{{ ssl_certchain }}"
+        dest: "/data/configs/{{ item }}/ssl/{{ www_domain }}.pem"
+        owner: media
+        group: media
+        mode: 0640
+      loop:
+        - plex
+        - tautulli

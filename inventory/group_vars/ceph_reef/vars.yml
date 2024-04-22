@@ -1,0 +1,509 @@
+---
+ceph_release: reef
+ceph_pkgs:
+  - cephadm
+  - ceph-common
+ceph_client_pkgs:
+  - chrony
+  - ceph-common
+infra_pkgs:
+  - chrony
+  - podman
+cephadm_grafana_admin_pw: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  63336663303964396361663139613962323038383735383132356134383164646632646431386435
+  3762366339633666306263613966613931393030396638340a313732313463313262656362613336
+  65396130376262303233656336356663646161363730323263356363653931663063613032666531
+  6639393661386633380a313662626237663133356439383331633930303066396537306139316161
+  6165
+cephadm_grafana_admin_user: admin
+cluster: ceph
+client_group: clients
+delegate_facts_host: true
+ceph_container_registry: quay.io
+ceph_container_registry_auth: false
+ceph_container_no_proxy: localhost,127.0.0.1
+health_mon_check_retries: 300
+health_mon_check_delay: 1
+ceph_cluster_network: 10.0.10.0/24
+ceph_public_network: 10.0.10.0/24
+admin_node: ceph001
+keyring_dest: /etc/ceph/ceph.client.admin.keyring
+keyring: /etc/ceph/ceph.client.admin.keyring
+fsid: 5edafde6-a3ad-11ee-8920-ac1f6b4e335a
+conf: /etc/ceph/ceph.conf
+cephadm_pull: true
+local_client_dir: /workspaces/home-ansible-awx/include
+cephadm_ssh_config: /root/.ssh/config
+cephadm_allow_fqdn_hostname: true
+cephadm_ssh_user: root
+cephadm_allow_overwrite: true
+cephadm_cmd: cephadm  shell -- ceph
+cephadm_monitoring: true
+cephadm_firewalld: true
+cephadm_pubkey_path: "{{ local_client_dir }}/ceph.pub"
+cephadm_dashboard: true
+cephadm_dashboard_user: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  32353131663161633439656535653536313261313963663331383664333233323134636131343734
+  3363363036626533636434343635653738333139353262340a323461663663366332666561303532
+  64333131356632316434356136663665643333343035623930393137383839613335666533633733
+  6632313839303536630a313630366562613030616638663363333037373739653064373262386237
+  3730
+cephadm_dashboard_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  32383237626433333666313331653336356362396465646639303561373461323838343066636337
+  3266313539313237343533316137396132373234306236390a303032666230663162396630333337
+  63313136663535656234336661623862656561626337383738373564653133326635653639353739
+  3836623962303530650a373735376365646135653264303562326461646530363835303633663537
+  6336
+mon_hosts:
+  - 10.0.10.101
+  - 10.0.10.102
+  - 10.0.10.103
+  - 10.0.10.104
+mon_host: >-
+  {%- for host in groups['mons'] -%} [v2:{{ hostvars[host]['ansible_host'] }}:3300/0,v1:{{
+  hostvars[host]['ansible_host'] }}:6789/0]{%- if not loop.last %} {% endif -%} {%- endfor -%}
+cephadm_enables:
+  - ceph config set global mon_max_pg_per_osd 800
+  - ceph config set global log_to_file true
+  - ceph config set global mon_cluster_log_to_file true
+  - ceph config set global log_to_stderr false
+  - ceph config set global mon_cluster_log_to_stderr false
+  - ceph config set global log_to_journald false
+  - ceph config set global mon_cluster_log_to_journald false
+  - ceph mgr module enable prometheus
+  - ceph mgr module enable alerts
+  - ceph mgr module enable diskprediction_local
+  - ceph mgr module enable insights
+  - ceph mgr module enable localpool
+  - ceph mgr module enable mds_autoscaler
+  - ceph mgr module enable osd_perf_query
+  - ceph mgr module enable osd_support
+  - ceph mgr module enable selftest
+  - ceph mgr module enable stats
+  - ceph mgr module enable snap_schedule
+  - ceph config set mgr mgr/dashboard/GRAFANA_FRONTEND_API_URL "https://cephgraf.home.prettybaked.com"
+  - ceph dashboard set-ssl-certificate-key -i /data/ssl/prettybaked.com_ecc/prettybaked.com.key
+  - ceph dashboard set-ssl-certificate -i /data/ssl/prettybaked.com_ecc/fullchain.cer
+  - ceph orch apply jaeger
+cephadm_config_options:
+  global:
+    - name: cluster_network
+      value: 10.0.10.0/24
+      level: advanced
+    - name: auth_client_required
+      value: cephx
+      level: advanced
+    - name: auth_cluster_required
+      value: cephx
+      level: advanced
+    - name: auth_service_required
+      value: cephx
+      level: advanced
+    - name: auth_supported
+      value: cephx
+      level: advanced
+    - name: bluestore_cache_autotune
+      value: "true"
+      level: dev
+    - name: device_failure_prediction_mode
+      value: local
+      level: basic
+    - name: mon_allow_pool_delete
+      value: "true"
+      level: advanced
+    - name: osd_memory_target_autotune
+      value: "true"
+      level: advanced
+    - name: osd_pool_default_pg_autoscale_mode
+      value: "true"
+      level: advanced
+  mon:
+    - name: public_network
+      value: 10.0.10.0/24
+      level: advanced
+
+cephadm_service_specs: |
+  ---
+  service_type: elasticsearch
+  service_name: elasticsearch
+  placement:
+    hosts:
+      - ceph004
+  ---
+  service_type: jaeger-query
+  service_name: jaeger-query
+  placement:
+    hosts:
+      - ceph004
+  ---
+  service_type: jaeger-collector
+  service_name: jaeger-collector
+  placement:
+    hosts:
+      - ceph004
+  ---
+  service_type: jaeger-agent
+  service_name: jaeger-agent
+  placement:
+    host_pattern: '*'
+  ---
+  service_type: alertmanager
+  service_name: alertmanager
+  placement:
+    hosts:
+      - ceph001
+  ---
+  service_type: ceph-exporter
+  service_name: ceph-exporter
+  placement:
+    host_pattern: '*'
+  spec:
+    prio_limit: 5
+    stats_period: 5
+  ---
+  service_type: mon
+  service_name: mon
+  placement:
+    host_pattern: '*'
+  ---
+  service_type: crash
+  service_name: crash
+  placement:
+    host_pattern: '*'
+  ---
+  service_type: grafana
+  service_name: grafana
+  placement:
+    hosts:
+      - ceph001
+  spec:
+    initial_admin_password: admin
+    anonymous_access: true
+    protocol: https
+  extra_container_args:
+    - "-v"
+    - "/data/ssl/prettybaked.com_ecc/fullchain.cer:/etc/grafana/certs/cert_file:ro"
+    - "-v"
+    - "/data/ssl/prettybaked.com_ecc/prettybaked.com.key:/etc/grafana/certs/key_file:ro"
+  ---
+  service_type: loki
+  service_name: loki
+  placement:
+    hosts:
+      - ceph001
+  ---
+  service_type: mgr
+  service_name: mgr
+  placement:
+    label: mgrs
+  ---
+  service_type: mds
+  service_id: cephfs
+  service_name: mds.cephfs
+  placement:
+    host_pattern: '*'
+  ---
+  service_type: node-exporter
+  service_name: node-exporter
+  placement:
+    host_pattern: '*'
+  ---
+  service_type: osd
+  service_id: all-available-devices
+  service_name: osd.all-available-devices
+  placement:
+    host_pattern: '*'
+  spec:
+    data_devices:
+      rotational: 1
+      size: '6G:'
+    filter_logic: AND
+    objectstore: bluestore
+  ---
+  service_type: prometheus
+  service_name: prometheus
+  placement:
+    hosts:
+      - ceph001
+  spec:
+    retention_time: '4w'
+    retention_size: '100GB'
+  ---
+  service_type: promtail
+  service_name: promtail
+  placement:
+    host_pattern: '*'
+  ---
+  service_type: nfs
+  service_id: hass
+  service_name: nfs.hass
+  placement:
+    count: 1
+    hosts:
+    - ceph002
+    - ceph003
+  spec:
+    enable_haproxy_protocol: true
+    port: 3049
+  ---
+  service_type: ingress
+  service_id: nfs.hass
+  service_name: ingress.nfs.hass
+  placement:
+    count: 1
+    hosts:
+    - ceph002
+    - ceph003
+  spec:
+    backend_service: nfs.hass
+    enable_haproxy_protocol: true
+    first_virtual_router_id: 50
+    frontend_port: 2049
+    monitor_port: 9049
+    virtual_ip: 10.0.10.105/24
+
+# OVERRIDE TELEGRAF BASE INPUT PLUGINS
+ceph_root_ssh_key: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  35323734316663356263653865393839303538316631336364316231336261613164373265313766
+  6636633265343235643633653461356431656530613035380a663362643034633131666330333034
+  32303166653733346437636264326536343930666134636439613862383830643861363037363636
+  3666343832363661660a336432663565613339356663303632643232303435363265636138323139
+  30366662333232323061346461663332353532343735313537356439346665646236393763393862
+  63613065303338613136646138303239313936383337326461333866333136393664376534643136
+  34633963643764383735316134323863323235333063383736343764663533363931363762623336
+  33386434633861336162643535636662653434666264646237303962333666333339636563613336
+  34366266656630326532366330363461353361636666663638386231316630333566626664636161
+  35663364333933366561373063633933323930393237633462666431616664646266643531363230
+  36623830666338643633666361383032326461313165663766326662613938333035333337633139
+  31376633383132313538633732653732383636353535346364633233303966373830356465666233
+  64303037623334376332323065616663376135623139313365386533666330376239383366336530
+  33353835663935323634343066346232643361383132373738663664333135346132346430666236
+  63623230393937376632376162363162343233313831616237613963626430313938623839373865
+  62363938643735613135356130626233303738303963346536643066303631383664356165616336
+  39366261316435363164373962613434373837376365383163633766626230303432393261303531
+  62376437646438636134306331636334336536313730383537353664383265623536353536343536
+  37333538353062343463343231373339386138346466363031623732393734653438623065316361
+  63323939323036396562386362333665323439623361656461636665346237636639663437346531
+  33636164356662653731643665326635303866303635646364303930613361633338363930343339
+  36396137343163383166653537623531353130383065343266396264653533613435363562373539
+  66636166663831303666383863346530386263383662653234383931663837646635336535363531
+  38393030336339393461386261356262346666623361373533663933656138313365356434363566
+  66366336363133636430633430316335663837386663356132373063396137383063666531363861
+  64643631626362363064616539303438316337613862393736646632313363383237366361653662
+  66623933326533393563363966313133333761343965656237613963353265663334333930396336
+  37663061316632323337313035313438633464353930343765613630316233333861353131376261
+  63353132363137666564653531666231393338346434363761636233653938636361
+
+ceph_reef_cephfs_data_secret: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  66353938396633633231663962393132366334396437636264353162356465376637303363333837
+  6664653264373035643332313666633962346465666431610a653061336165323931643338666261
+  38303264363661653830653534646661343866626636663165373264353134643861363934366638
+  6238636262623164650a376139653165653061623466303230303534343037663666636432343461
+  34623266323736393238653963623138633739373831666166333361356238303764613330313463
+  3262623734316536343233633165366161663438393566623764
+
+ceph_reef_cephfs_data_secretfile: /etc/ceph/data.secret
+
+ceph_cephfs_data_secret: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  31323964333765323232343562363861333138343363653531653766343663373531656136613033
+  6466393333383636363563323564376164633462646363360a613036333335353865333535373835
+  31363238336531363935643265666235613463343935316639336230666635366330363564323464
+  6133383330633266610a613033376163383933323465353436373637383339316339636232376261
+  32653739356435326131356233323266383438396565336262363932313535326136303431376631
+  3665356361633932656633633863633230313537316231373665
+
+ceph_cephfs_data_secretfile: /etc/ceph/dataold.secret
+
+ceph_cephfs_media_secret: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  37363132303637353834306634646331623337396435323265323463373861623064643962653631
+  3937343030333730383332326365336233666630313638610a643062336234383136663562306237
+  65643534333266623430633434623566653561646637613835363366616132666533303562646266
+  3831313763623061380a306433633237353366393864376536323164336432333862323731306565
+  33366538363633656161333737393833353337356263316538633462633638366438333861323632
+  3262323964623632393831343633646663613665386462666663
+
+ceph_cephfs_media_secretfile: /etc/ceph/media.secret
+
+ceph_cluster_admin_secret: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  38303134613836623333386438663836306436646231323235633730646430396631323635353966
+  6138363062653932363834643866326161653163366631370a656434613966356630323439353032
+  34633538363164366337356562666362313266666331363436616563616462386134386235396431
+  3436356635383531320a636631323865333235366237333233363662363437396639663533363631
+  35323638326262393661653437336139363734346236626661323034613765393030383132643533
+  3961643963353039353530643133653066613764626465616131
+
+ceph_cluster_admin_keyring: /etc/ceph/ceph.client.admin.keyring
+ceph_keyring_permissions: "0600"
+ceph_mountconfig_directory: /opt/ceph
+ceph_auth: cephx
+ceph_cephfs_user: admin
+ceph_cephfs_fsname: cephfs
+ceph_cephfs_ms_mode: prefer-crc
+ceph_cephfs_mds_port: 3300
+ceph_cluster_admin: admin
+ceph_copy_admin_key: true
+
+# Ceph vars used ceph_mount:
+cephfs_mounts:
+  - mount: /data
+    fsname: "{{ ceph_cephfs_fsname }}"
+    fsid: 5edafde6-a3ad-11ee-8920-ac1f6b4e335a
+    ms_mode: "{{ ceph_cephfs_ms_mode }}"
+    mount_opts:
+      - noatime
+      - nodiratime
+      - _netdev
+    mon:
+      - 10.0.10.101
+      - 10.0.10.102
+      - 10.0.10.103
+      - 10.0.10.104
+    port: "{{ ceph_cephfs_mds_port }}"
+    user: "{{ ceph_cephfs_user }}"
+    secret: "{{ ceph_reef_cephfs_data_secret }}"
+    secretfile: "{{ ceph_reef_cephfs_data_secretfile }}"
+
+  - mount: /media
+    fsname: "{{ ceph_cephfs_fsname }}"
+    fsid: df72f399-c211-4268-a81c-8206001991ad
+    ms_mode: "{{ ceph_cephfs_ms_mode }}"
+    mount_opts:
+      - noatime
+      - nodiratime
+      - _netdev
+    mon:
+      - 10.0.10.201
+      - 10.0.10.202
+      - 10.0.10.203
+      - 10.0.10.204
+    port: "{{ ceph_cephfs_mds_port }}"
+    user: "{{ ceph_cephfs_user }}"
+    secret: "{{ ceph_cephfs_media_secret }}"
+    secretfile: "{{ ceph_cephfs_media_secretfile }}"
+
+cephfs_autofs_mount:
+  mount: /homedirs
+  fsname: "{{ ceph_cephfs_fsname }}"
+  fsid: 5edafde6-a3ad-11ee-8920-ac1f6b4e335a
+  ms_mode: "{{ ceph_cephfs_ms_mode }}"
+  mount_opts:
+    - noatime
+    - nodiratime
+    - _netdev
+  mon:
+    - 10.0.10.101
+    - 10.0.10.102
+    - 10.0.10.103
+    - 10.0.10.104
+  port: "{{ ceph_cephfs_mds_port }}"
+  user: "{{ ceph_cephfs_user }}"
+  secret: "{{ ceph_reef_cephfs_data_secret }}"
+  secretfile: "{{ ceph_reef_cephfs_data_secret }}"
+
+cephfs_mount_options: mon_addr={%- for host in cephfs_autofs_mount.mon | list -%}{{ host }}:{{ cephfs_autofs_mount.port }}{%- if not loop.last -%}/{%- endif -%}{%-
+  endfor -%},ms_mode={{ cephfs_autofs_mount.ms_mode }},secret={{ cephfs_autofs_mount.secret }}{%- if cephfs_autofs_mount.mount_opts is defined -%},{{ cephfs_autofs_mount.mount_opts
+  | list | join(',') }}{%- endif -%}
+
+# telegraf_output_plugins:
+#   # influxdb v2 output config
+#   - name: influxdb_v2
+#     options:
+#       urls:
+#         - "{{ telegraf_influxdb2_default_url }}"
+#       token: "{{ vault_influxdb2_telegraf_token }}"
+#       organization: "{{ telegraf_influxdb2_organization }}"
+#       bucket: "{{ telegraf_influxdb2_bucket }}"
+#       exclude_bucket_tag: "{{ telegraf_influxdb2_exclude_bucket_tag }}"
+#       timeout: "{{ telegraf_influxdb2_timeout }}"
+#       user_agent: "{{ telegraf_influxdb2_user_agent }}"
+#       content_encoding: "{{ telegraf_influxdb2_content_encoding }}"
+#       influx_uint_support: "{{ telegraf_influxdb2_influx_uint_support }}"
+#       tls_cert: "{{ ssl_cert_slurp_path }}"
+#       tls_key: "{{ ssl_key_slurp_path }}"
+#       insecure_skip_verify: "{{ telegraf_influxdb2_insecure_skip_verify }}"
+#   - name: http
+#     options:
+#       url: "{{ prometheus_default_url }}"
+#       data_format: "{{ prometheus_data_format }}"
+#       headers:
+#         Content-Type: application/x-protobuf
+#         Content-Encoding: snappy
+#         X-Prometheus-Remote-Write-Version: "0.1.0"
+#   - name: prometheus_client
+#     options:
+#       listen: "0.0.0.0:9273"
+#       metric_version: 2
+#       data_format: "{{ prometheus_data_format }}"
+# # Loki remote_write output config
+# - name: loki
+#   options:
+#     domain: "{{ loki_default_url }}"
+#     endpoint: "{{ loki_endpoint }}"
+#     timeout: "{{ loki_timeout }}"
+
+# ADDITIONAL TELEGRAF INPUT PLUGINS
+telegraf_plugins_extra:
+  - name: bond
+    options:
+      host_proc: /proc
+      bond_interfaces:
+        - bond0
+  - name: smart
+    options:
+      attributes: "true"
+      devices:
+        - /dev/sda -d scsi --all
+        - /dev/sdb -d scsi --all
+        - /dev/sdc -d scsi --all
+        - /dev/sdd -d scsi --all
+        - /dev/sde -d scsi --all
+        - /dev/sdf -d scsi --all
+        - /dev/sdg -d scsi --all
+        - /dev/sdh -d scsi --all
+        - /dev/sdi -d scsi --all
+        - /dev/sdj -d scsi --all
+        - /dev/sdk -d scsi --all
+        - /dev/sdl -d scsi --all
+        - /dev/nvme0 -d nvme --all
+  - name: sensors
+  - name: temp
+  - name: ipmi_sensor
+    options:
+      metric_version: 2
+      use_cache: "true"
+      cache_path: /tmp
+  # - name: prometheus
+  #   options:
+  #     urls:
+  #       - http://localhost:9283/metrics
+  #     metric_version: 2
+  #     data_format: influx
+  # - name: socket_listener
+  #   options:
+  #     service_address: tcp4://:8094
+  #     data_format: influx
+  - name: ceph
+    options:
+      interval: 15s
+      ceph_binary: /usr/bin/ceph
+      socket_dir: /var/run/ceph/{{ fsid }}
+      mon_prefix: ceph-mon
+      osd_prefix: ceph-osd
+      mds_prefix: ceph-mds
+      rgw_prefix: ceph-client
+      socket_suffix: asok
+      ceph_user: client.{{ ceph_cluster_admin }}
+      ceph_config: "{{ conf }}"
+      gather_admin_socket_stats: "true"
+      gather_cluster_stats: "true"
+
+# Rsyslog Enable
+rsyslog_config: true

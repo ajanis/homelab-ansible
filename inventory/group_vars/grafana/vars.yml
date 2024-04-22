@@ -1,0 +1,94 @@
+---
+vault_grafana_admin_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  34626237306536396132363932383761333963313130353866343963313236653731626134653364
+  6232353331393838343434393637396263633135663063650a653932636163633266626431666661
+  34643965373665303632383032303563633865653838343365616366303765616636366265393335
+  3763356266613539340a666462613931323861363934343939616536383762643361663731316432
+  3564
+vault_grafana_default_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  34626237306536396132363932383761333963313130353866343963313236653731626134653364
+  6232353331393838343434393637396263633135663063650a653932636163633266626431666661
+  34643965373665303632383032303563633865653838343365616366303765616636366265393335
+  3763356266613539340a666462613931323861363934343939616536383762643361663731316432
+  3564
+
+docker_install_community_edition: true
+
+### Grafana
+grafana_containerized: true
+grafana_auth_anonymous_org_name: Main Org.
+grafana_config_uid: "472"
+grafana_config_gid: "0"
+grafana_configuration_dir: /opt/grafana/config
+grafana_install_release: latest
+grafana_allow_embedding: true
+## Grafana LDAP
+grafana_groups_ou: "{{ groups_ou }}"
+grafana_openldap_server_bind_dn: "{{ openldap_server_bind_dn }}"
+grafana_openldap_server_dc: "{{ openldap_server_dc }}"
+grafana_openldap_server_ip: "{{ openldap_server_ip }}"
+grafana_openldap_server_rootpw: "{{ openldap_server_rootpw }}"
+
+### Grafana Dashboard/API Access
+grafana_enable_backups: false
+grafana_backup_dir: /data/backups/grafana
+grafana_backup_archive_dir: "{{ grafana_backup_dir }}/archives"
+grafana_backup_config_dir: "{{ grafana_backup_dir }}/configs"
+grafana_backup_config_file: "{{ grafana_backup_config_dir }}/grafanaSettings.json"
+grafana_backup_file_format: grafana_backup_%Y-%m-%d_%H:%M:%S
+grafana_backup_verify_ssl: "true"
+grafana_backup_debug: "true"
+grafana_url: http://{{ ansible_default_ipv4.address }}:3000
+grafana_api_token: "{{ vault_grafana_api_token | default('') }}"
+grafana_datasource_limit: 5000
+grafana_default_password: "{{ vault_grafana_default_password }}"
+grafana_admin_user: admin
+grafana_admin_password: "{{ vault_grafana_admin_password | default(vault_grafana_default_password) }}"
+
+grafana_ldap_configurations:
+  - name: attributes
+    options:
+      name: givenName
+      surname: sn
+      username: uid
+      member_of: cn
+      email: mail
+  - name: group_mappings
+    options:
+      group_dn: admin
+      org_role: Admin
+      grafana_admin: true
+      org_id: 1
+  - name: group_mappings
+    options:
+      group_dn: users
+      org_role: Viewer
+  - name: group_mappings
+    options:
+      group_dn: media
+      org_role: Viewer
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"
+  - name: postgresql
+    options:
+      address: postgres://postgres:{{ vault_postgres_password }}@localhost
+      ignored_databases:
+        - template0
+        - template1
+  - name: redis
+    options:
+      servers:
+        - tcp://localhost:6379

@@ -1,0 +1,72 @@
+---
+- name: Update role version in roles/requirements.yml
+  hosts: localhost
+  connection: local
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Check taggs and update roles in project
+      block:
+        - name: Ensure event is a new tag and not the awx_project
+          ansible.builtin.meta: end_play
+          when:
+            - (awx_webhook_payload.ref_type | default("") != "tag") or (awx_webhook_payload.ssh_url | default("")) == repo_url
+        - name: Clone AWX project
+          ansible.builtin.git:
+            repo: "{{ repo_url }}"
+            dest: "{{ temp_repo_dest }}"
+            version: "{{ repo_version }}"
+            key_file: ~/.ssh/id_rsa
+        - name: Read current role requirements
+          ansible.builtin.slurp:
+            src: "{{ temp_repo_dest }}/roles/requirements.yml"
+          register: role_requirements
+
+        - name: Parse webhook payload
+          ansible.builtin.set_fact:
+            role_url: "{{ awx_webhook_payload.repository.clone_url }}"
+            role_version: "{{ awx_webhook_payload.ref }}"
+            role_requirements: "{{ role_requirements['content'] | b64decode }}"
+
+        - name: Update role requirement version
+          ansible.builtin.set_fact:
+            updated_role_requirement: |
+              {{
+                role_requirements |
+                rejectattr('src', 'undefined') |
+                selectattr('src', 'eq', role_url) |
+                list |
+                first |
+                combine({'version': role_version})
+              }}
+
+        - name: Write updated role requirements.yml
+          ansible.builtin.copy:
+            content: |
+              {%- set ns = namespace(requirements=[]) -%}
+              {%- for role in role_requirements -%}
+                {%- if (role.src | default("")) == role_url and updated_role_requirement is not none -%}
+                  {%- set ns.requirements = ns.requirements + [updated_role_requirement] -%}
+                {%- else -%}
+                  {%- set ns.requirements = ns.requirements + [role] -%}
+                {%- endif -%}
+              {% endfor -%}
+              ---
+              {{ ns.requirements | to_nice_yaml }}
+            dest: "{{ temp_repo_dest }}/roles/requirements.yml"
+
+        - name: Stage, commit and push changes to requirements
+          lvrfrc87.git_acp.git_acp:
+            path: "{{ temp_repo_dest }}"
+            comment: Update role {{ updated_role_requirement.name }} to {{ role_version }}
+            add: roles/requirements.yml
+            branch: master
+            mode: ssh
+            url: "{{ role_url }}"
+
+      always:
+        - name: Remove temporary cloned directory
+          ansible.builtin.file:
+            path: "{{ temp_repo_dest }}"
+            state: absent

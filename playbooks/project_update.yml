@@ -1,0 +1,20 @@
+---
+- name: "Update AWX Project"
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Trigger update
+      ansible.builtin.uri:
+        url: http://awx.home.prettybaked.com/api/v2/projects/8/update/
+        user: "{{ awx_admin_user }}"
+        password: "{{ awx_admin_password }} "
+        method: POST
+        force_basic_auth: true
+        follow_redirects: true
+        validate_certs: false
+        body_format: json

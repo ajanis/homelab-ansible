@@ -1,0 +1,108 @@
+---
+docker_install_community_edition: true
+
+media_disk_mnt: /media
+queued_dir: "{{ data_mount_root }}/queued"
+transcoding_dir: "{{ data_mount_root }}/transcoding"
+complete_dir: "{{ data_mount_root }}/complete"
+incomplete_dir: "{{ data_mount_root }}/incomplete"
+logs_dir: "{{ data_mount_root }}/logs"
+
+tdarr:
+  server:
+    image: haveagitgat/tdarr:latest
+    tdarr_port: 8266
+    web_ui_port: 8265
+  node:
+    image: haveagitgat/tdarr_node:latest
+    tdarr_port: 8267
+
+docker_compose_projects:
+  - project_name: tdarr_server
+    pull: "{{ docker_recreate | default(False) }}"
+    build: "{{ docker_recreate | default(False) }}"
+    nocache: "{{ docker_recreate | default(False) }}"
+    recreate: "{{ docker_recreate | default(False) }}"
+    remove_orphans: "{{ docker_recreate | default(False) }}"
+    definition:
+      version: "3.9"
+      x-logging: &default-logging
+        driver: journald
+      services:
+        tdarr-server:
+          hostname: tdarr-server
+          container_name: tdarr_server
+          image: "{{ tdarr.server.image }}"
+          restart: unless-stopped
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /dev/rtc:/dev/rtc:ro
+            - /opt/tdarr/server:/app/server
+            - /opt/tdarr/config:/app/configs
+            - "{{ transcoding_dir }}:/temp"
+            - "{{ complete_dir }}:/complete"
+            - "{{ queued_dir }}:/queued"
+            - "{{ data_mount_root }}/tv:/tv"
+            - "{{ data_mount_root }}/movies:/movies"
+          network_mode: host
+          environment:
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            serverIP: "0.0.0.0"
+            serverPort: "{{ tdarr.server.tdarr_port }}"
+            webUIPort: "{{ tdarr.server.web_ui_port }}"
+            TZ: "{{ timezone }}"
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: tdarr_server
+# sysctls:
+#   - net.ipv6.conf.all.disable_ipv6=1
+# docker_containers:
+#   tdarr:
+#     description: Web UI and control server for Tdarr distributed transcoding
+#     image: "haveagitgat/tdarr:{{ dddfd }}"
+#     state: started
+#     recreate: "{{ docker_recreate | default(false) }}"
+#     pull: "{{ docker_recreate | default(false) }}"
+#     restart_policy: unless-stopped
+#     ports:
+#       - "{{ tdarr_ports.web_ui }}:{{ tdarr_ports.web_ui }}"
+#       - "{{ tdarr_ports.server }}:{{ tdarr_ports.server }}"
+#     volumes:
+#       - "/etc/localtime:/etc/localtime:ro"
+#       - "/dev/rtc:/dev/rtc:ro"
+#       - "/opt/tdarr/server:/app/server"
+#       - "/opt/tdarr/config:/app/configs"
+#       - "{{ transcoding_dir }}:/temp"
+#       - "{{ complete_dir }}:/complete"
+#       - "{{ queued_dir }}:/queued"
+#       - "{{ data_mount_root }}/tv:/tv"
+#       - "{{ data_mount_root }}/movies:/movies"
+#     env:
+#       PUID: "{{ media_user_uid }}"
+#       PGID: "{{ media_user_gid }}"
+#       serverIP: "0.0.0.0"
+#       serverPort: "{{ tdarr_ports.server }}"
+#       webUIPort: "{{ tdarr_ports.web_ui }}"
+#       TZ: "{{ timezone }}"
+#     logging:
+#       driver: journald
+#       options:
+#         tag: tdarr
+#     sysctls:
+#       - net.ipv6.conf.all.disable_ipv6=1
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"

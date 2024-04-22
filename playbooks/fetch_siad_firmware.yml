@@ -1,0 +1,11 @@
+---
+- name: Fetch siad firmware for tftp server
+  hosts: pxe
+  become: false
+  gather_facts: true
+  remote_user: root
+  tasks:
+    - name: Add tftpserver role
+      ansible.builtin.include_role:
+        name: tftpserver
+        tasks_from: siad_firmware_fetch.yml

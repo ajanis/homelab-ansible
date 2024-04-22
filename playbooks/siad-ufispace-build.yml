@@ -1,0 +1,22 @@
+---
+- name: Ufispace Host Firmware upgrades and diagnostics
+  hosts: ufispace
+  become: true
+  remote_user: root
+
+  tasks:
+    - name: Add siad role
+      ansible.builtin.include_role:
+        name: siad
+      tags:
+        - ssh
+        - ufispace
+        - bsp
+        - bios
+        - bmc
+        - cpu_cpld
+        - mainboard_cpld
+        - network
+        - ucd
+        - tpm
+        - eeprom

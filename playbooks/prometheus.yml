@@ -1,0 +1,273 @@
+---
+- name: Install and configure Prometheus and Prometheus Node Exporter on target host
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  vars:
+    vault_proxmox_root_password: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      61376538356462353564643865633233323734613037376533623764636639343863396631353430
+      3934636434636334386232356632303733323365373631640a323235353563616233656339343731
+      37633631653732626534636461316537353838363865376466633162376230633236346134306337
+      6233336131666266370a613634626135643131383537393238353565313436363037326566623337
+      3062
+
+  handlers:
+    - name: Restart prometheus
+      listen: restart_prometheus_services
+      ansible.builtin.service:
+        name: prometheus
+        state: restarted
+        enabled: true
+      when:
+        - ansible_os_family == "Debian"
+
+    - name: Restart prometheus-node-exporter
+      listen: restart_prometheus_services
+      ansible.builtin.service:
+        name: prometheus-node-exporter
+        state: restarted
+        enabled: true
+      when:
+        - "'ceph' not in group_names"
+
+  tasks:
+    - name: Prometheus Setup
+      tags:
+        - prometheus-setup
+      block:
+        - name: Install Prometheus packages
+          ansible.builtin.package:
+            name: |
+              {%- if ansible_os_family == 'Debian' -%}
+                ['prometheus-node-exporter', 'prometheus']
+              {%- elif ansible_os_family == 'RedHat' and 'ceph' not in group_names -%}
+                ['golang-github-prometheus-node-exporter']
+              {%- endif -%}
+            state: present
+
+        - name: Check for GPU presence
+          ansible.builtin.command:
+            cmd: nvidia-smi -L
+          register: nvidia_presence
+          changed_when: false
+          failed_when: false
+
+        - name: Check for Docker presence
+          ansible.builtin.command:
+            cmd: docker -v
+          register: docker_presence
+          changed_when: false
+          failed_when: false
+
+        - name: Gather Port information
+          community.general.listen_ports_facts:
+
+        - name: Check for Proxmox presence
+          ansible.builtin.command:
+            cmd: pveversion
+          register: pve_presence
+          changed_when: false
+          failed_when: false
+
+        - name: Install Prometheus Exporter for Proxmox PVE
+          when:
+            - "'pve-manager' in pve_presence.stdout"
+
+          block:
+            - name: Install Proxmox PVE exporter
+              ansible.builtin.pip:
+                name: prometheus-pve-exporter
+                state: present
+                executable: /usr/bin/pip3
+
+            - name: Create PVE exporter service
+              ansible.builtin.copy:
+                mode: "0755"
+                dest: /etc/systemd/system/prometheus-pve-exporter.service
+                content: |
+                  [Unit]
+                  Description=Prometheus exporter for Proxmox PVE
+                  Documentation=https://github.com/prometheus-pve/prometheus-pve-exporter
+
+                  [Service]
+                  Restart=always
+                  User=prometheus
+                  ExecStart=/usr/local/bin/pve_exporter /etc/prometheus/pve.yml
+
+                  [Install]
+                  WantedBy=multi-user.target
+
+            - name: Create Proxmox authentication file for Prometheus PVE exporter
+              ansible.builtin.copy:
+                dest: /etc/prometheus/pve.yml
+                content: |
+                  default:
+                    user: root@pam
+                    password: '{{ vault_proxmox_root_password }}'
+                    verify_ssl: false
+                owner: prometheus
+                group: prometheus
+                mode: "0600"
+
+            - name: Register and enable Prometheus PVE Exporter service
+              ansible.builtin.systemd:
+                name: prometheus-pve-exporter
+                state: started
+                enabled: true
+
+            - name: Install Prometheus IPMI exporter
+              ansible.builtin.package:
+                name: prometheus-ipmi-exporter
+                state: present
+
+            - name: Register and enable Prometheus PVE Exporter service
+              ansible.builtin.systemd:
+                name: prometheus-node-exporter-ipmitool-sensor
+                state: started
+                enabled: true
+
+            - name: Set 'has_proxmox' fact
+              ansible.builtin.set_fact:
+                has_proxmox: true
+
+        - name: Install Prometheus GPU Exporter if GPU found
+          when:
+            - "'GPU' in nvidia_presence.stdout"
+
+          block:
+            - name: Print GPU info
+              ansible.builtin.debug:
+                msg: "{{ nvidia_presence.stdout }}"
+
+            - name: Install GPU Exporter Package
+              ansible.builtin.apt:
+                deb: https://github.com/utkuozdemir/nvidia_gpu_exporter/releases/download/v1.1.0/nvidia-gpu-exporter_1.1.0_linux_amd64.deb
+                state: present
+
+            - name: Enable GPU Exporter service
+              ansible.builtin.service:
+                name: nvidia_gpu_exporter
+                state: started
+                enabled: true
+
+            - name: Set 'has_gpu' fact
+              ansible.builtin.set_fact:
+                has_gpu: true
+
+        - name: Enable JellyFin Job for prometheus
+          when:
+            - "'jellyfin' in ansible_facts.tcp_listen|map(attribute='name')"
+
+          block:
+            - name: Print Jellyfin metrics endpoint info
+              ansible.builtin.debug:
+                msg: "Port {{ item.port }}: {{ item.name }}"
+              when:
+                - item.name == 'jellyfin'
+                - item.port == 8096
+              loop: "{{ ansible_facts.tcp_listen }}"
+
+            - name: Set 'has_jellyfin' fact
+              ansible.builtin.set_fact:
+                has_jellyfin: true
+        - name: Add Prometheus configurations for Docker
+          when:
+            - "'version' in docker_presence.stdout"
+
+          block:
+            - name: Print Docker info
+              ansible.builtin.debug:
+                msg: "{{ docker_presence.stdout }}"
+
+            - name: Set 'has_docker' fact
+              ansible.builtin.set_fact:
+                has_docker: true
+
+            - name: Check for existing docker daemon config
+              ansible.builtin.stat:
+                path: /etc/docker/daemon.json
+              register: docker_daemon_json
+            - name: Printer docker daemon.json file contents
+              ansible.builtin.debug:
+                var: docker_daemon_json
+                verbosity: 1
+
+            - name: Slurp JSON from file
+              ansible.builtin.slurp:
+                src: /etc/docker/daemon.json
+              register: docker_daemon_configfile
+              when:
+                - docker_daemon_json.stat.exists
+            - name: Print base64 string
+              ansible.builtin.debug:
+                var: docker_daemon_configfile.content|b64decode
+                verbosity: 1
+              when:
+                - docker_daemon_json.stat.exists
+
+            - name: Set empty array for docker daemon config
+              ansible.builtin.set_fact:
+                docker_daemon_config: {}
+
+            - name: Set daemon config to existing file content if found
+              ansible.builtin.set_fact:
+                docker_daemon_config: "{{ docker_daemon_configfile.content | b64decode }}"
+              when:
+                - docker_daemon_json.stat.exists
+            - name: Print Docker daemon config as JSON
+            - ansible.builtin.debug:
+                var: docker_daemon_config | to_nice_json
+                verbosity: 1
+
+            - name: Add Prometheus metrics to docker daemon config
+              ansible.builtin.set_fact:
+                docker_daemon_config: "{{ docker_daemon_config | combine({'experimental': true, 'metrics-addr': '0.0.0.0:9323'}, recursive=true) }}"
+              when: "'metrics-addr' not in docker_daemon_config|default({})"
+
+            - name: Print updated docker daemon config
+            - ansible.builtin.debug:
+                var: docker_daemon_config|to_nice_json
+                verbosity: 1
+
+            - name: Add Nvidia runtime to docker daemon config
+              ansible.builtin.set_fact:
+                docker_daemon_config: "{{ docker_daemon_config | combine({'runtimes': {'nvidia': {'path': '/usr/bin/nvidia-container-runtime', 'runtimeArgs': []}}},
+                  recursive=true) }}"
+              when: "'nvidia' not in docker_daemon_config.runtimes|default({})"
+            - name: Print Nvidia runtime addition to docker daemon config
+              ansible.builtin.debug:
+                var: docker_daemon_config|to_nice_json
+                verbosity: 1
+
+            - name: Write modified Docker daemon json
+              ansible.builtin.copy:
+                content: "{{ docker_daemon_config | to_nice_json }}"
+                dest: /etc/docker/daemon.json
+              register: docker_daemon_updated
+
+            - name: Restart docker service
+              ansible.builtin.service:
+                name: docker
+                state: restarted
+              when: docker_daemon_updated
+
+        - name: Ensure /etc/prometheus directory exists
+          ansible.builtin.file:
+            dest: /etc/prometheus
+            state: directory
+            mode: "0755"
+
+        - name: Add Prometheus configuration from template
+          ansible.builtin.template:
+            src: "{{ CWD }}../include/prometheus.yml.j2"
+            dest: /etc/prometheus/prometheus.yml
+            mode: "0644"
+          notify: restart_prometheus_services
+
+        - name: Flush Handlers
+          ansible.builtin.meta: flush_handlers

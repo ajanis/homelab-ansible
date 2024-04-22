@@ -1,0 +1,89 @@
+---
+ceph_reef:
+
+  hosts:
+    ceph001:
+      ansible_python_interpreter: /usr/bin/env python3
+      ansible_host: 10.0.10.101
+      labels:
+        - _admin
+        - mons
+        - mgrs
+        - mdss
+        - osds
+        - prometheus
+        - alertmanager
+        - grafana
+        - loki
+        - monitoring
+    ceph002:
+      ansible_python_interpreter: /usr/bin/env python3
+      ansible_host: 10.0.10.102
+      labels:
+        - _admin
+        - osds
+        - mons
+        - mdss
+        - mgrs
+    ceph003:
+      ansible_python_interpreter: /usr/bin/env python3
+      ansible_host: 10.0.10.103
+      labels:
+        - _admin
+        - osds
+        - mons
+        - mdss
+        - mgrs
+    ceph004:
+      ansible_python_interpreter: /usr/bin/env python3
+      ansible_host: 10.0.10.104
+      labels:
+        - _admin
+        - osds
+        - mons
+        - mdss
+        - jaeger
+        - elasticsearch
+  children:
+    mdss:
+      hosts:
+        ceph001: {}
+        ceph002: {}
+        ceph003: {}
+        ceph004: {}
+    rgws:
+      hosts:
+        ceph001: {}
+        ceph002: {}
+        ceph003: {}
+        ceph004: {}
+    mgrs:
+      hosts:
+        ceph001: {}
+        ceph002: {}
+        ceph003: {}
+        ceph004: {}
+    mons:
+      hosts:
+        ceph001: {}
+        ceph002: {}
+        ceph003: {}
+        ceph004: {}
+    osds:
+      hosts:
+        ceph001: {}
+        ceph002: {}
+        ceph003: {}
+        ceph004: {}
+    admin:
+      hosts:
+        ceph001: {}
+        ceph002: {}
+        ceph003: {}
+        ceph004: {}
+    # clients:
+    #   children:
+    #     proxmox__all_qemu: {}
+    #     proxmox__all_lxc: {}
+    #     automation: {}
+    #     proxmox__nodes: {}

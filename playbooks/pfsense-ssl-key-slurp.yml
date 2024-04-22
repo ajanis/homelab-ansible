@@ -1,0 +1,82 @@
+---
+- name: Slurp ssl keys
+  hosts: opnsense
+  become: false
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Slurp ssl data from remote host
+      when:
+        - slurp_ssl_keys_from_remote|default(False)
+        - ssl_slurp_remote_host is defined
+        - ssl_slurp_remote_host != None
+      tags:
+        - nginx-ssl-slurp
+      block:
+        - name: Identify latest ssl directory
+          ansible.builtin.shell: set -o pipefail && ls -ltr /var/etc/acme-client/keys/| tail -n1 | awk '{print $NF}'
+          register: ssl_dir
+          delegate_to: "{{ ssl_slurp_remote_host }}"
+          delegate_facts: true
+          changed_when: false
+
+        - name: Print ssl directory path
+          ansible.builtin.debug:
+            msg: "{{ ssl_dir.stdout }}"
+            verbosity: 1
+
+        - name: Slurp ssl key contents
+          ansible.builtin.slurp:
+            src: /var/etc/acme-client/keys/{{ ssl_dir.stdout }}/private.key
+          register: slurp_prettybaked_wildcard_ssl_key
+          delegate_to: "{{ ssl_slurp_remote_host }}"
+          delegate_facts: true
+
+        - name: Print ssl key content
+          ansible.builtin.debug:
+            msg: "{{ slurp_prettybaked_wildcard_ssl_key['content'] | b64decode }}"
+            verbosity: 1
+
+        - name: Slurp ssl key contents
+          ansible.builtin.slurp:
+            src: /var/etc/acme-client/certs/{{ ssl_dir.stdout }}/fullchain.pem
+          register: slurp_prettybaked_wildcard_ssl_cert
+          delegate_to: "{{ ssl_slurp_remote_host }}"
+          delegate_facts: true
+
+        - name: Print ssl cert contents
+          ansible.builtin.debug:
+            msg: "{{ slurp_prettybaked_wildcard_ssl_cert['content'] | b64decode }}"
+            verbosity: 1
+
+        - name: Set key facts
+          ansible.builtin.set_fact:
+            ssl_privkey: "{{ slurp_prettybaked_wildcard_ssl_key['content'] | b64decode }}"
+            ssl_certchain: "{{ slurp_prettybaked_wildcard_ssl_cert['content'] | b64decode }}"
+
+        - name: Ensure mounted ssl directory exists
+          ansible.builtin.file:
+            path: "{{ data_mount_root }}/ssl/"
+            state: directory
+            mode: "0640"
+            owner: "{{ media_user_uid }}"
+            group: "{{ media_user_gid }}"
+          delegate_to: webservices
+
+        - name: Install SSL Key
+          ansible.builtin.copy:
+            content: "{{ ssl_privkey }}"
+            dest: "{{ data_mount_root }}/ssl/{{ www_domain }}.key"
+            owner: "{{ media_user_uid }}"
+            group: "{{ media_user_gid }}"
+            mode: "0600"
+          delegate_to: webservices
+
+        - name: Install SSL Certificate Chain
+          ansible.builtin.copy:
+            content: "{{ ssl_certchain }}"
+            dest: "{{ data_mount_root }}/ssl/{{ www_domain }}.crt"
+            owner: "{{ media_user_uid }}"
+            group: "{{ media_user_gid }}"
+            mode: "0640"
+          delegate_to: webservices

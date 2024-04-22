@@ -1,0 +1,10 @@
+- name: "Deploy FIO Load-Generation server"
+  hosts: all
+  become: true
+  tasks:
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+    - name: Add fioserver role
+      ansible.builtin.include_role:
+        name: fioserver

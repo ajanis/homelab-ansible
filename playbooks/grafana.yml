@@ -1,0 +1,36 @@
+---
+- name: Deploy Grafana Server and backup service
+  hosts:
+    - grafana
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  # vars_prompt:
+  #   - name: prompt_grafana_api_key
+  #     prompt: Enter Grafana API key
+  tasks: {}
+
+    # - name: Add common role
+    #   ansible.builtin.import_role:
+    #     name: common
+    # - name: Add openldap role
+    #   ansible.builtin.import_role:
+    #     name: openldap
+    #   when: openldap_server_ip is defined and openldap_server_ip != None
+    # - name: Add ceph-fs role
+    #   ansible.builtin.import_role:
+    #     name: ceph-fs
+    #   when:
+    #     - shared_storage
+    #     - storage_backend == "cephfs"
+    # - name: Add grafana role
+    #   ansible.builtin.import_role:
+    #     name: grafana
+    # - name: Add telegraf role
+    #   ansible.builtin.import_role:
+    #     name: telegraf
+    #   when: "'telegraf' in group_names"
+    # - ansible.builtin.setup: {}

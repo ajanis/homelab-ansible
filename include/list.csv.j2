@@ -1,0 +1,4 @@
+Groups,Label,Tags,Hostname/IP,Protocol,Port
+{% for hostname in groups['all'] %}
+,{{ hostname }},"{% for group in hostvars[hostname].group_names %}{{ group | lower }}{% if not loop.last %},{% endif %}{% endfor %}",{{ hostvars[hostname].ansible_ssh_host }},ssh,22
+{% endfor %}

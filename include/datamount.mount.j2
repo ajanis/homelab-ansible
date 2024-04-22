@@ -1,0 +1,30 @@
+# [Unit]
+# Description=Media Storage at {{ ceph_cephfs_mount }}
+# After=network-online.target firewalld.service
+# Wants=network-online.target
+#
+# [Mount]
+# What={{ ceph_user }}@{{ ceph_fsid }}.{{ ceph_cephfs_fsname }}=/
+# Where={{ ceph_cephfs_mount }}
+# Type=ceph
+# Options=mon_addr={% for host in ceph_mons %}{{ host }}:{{ ceph_cephfs_mds_port }}{% if not loop.last %}/{% endif %}{% endfor %},ms_mode={{ ceph_cephfs_ms_mode }},secret={{ cephfs_data_secret }}
+#
+# [Install]
+# WantedBy=multi-user.target
+
+
+
+
+# [Unit]
+# Description=Media Storage at {{ cephfs_mount.mount }}
+# After=network-online.target firewalld.service
+# Wants=network-online.target
+#
+# [Mount]
+# What={{ cephfs_mount.user }}@{{ cephfs_mount.fsid }}.{{ cephfs_mount.fsname }}=/
+# Where={{ cephfs_mount.mount }}
+# Type=ceph
+# Options=mon_addr={% for host in cephfs_mount.mon %}{{ host }}:{{ cephfs_mount.port }}{% if not loop.last %}/{% endif %}{% endfor %},ms_mode={{ cephfs_mount.ms_mode }},secretfile={{ cephfs_mount.secretfile }}
+#
+# [Install]
+# WantedBy=multi-user.target

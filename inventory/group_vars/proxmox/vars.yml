@@ -1,0 +1,255 @@
+---
+vault_proxmox_telegraf_token: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  37633238316336333534343937333130363536613530326662336561633530366562303035373036
+  6262616330393566393831316637306463623065636662650a336665656266386637626531326635
+  32633934363737383265326362383137613365333763373062376532363738393931313634643164
+  3530646364356537390a643031323831313130653334386335383234643937363366383035353031
+  36613563623436653438313133323436666235313539383132613835343038616265343237663732
+  39663633663564636131393965386631386337616539356563383464363939386663343935396139
+  37353234366438313563336666303961613762326561313830643265376266316464656439616666
+  61383433376338323431363736396537636533323363383936663862333133323362303366393463
+  3330
+cephfs_copy_user_key: false
+cephfs_copy_admin_key: false
+ceph_release: reef
+ceph_fsid: df72f399-c211-4268-a81c-8206001991ad
+ceph_config_directory: /etc/pve
+ceph_cephfs_user: admin
+ceph_admin_user: admin
+
+ceph_conf_overrides:
+  global:
+    auth_client_required: cephx
+    auth_cluster_required: cephx
+    auth_service_required: cephx
+    cluster_network: 10.0.10.0/24
+    fsid: "{{ ceph_fsid }}"
+    mon_allow_pool_delete: true
+    mon_host: 10.0.10.201 10.0.10.202 10.0.10.203 10.0.10.204
+    ms_bind_ipv4: true
+    ms_bind_ipv6: false
+    osd_pool_default_min_size: 2
+    osd_pool_default_size: 2
+    public_network: 10.0.10.0/24
+  osd:
+    osd_pool_default_pg_autoscale_mode: "on"
+    osd_pool_default_min_size: "2"
+    osd_pool_default_size: "2"
+  client:
+    keyring: /etc/pve/priv/$cluster.$name.keyring
+  mds:
+    keyring: /var/lib/ceph/mds/ceph-$id/keyring
+  mds.pve01:
+    host: pve01
+    mds standby for name: pve
+  mds.pve02:
+    host: pve02
+    mds_standby_for_name: pve
+  mds.pve03:
+    host: pve03
+    mds_standby_for_name: pve
+  mds.pve04:
+    host: pve04
+    mds_standby_for_name: pve
+  mon.pve01:
+    public_addr: 10.0.10.201
+  mon.pve02:
+    public_addr: 10.0.10.202
+  mon.pve03:
+    public_addr: 10.0.10.203
+  mon.pve04:
+    public_addr: 10.0.10.204
+
+grub_config: /boot/grub/grub.cfg
+grub_update_cmd: /usr/sbin/update-grub2
+serialtty: ttyS0
+consoletty: tty1
+
+pve_sysctl_tuning_parameters:
+  - { key: fs.file-max, value: "26234859" }
+  - { key: vm.zone_reclaim_mode, value: d }
+  - { key: vm.swappiness, value: "10" }
+  - { key: net.nf_conntrack_max, value: "4194304" }
+
+pve_sysfs_tuning_parameters:
+  - { path: /sys/module/kvm/parameter/halt_poll_ns, value: 5000 }
+  - { path: /sys/kernel/mm/transparent_hugepage/enabled, value: always }
+  - { path: /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor, value: performance }
+
+pve_kmod_tuning_parameters:
+  kvm_intel:
+    state: absent
+    params: ple_gap=0 dddple_window=0
+
+pve_performance_tuning_pkgs:
+  - ksmtuned
+
+pve_performance_tuning_services:
+  ksm:
+    enabled: true
+    state: started
+  ksmtuned:
+    enabled: true
+    state: started
+
+### TELEGRAF OUTPUT PLUGINS
+# telegraf_output_plugins:
+#   # influxdb v2 output config
+#   - name: influxdb_v2
+#     options:
+#       urls:
+#         - "{{ telegraf_influxdb2_default_url }}"
+#       token: "{{ vault_influxdb2_telegraf_token }}"
+#       organization: "{{ telegraf_influxdb2_organization }}"
+#       bucket: "{{ telegraf_influxdb2_bucket }}"
+#       exclude_bucket_tag: "{{ telegraf_influxdb2_exclude_bucket_tag }}"
+#       timeout: "{{ telegraf_influxdb2_timeout }}"
+#       user_agent: "{{ telegraf_influxdb2_user_agent }}"
+#       content_encoding: "{{ telegraf_influxdb2_content_encoding }}"
+#       influx_uint_support: "{{ telegraf_influxdb2_influx_uint_support }}"
+#       # tls_ca: "/etc/telegraf/ca.pem"
+#       tls_cert: "{{ ssl_cert_slurp_path }}"
+#       tls_key: "{{ ssl_key_slurp_path }}"
+#       insecure_skip_verify: "{{ telegraf_influxdb2_insecure_skip_verify }}"
+
+# Prometheus remote-write output config
+# - name: http
+#   options:
+#     url: "{{ prometheus_default_url }}"
+#     data_format: "{{ prometheus_data_format }}"
+#     headers:
+#       Content-Type: application/x-protobuf
+#       Content-Encoding: snappy
+#       X-Prometheus-Remote-Write-Version: "0.1.0"
+# - name: prometheus_client
+#   options:
+#     listen: "0.0.0.0:9273"
+#     metric_version: 2
+#     data_format: "{{ prometheus_data_format }}"
+
+# ADDITIONAL TELEGRAF INPUT PLUGINS
+telegraf_plugins_extra:
+  - name: bond
+    options:
+      host_proc: /proc
+      bond_interfaces:
+        - bond0
+  - name: smart
+    options:
+      attributes: "true"
+      devices:
+        - /dev/sda -d scsi --all
+        - /dev/sdb -d scsi --all
+        - /dev/sdc -d scsi --all
+        - /dev/sdd -d scsi --all
+        - /dev/sde -d scsi --all
+        - /dev/sdf -d scsi --all
+        - /dev/nvme0 -d nvme --all
+  - name: sensors
+  - name: temp
+  - name: ipmi_sensor
+    options:
+      metric_version: 2
+      use_cache: "true"
+      cache_path: /tmp
+  - name: ceph
+    options:
+      interval: 15000ms
+      ceph_binary: /usr/bin/ceph
+      socket_dir: /var/run/ceph
+      mon_prefix: ceph-mon
+      osd_prefix: ceph-osd
+      mds_prefix: ceph-mds
+      rgw_prefix: ceph-client
+      socket_suffix: asok
+      ceph_user: client.{{ ceph_admin_user }}
+      ceph_config: "{{ ceph_config_directory }}/ceph.conf"
+      gather_admin_socket_stats: "true"
+      gather_cluster_stats: "true"
+
+# netplan_network_configuration: '{% if ansible_os_family == Debian %}True{% else %}False{% endif %}'
+# rhel_network_configuration: '{% if ansible_os_family == RedHat %}True{% else %}False{% endif %}'
+
+# netplan_configuration:
+#   network:
+#     version: 2
+#     ethernets:
+#       eth0:
+#         mtu: 1500
+#       eth1:
+#         mtu: 1500
+#     bonds:
+#       bond0:
+#         interfaces:
+#           - eth0
+#           - eth1
+#         mtu: 1500
+#         parameters:
+#           down-delay: 0
+#           lacp-rate: fast
+#           mii-monitor-interval: 100
+#           mode: 802.3ad
+#           transmit-hash-policy: layer3+4
+#           up-delay: 0
+#     bridges:
+#       br0:
+#         addresses:
+#           - "{{ (ansible_default_ipv4.address + '/' + ansible_default_ipv4.netmask | string) | ipaddr('host/prefix') }}"
+#         gateway4: 10.0.10.1
+#         interfaces:
+#           - bond0
+#         mtu: 1500
+#         nameservers:
+#           addresses:
+#             - 10.0.10.1
+#           search:
+#             - home.prettybaked.com
+#         parameters:
+#           forward-delay: 0
+#           stp: true
+#       br10:
+#         interfaces:
+#           - bond0.10
+#         mtu: 1500
+#         parameters:
+#           forward-delay: 0
+#           stp: true
+#       br11:
+#         interfaces:
+#           - bond0.11
+#         mtu: 1500
+#         parameters:
+#           forward-delay: 0
+#           stp: true
+#       br12:
+#         interfaces:
+#           - bond0.12
+#         mtu: 1500
+#         parameters:
+#           forward-delay: 0
+#           stp: true
+#       br20:
+#         interfaces:
+#           - bond0.20
+#         mtu: 1500
+#         parameters:
+#           forward-delay: 0
+#           stp: true
+#     vlans:
+#       bond0.10:
+#         id: 10
+#         link: bond0
+#         mtu: 1500
+#       bond0.11:
+#         id: 11
+#         link: bond0
+#         mtu: 1500
+#       bond0.12:
+#         id: 12
+#         link: bond0
+#         mtu: 1500
+#       bond0.20:
+#         id: 20
+#         link: bond0
+#         mtu: 1500

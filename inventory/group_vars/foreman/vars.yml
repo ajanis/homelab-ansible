@@ -1,0 +1,2214 @@
+---
+shared_storage: false
+
+foreman_install_version: 1.24
+foreman_plugins_version: 1.24
+
+foreman_hostname: foreman
+foreman_interface: "0.0.0.0"
+foreman_port: 3000
+foreman_proxy_tftp: true
+foreman_proxy_dhcp: false
+foreman_proxy_dhcp_protocol: http
+foreman_proxy_dhcp_provider: dhcp_isc
+foreman_proxy_dhcp_omapi_port: 7911
+foreman_proxy_dns: false
+foreman_proxy_dns_protocol: http
+foreman_proxy_dns_key: /etc/rndc.key
+foreman_proxy_bmc: true
+foreman_proxy_templates: false
+foreman_db_name: foreman
+foreman_db_username: foreman
+foreman_db_password: "{{ vault_foreman_db_password }}"
+foreman_admin_user: admin
+foreman_admin_group: administrators
+foreman_admin_password: "{{ vault_foreman_admin_password }}"
+foreman_manager_group: managers
+foreman_env: production
+
+foreman_settings:
+  - name: host_owner
+    value: "{{ foreman_admin_id }}"
+  - name: ansible_ssh_private_key_file
+    value: "{{ foreman_proxy_user_homedir }}/.ssh/id_rsa"
+  - name: entries_per_page
+    value: "20"
+  - name: use_shortname_for_vms
+    value: "True"
+  - name: idle_timeout
+    value: "480"
+
+foreman_global_parameters:
+  - name: remote_execution_ssh_keys
+    parameter_type: array
+    value:
+      - "{{ foreman_ssh_public_key }}"
+  - name: ansible_host_config_key
+    value: "{{ awx_host_config_key }}"
+  - name: ansible_tower_fqdn
+    value: "{{ awx_web_url }}"
+  - name: ansible_enabled
+    parameter_type: boolean
+    value: "True"
+  - name: ansible_tower_provisioning
+    parameter_type: boolean
+    value: "True"
+  - name: kernel_params
+    parameter_type: string
+    value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0 nosplash
+  - name: bmc_user
+    parameter_type: string
+    value: ADMIN
+  - name: bmc_password
+    parameter_type: string
+    value: "{{ vault_foreman_bmc_password }}"
+
+foreman_proxy_log_buffer: "1000"
+foreman_proxy_log_buffer_errors: "2000"
+
+foreman_ldap_sources:
+  - name: ldap.home.prettybaked.com
+    host: 10.0.10.15
+    onthefly_register: true
+    account: cn=Manager,dc=ldap,dc=home,dc=prettybaked,dc=com
+    account_password: "{{ openldap_server_rootpw }}"
+    base_dn: dc=ldap,dc=home,dc=prettybaked,dc=com
+    groups_base: ou=groups,dc=ldap,dc=home,dc=prettybaked,dc=com
+    ldap_filter: (&(objectClass=posixAccount)(|(gidNumber=1042)(gidNumber=2002)))
+
+foreman_usergroups:
+  - name: "{{ foreman_admin_group }}"
+    admin: true
+  - name: "{{ foreman_manager_group }}"
+    admin: false
+    roles:
+      - Manager
+
+foreman_external_usergroups:
+  - name: admin
+    auth_source_ldap: ldap.home.prettybaked.com
+    usergroup: "{{ foreman_admin_group }}"
+  - name: users
+    auth_source_ldap: ldap.home.prettybaked.com
+    usergroup: "{{ foreman_manager_group }}"
+
+foreman_domains:
+  - name: "{{ www_domain }}"
+    description: "{{ www_domain }}"
+  - name: dev.{{ www_domain }}
+    description: dev.{{ www_domain }}
+
+foreman_proxy_dhcp_subnets:
+  # VLAN 1 - 192.168.1.0/24
+  - name: 192.168.1.0/24
+    network: 192.168.1.0
+    mask: 255.255.255.0
+    gateway: 192.168.1.1
+    boot_mode: DHCP
+    ipam: None
+    mtu: 1500
+    network_type: IPv4
+    tftp_proxy: smart-proxy
+    remote_execution_proxies: smart-proxy
+    discovery_proxy: smart-proxy
+    httpboot_proxy: smart-proxy
+    #    dhcp_proxy: "smart-proxy"
+    #    dns_proxy: "smart-proxy"
+    domains:
+      - "{{ www_domain }}"
+    dns_primary: 10.0.5.1
+    dns_secondary: 4.2.2.1
+  # VLAN 5 - 10.0.5.0/24
+  - name: 10.0.5.0/24
+    network: 10.0.5.0
+    vlanid: "5"
+    mask: 255.255.255.0
+    gateway: 10.0.5.1
+    boot_mode: DHCP
+    ipam: None
+    #    from_ip: "10.0.5.201"
+    #    to_ip: "10.0.5.250"
+    mtu: 1500
+    tftp_proxy: smart-proxy
+    remote_execution_proxies: smart-proxy
+    discovery_proxy: smart-proxy
+    httpboot_proxy: smart-proxy
+    #    dhcp_proxy: "smart-proxy"
+    #    dns_proxy: "smart-proxy"
+    domains:
+      - "{{ www_domain }}"
+    dns_primary: 10.0.5.1
+    dns_secondary: 4.2.2.1
+  # VLAN 10 - 10.0.10.0/24
+  - name: 10.0.10.0/24
+    network: 10.0.10.0
+    mask: 255.255.255.0
+    vlanid: "10"
+    gateway: 10.0.10.1
+    boot_mode: DHCP
+    ipam: None
+    #    from_ip: "10.0.10.201"
+    #    to_ip: "10.0.10.250"
+    mtu: 1500
+    tftp_proxy: smart-proxy
+    remote_execution_proxies: smart-proxy
+    discovery_proxy: smart-proxy
+    httpboot_proxy: smart-proxy
+    #    dhcp_proxy: "smart-proxy"
+    #    dns_proxy: "smart-proxy"
+    domains:
+      - "{{ www_domain }}"
+    dns_primary: 10.0.10.1
+    dns_secondary: 4.2.2.1
+  # VLAN 11 - 10.0.11.0/24
+  - name: 10.0.11.0/24
+    network: 10.0.11.0
+    vlanid: "11"
+    mask: 255.255.255.0
+    gateway: 10.0.11.1
+    boot_mode: DHCP
+    ipam: None
+    #    from_ip: "10.0.11.201"
+    #    to_ip: "10.0.11.250"
+    tftp_proxy: smart-proxy
+    remote_execution_proxies: smart-proxy
+    #    dhcp_proxy: "smart-proxy"
+    #    dns_proxy: "smart-proxy"
+    mtu: 1500
+    domains:
+      - "{{ www_domain }}"
+    dns_primary: 10.0.11.1
+    dns_secondary: 4.2.2.1
+  # VLAN 12 - 10.0.12.0/23
+  - name: 10.0.12.0/23
+    network: 10.0.12.0
+    vlanid: "12"
+    mask: 255.255.254.0
+    gateway: 10.0.12.1
+    boot_mode: DHCP
+    ipam: None
+    #    from_ip: "10.0.13.10"
+    #    to_ip: "10.0.13.250"
+    tftp_proxy: smart-proxy
+    remote_execution_proxies: smart-proxy
+    discovery_proxy: smart-proxy
+    httpboot_proxy: smart-proxy
+    #    dhcp_proxy: "smart-proxy"
+    #    dns_proxy: "smart-proxy"
+    mtu: 1500
+    domains:
+      - "{{ www_domain }}"
+    dns_primary: 10.0.12.1
+    dns_secondary: 4.2.2.1
+  # VLAN 20 - 10.0.20.0/24
+  - name: 10.0.20.0/24
+    network: 10.0.20.0
+    vlanid: "20"
+    mask: 255.255.255.0
+    gateway: 10.0.20.1
+    boot_mode: DHCP
+    ipam: None
+    #    from_ip: "10.0.20.201"
+    #    to_ip: "10.0.20.250"
+    tftp_proxy: smart-proxy
+    remote_execution_proxies: smart-proxy
+    discovery_proxy: smart-proxy
+    httpboot_proxy: smart-proxy
+    #    dhcp_proxy: "smart-proxy"
+    #    dns_proxy: "smart-proxy"
+    mtu: 1500
+    domains:
+      - "{{ www_domain }}"
+    dns_primary: 10.0.20.1
+    dns_secondary: 4.2.2.1
+  # VLAN 42 - 10.0.42.0/24
+  - name: 10.0.42.0/24
+    network: 10.0.42.0
+    vlanid: "42"
+    mask: 255.255.255.0
+    gateway: 10.0.42.1
+    boot_mode: DHCP
+    ipam: None
+    #    from_ip: "10.0.42.201"
+    #    to_ip: "10.0.42.250"
+    mtu: 1500
+    tftp_proxy: smart-proxy
+    remote_execution_proxies: smart-proxy
+    discovery_proxy: smart-proxy
+    httpboot_proxy: smart-proxy
+    #    dhcp_proxy: "smart-proxy"
+    #    dns_proxy: "smart-proxy"
+    domains:
+      - "{{ www_domain }}"
+    dns_primary: 10.0.42.1
+    dns_secondary: 4.2.2.1
+
+foreman_installation_mediums:
+  - name: Ubuntu mirror
+    path: http://archive.ubuntu.com/ubuntu
+    os_family: Debian
+  - name: CentOS 8 mirror
+    path: http://mirror.centos.org/centos/$major/BaseOS/$arch/os
+    os_family: Redhat
+  - name: CentOS mirror
+    path: http://mirror.centos.org/centos/$major/os/$arch
+    os_family: Redhat
+  - name: CentOS 8 Latest KickStart Stream
+    path: http://mirror.centos.org/centos/$major/BaseOS/$arch/kickstart
+    os_family: Redhat
+
+foreman_operatingsystems:
+  ## Ubuntu 19.10
+  #  - name: "Ubuntu"
+  #    description: "Ubuntu 19.10"
+  #    release_name: "eoan"
+  #    family: "Debian"
+  #    major: "19"
+  #    minor: "10"
+  #    provisioning_templates:
+  #      - "Preseed default iPXE"
+  #      - "Preseed default"
+  #      - "Preseed default PXELinux"
+  #      - "Preseed default finish"
+  #      - "Preseed default user data"
+  #    ptables:
+  #      - "Preseed default"
+  #      - "Preseed default LVM"
+  #    architectures:
+  #      - x86_64
+  #    media: "Ubuntu mirror"
+  #    parameters:
+  #      - name: additional-packages
+  #        parameter_type: yaml
+  #        value:
+  #          - curl
+  #          - net-tools
+  #      - name: kernel_params
+  #        parameter_type: string
+  #        value: "console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0 nosplash"
+  #      - name: partitioning-type
+  #        parameter_type: string
+  #        value: "general"
+  #      - name: partitioning-recipe
+  #        parameter_type: string
+  #        value: "atomic"
+  # Ubuntu 18.04.3 LTS
+  - name: Ubuntu
+    description: Ubuntu 18.04.3 LTS
+    release_name: bionic
+    family: Debian
+    major: "18"
+    minor: "04.3"
+    provisioning_templates:
+      - Preseed default iPXE
+      - Preseed default
+      - Preseed default PXELinux
+      - Preseed default finish
+      - Preseed default user data
+    ptables:
+      - Preseed default
+      - Preseed default LVM
+    architectures:
+      - x86_64
+    media: Ubuntu mirror
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - curl
+          - net-tools
+          - ethtool
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0 nosplash
+      - name: partitioning-type
+        parameter_type: string
+        value: general
+      - name: partitioning-recipe
+        parameter_type: string
+        value: atomic
+  # Ubuntu 18.04.2 LTS
+  - name: Ubuntu
+    description: Ubuntu 18.04.2 LTS
+    release_name: bionic
+    family: Debian
+    major: "18"
+    minor: "04.2"
+    provisioning_templates:
+      - Preseed default iPXE
+      - Preseed default
+      - Preseed default PXELinux
+      - Preseed default finish
+      - Preseed default user data
+    ptables:
+      - Preseed default
+      - Preseed default LVM
+    architectures:
+      - x86_64
+    media: Ubuntu mirror
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - curl
+          - net-tools
+          - ethtool
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0 nosplash
+      - name: partitioning-type
+        parameter_type: string
+        value: general
+      - name: partitioning-recipe
+        parameter_type: string
+        value: atomic
+  # Ubuntu 18.04
+  - name: Ubuntu
+    description: Ubuntu 18.04
+    release_name: bionic
+    family: Debian
+    major: "18"
+    minor: "04"
+    provisioning_templates:
+      - Preseed default iPXE
+      - Preseed default
+      - Preseed default PXELinux
+      - Preseed default finish
+      - Preseed default user data
+    ptables:
+      - Preseed default
+      - Preseed default LVM
+    architectures:
+      - x86_64
+    media: Ubuntu mirror
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - curl
+          - net-tools
+          - ethtool
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0 nosplash
+      - name: partitioning-type
+        parameter_type: string
+        value: general
+      - name: partitioning-recipe
+        parameter_type: string
+        value: atomic
+  ## Ubuntu 19.04
+  #  - name: "Ubuntu"
+  #    description: "Ubuntu 19.04"
+  #    release_name: "disco"
+  #    family: "Debian"
+  #    major: "19"
+  #    minor: "04"
+  #    provisioning_templates:
+  #      - "Preseed default iPXE"
+  #      - "Preseed default"
+  #      - "Preseed default PXELinux"
+  #      - "Preseed default finish"
+  #      - "Preseed default user data"
+  #    ptables:
+  #      - "Preseed default"
+  #      - "Preseed default LVM"
+  #    architectures:
+  #      - x86_64
+  #    media: "Ubuntu mirror"
+  #    parameters:
+  #      - name: additional-packages
+  #        parameter_type: yaml
+  #        value:
+  #          - curl
+  #          - net-tools
+  #          - ethtool
+  #      - name: kernel_params
+  #        parameter_type: string
+  #        value: "console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0 nosplash"
+  #      - name: partitioning-type
+  #        parameter_type: string
+  #        value: "general"
+  #      - name: partitioning-recipe
+  #        parameter_type: string
+  #        value: "atomic"
+  # Ubuntu 20.04
+  - name: Ubuntu
+    description: Ubuntu 20.04
+    release_name: focal
+    family: Debian
+    major: "20"
+    minor: "04"
+    provisioning_templates:
+      - Preseed default iPXE
+      - Preseed default
+      - Preseed default PXELinux
+      - Preseed default finish
+      - Preseed default user data
+    ptables:
+      - Preseed default
+      - Preseed default LVM
+    architectures:
+      - x86_64
+    media: Ubuntu mirror
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - curl
+          - net-tools
+          - ethtool
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0 nosplash
+      - name: partitioning-type
+        parameter_type: string
+        value: general
+      - name: partitioning-recipe
+        parameter_type: string
+        value: atomic
+  # Ubuntu 16.04.5 LTS
+  - name: Ubuntu
+    description: Ubuntu 16.04.5 LTS
+    release_name: trusty
+    family: Debian
+    major: "16"
+    minor: "04.5"
+    provisioning_templates:
+      - Preseed default iPXE
+      - Preseed default
+      - Preseed default PXELinux
+      - Preseed default finish
+      - Preseed default user data
+    ptables:
+      - Preseed default
+      - Preseed default LVM
+    architectures:
+      - x86_64
+    media: Ubuntu mirror
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - curl
+          - net-tools
+          - ethtool
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0 nosplash
+      - name: partitioning-type
+        parameter_type: string
+        value: general
+      - name: partitioning-recipe
+        parameter_type: string
+        value: atomic
+  # CentOS 7.7
+  - name: CentOS
+    description: CentOS 7.7
+    family: Redhat
+    major: "7"
+    minor: "7"
+    provisioning_templates:
+      - Kickstart default iPXE
+      - Kickstart default
+      - Kickstart default PXELinux
+      - Kickstart default finish
+      - Kickstart default user data
+    ptables:
+      - Kickstart default
+      - Kickstart default thin
+    architectures:
+      - x86_64
+    media: CentOS mirror
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - net-tools
+          - redhat-lsb
+      - name: autopart_options
+        parameter_type: string
+        value: --type=plain --nohome --fstype=ext4
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0
+      - name: selinux-mode
+        parameter_type: string
+        value: disabled
+  # CentOS 8.0
+  - name: CentOS
+    description: CentOS 8.0
+    family: Redhat
+    major: "8"
+    minor: "0"
+    provisioning_templates:
+      - Kickstart default iPXE
+      - Kickstart default
+      - Kickstart default PXELinux
+      - Kickstart default finish
+      - Kickstart default user data
+    ptables:
+      - Kickstart default
+      - Kickstart default thin
+    architectures:
+      - x86_64
+    media: CentOS 8 mirror
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - net-tools
+          - redhat-lsb
+      - name: autopart_options
+        parameter_type: string
+        value: --type=plain --nohome --fstype=ext4
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0
+      - name: selinux-mode
+        parameter_type: string
+        value: disabled
+
+  # CentOS 8.1
+  - name: CentOS
+    description: CentOS 8.1
+    family: Redhat
+    major: "8"
+    minor: "1"
+    provisioning_templates:
+      - Kickstart default iPXE
+      - Kickstart default
+      - Kickstart default PXELinux
+      - Kickstart default finish
+      - Kickstart default user data
+    ptables:
+      - Kickstart default
+      - Kickstart default thin
+    architectures:
+      - x86_64
+    media: CentOS 8 mirror
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - net-tools
+          - redhat-lsb
+      - name: autopart_options
+        parameter_type: string
+        value: --type=plain --nohome --fstype=ext4
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0
+      - name: selinux-mode
+        parameter_type: string
+        value: disabled
+  ## CentOS 8.2
+  #  - name: "CentOS"
+  #    description: "CentOS 8.2"
+  #    family: "Redhat"
+  #    major: "8"
+  #    minor: "2.2004"
+  #    provisioning_templates:
+  #      - "Kickstart default iPXE"
+  #      - "Kickstart default"
+  #      - "Kickstart default PXELinux"
+  #      - "Kickstart default finish"
+  #      - "Kickstart default user data"
+  #    ptables:
+  #      - "Kickstart default"
+  #      - "Kickstart default thin"
+  #    architectures:
+  #      - x86_64
+  #    media: "CentOS 8 mirror"
+  #    parameters:
+  #      - name: additional-packages
+  #        parameter_type: yaml
+  #        value:
+  #          - net-tools
+  #          - redhat-lsb
+  #      - name: autopart_options
+  #        parameter_type: string
+  #        value: "--type=plain --nohome --fstype=ext4"
+  #      - name: kernel_params
+  #        parameter_type: string
+  #        value: "console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0"
+  #      - name: selinux-mode
+  #        parameter_type: string
+  #        value: "disabled"
+  #  CentOS 8.2
+  - name: CentOS
+    description: CentOS Linux release 8.2.2004 (Core)
+    family: Redhat
+    major: "8"
+    minor: "2.2004"
+    provisioning_templates:
+      - Kickstart default iPXE
+      - Kickstart default
+      - Kickstart default PXELinux
+      - Kickstart default finish
+      - Kickstart default user data
+    ptables:
+      - Kickstart default
+      - Kickstart default thin
+    architectures:
+      - x86_64
+    media: CentOS 8 mirror
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - net-tools
+          - redhat-lsb
+      - name: autopart_options
+        parameter_type: string
+        value: --type=plain --nohome --fstype=ext4
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0
+      - name: selinux-mode
+        parameter_type: string
+        value: disabled
+  # CentOS 8.4
+  - name: CentOS
+    description: CentOS Linux release 8.4.2105
+    family: Redhat
+    major: "8"
+    minor: "4.2105"
+    provisioning_templates:
+      - Kickstart default iPXE
+      - Kickstart default
+      - Kickstart default PXELinux
+      - Kickstart default finish
+      - Kickstart default user data
+    ptables:
+      - Kickstart default
+    architectures:
+      - x86_64
+    media: CentOS 8 Latest KickStart Stream
+    parameters:
+      - name: additional-packages
+        parameter_type: yaml
+        value:
+          - net-tools
+          - redhat-lsb
+      - name: autopart_options
+        parameter_type: string
+        value: --type=plain --nohome --fstype=ext4
+      - name: kernel_params
+        parameter_type: string
+        value: console=ttyS1,115200n8 console=tty1 net.ifnames=0 biosdevname=0
+      - name: selinux-mode
+        parameter_type: string
+        value: disabled
+
+foreman_os_default_templates:
+  # Ubuntu 20.04
+  - operatingsystem: Ubuntu 20.04
+    template_kind: finish
+    provisioning_template: Preseed default finish
+  - operatingsystem: Ubuntu 20.04
+    template_kind: provision
+    provisioning_template: Preseed default
+  - operatingsystem: Ubuntu 20.04
+    template_kind: PXELinux
+    provisioning_template: Preseed default PXELinux
+  - operatingsystem: Ubuntu 20.04
+    template_kind: iPXE
+    provisioning_template: Preseed default iPXE
+  - operatingsystem: Ubuntu 20.04
+    template_kind: user_data
+    provisioning_template: Preseed default user data
+  ## Ubuntu 19.10
+  #  - operatingsystem: "Ubuntu 19.10"
+  #    template_kind: "finish"
+  #    provisioning_template: "Preseed default finish"
+  #  - operatingsystem: "Ubuntu 19.10"
+  #    template_kind: "provision"
+  #    provisioning_template: "Preseed default"
+  #  - operatingsystem: "Ubuntu 19.10"
+  #    template_kind: "PXELinux"
+  #    provisioning_template: "Preseed default PXELinux"
+  #  - operatingsystem: "Ubuntu 19.10"
+  #    template_kind: "iPXE"
+  #    provisioning_template: "Preseed default iPXE"
+  #  - operatingsystem: "Ubuntu 19.10"
+  #    template_kind: "user_data"
+  #    provisioning_template: "Preseed default user data"
+  ## Ubuntu 19.04
+  #  - operatingsystem: "Ubuntu 19.04"
+  #    template_kind: "finish"
+  #    provisioning_template: "Preseed default finish"
+  #  - operatingsystem: "Ubuntu 19.04"
+  #    template_kind: "provision"
+  #    provisioning_template: "Preseed default"
+  #  - operatingsystem: "Ubuntu 19.04"
+  #    template_kind: "PXELinux"
+  #    provisioning_template: "Preseed default PXELinux"
+  #  - operatingsystem: "Ubuntu 19.04"
+  #    template_kind: "iPXE"
+  #    provisioning_template: "Preseed default iPXE"
+  #  - operatingsystem: "Ubuntu 19.04"
+  #    template_kind: "user_data"
+  #    provisioning_template: "Preseed default user data"
+  # Ubuntu 18.04
+  - operatingsystem: Ubuntu 18.04
+    template_kind: finish
+    provisioning_template: Preseed default finish
+  - operatingsystem: Ubuntu 18.04
+    template_kind: provision
+    provisioning_template: Preseed default
+  - operatingsystem: Ubuntu 18.04
+    template_kind: PXELinux
+    provisioning_template: Preseed default PXELinux
+  - operatingsystem: Ubuntu 18.04
+    template_kind: iPXE
+    provisioning_template: Preseed default iPXE
+  - operatingsystem: Ubuntu 18.04
+    template_kind: user_data
+    provisioning_template: Preseed default user data
+  # Ubuntu 18.04.3 LTS
+  - operatingsystem: Ubuntu 18.04.3 LTS
+    template_kind: finish
+    provisioning_template: Preseed default finish
+  - operatingsystem: Ubuntu 18.04.3 LTS
+    template_kind: provision
+    provisioning_template: Preseed default
+  - operatingsystem: Ubuntu 18.04.3 LTS
+    template_kind: PXELinux
+    provisioning_template: Preseed default PXELinux
+  - operatingsystem: Ubuntu 18.04.3 LTS
+    template_kind: iPXE
+    provisioning_template: Preseed default iPXE
+  - operatingsystem: Ubuntu 18.04.3 LTS
+    template_kind: user_data
+    provisioning_template: Preseed default user data
+  # Ubuntu 18.04.2 LTS
+  - operatingsystem: Ubuntu 18.04.2 LTS
+    template_kind: finish
+    provisioning_template: Preseed default finish
+  - operatingsystem: Ubuntu 18.04.2 LTS
+    template_kind: provision
+    provisioning_template: Preseed default
+  - operatingsystem: Ubuntu 18.04.2 LTS
+    template_kind: PXELinux
+    provisioning_template: Preseed default PXELinux
+  - operatingsystem: Ubuntu 18.04.2 LTS
+    template_kind: iPXE
+    provisioning_template: Preseed default iPXE
+  - operatingsystem: Ubuntu 18.04.2 LTS
+    template_kind: user_data
+    provisioning_template: Preseed default user data
+  # Ubuntu 16.04.5 LTS
+  - operatingsystem: Ubuntu 16.04.5 LTS
+    template_kind: finish
+    provisioning_template: Preseed default finish
+  - operatingsystem: Ubuntu 16.04.5 LTS
+    template_kind: provision
+    provisioning_template: Preseed default
+  - operatingsystem: Ubuntu 16.04.5 LTS
+    template_kind: PXELinux
+    provisioning_template: Preseed default PXELinux
+  - operatingsystem: Ubuntu 16.04.5 LTS
+    template_kind: iPXE
+    provisioning_template: Preseed default iPXE
+  - operatingsystem: Ubuntu 16.04.5 LTS
+    template_kind: user_data
+    provisioning_template: Preseed default user data
+  # CentOS 7.7
+  - operatingsystem: CentOS 7.7
+    template_kind: finish
+    provisioning_template: Kickstart default finish
+  - operatingsystem: CentOS 7.7
+    template_kind: provision
+    provisioning_template: Kickstart default
+  - operatingsystem: CentOS 7.7
+    template_kind: PXELinux
+    provisioning_template: Kickstart default PXELinux
+  - operatingsystem: CentOS 7.7
+    template_kind: iPXE
+    provisioning_template: Kickstart default iPXE
+  - operatingsystem: CentOS 7.7
+    template_kind: user_data
+    provisioning_template: Kickstart default user data
+  # CentOS 8.0
+  - operatingsystem: CentOS 8.0
+    template_kind: finish
+    provisioning_template: Kickstart default finish
+  - operatingsystem: CentOS 8.0
+    template_kind: provision
+    provisioning_template: Kickstart default
+  - operatingsystem: CentOS 8.0
+    template_kind: PXELinux
+    provisioning_template: Kickstart default PXELinux
+  - operatingsystem: CentOS 8.0
+    template_kind: iPXE
+    provisioning_template: Kickstart default iPXE
+  - operatingsystem: CentOS 8.0
+    template_kind: user_data
+    provisioning_template: Kickstart default user data
+  # CentOS 8.1
+  - operatingsystem: CentOS 8.1
+    template_kind: finish
+    provisioning_template: Kickstart default finish
+  - operatingsystem: CentOS 8.1
+    template_kind: provision
+    provisioning_template: Kickstart default
+  - operatingsystem: CentOS 8.1
+    template_kind: PXELinux
+    provisioning_template: Kickstart default PXELinux
+  - operatingsystem: CentOS 8.1
+    template_kind: iPXE
+    provisioning_template: Kickstart default iPXE
+  - operatingsystem: CentOS 8.1
+    template_kind: user_data
+    provisioning_template: Kickstart default user data
+  ## CentOS 8.2
+  #  - operatingsystem: "CentOS 8.2"
+  #    template_kind: "finish"
+  #    provisioning_template: "Kickstart default finish"
+  #  - operatingsystem: "CentOS 8.2"
+  #    template_kind: "provision"
+  #    provisioning_template: "Kickstart default"
+  #  - operatingsystem: "CentOS 8.2"
+  #    template_kind: "PXELinux"
+  #    provisioning_template: "Kickstart default PXELinux"
+  #  - operatingsystem: "CentOS 8.2"
+  #    template_kind: "iPXE"
+  #    provisioning_template: "Kickstart default iPXE"
+  #  - operatingsystem: "CentOS 8.2"
+  #    template_kind: "user_data"
+  #    provisioning_template: "Kickstart default user data"
+  # CentOS Linux release 8.2.2004 (Core)
+  - operatingsystem: CentOS Linux release 8.2.2004 (Core)
+    template_kind: finish
+    provisioning_template: Kickstart default finish
+  - operatingsystem: CentOS Linux release 8.2.2004 (Core)
+    template_kind: provision
+    provisioning_template: Kickstart default
+  - operatingsystem: CentOS Linux release 8.2.2004 (Core)
+    template_kind: PXELinux
+    provisioning_template: Kickstart default PXELinux
+  - operatingsystem: CentOS Linux release 8.2.2004 (Core)
+    template_kind: iPXE
+    provisioning_template: Kickstart default iPXE
+  - operatingsystem: CentOS Linux release 8.2.2004 (Core)
+    template_kind: user_data
+    provisioning_template: Kickstart default user data
+  # CentOS Linux release 8.4.2105
+  - operatingsystem: CentOS Linux release 8.4.2105
+    template_kind: finish
+    provisioning_template: Kickstart default finish
+  - operatingsystem: CentOS Linux release 8.4.2105
+    template_kind: provision
+    provisioning_template: Kickstart default
+  - operatingsystem: CentOS Linux release 8.4.2105
+    template_kind: PXELinux
+    provisioning_template: Kickstart default PXELinux
+  - operatingsystem: CentOS Linux release 8.4.2105
+    template_kind: iPXE
+    provisioning_template: Kickstart default iPXE
+  - operatingsystem: CentOS Linux release 8.4.2105
+    template_kind: user_data
+    provisioning_template: Kickstart default user data
+
+foreman_hostgroups:
+  # Machine Learning Hostgroup
+  - name: machine_learning
+    description: Machine Learning Hostgroup
+    architecture: x86_64
+    operatingsystem: Ubuntu 18.04
+    medium: Ubuntu mirror
+    ptable: Preseed default LVM
+    pxe_loader: PXELinux BIOS
+    domain: "{{ www_domain }}"
+    subnet: 10.0.11.0/24
+    parameters:
+      - name: blacklist
+        parameter_type: string
+        value: nouveau
+  # Ceph Hostgroup
+  - name: ceph
+    description: Ceph Hostgroup
+    architecture: x86_64
+    operatingsystem: CentOS Linux release 8.2.2004 (Core)
+    medium: CentOS 8 mirror
+    ptable: Kickstart default
+    pxe_loader: PXELinux BIOS
+    domain: "{{ www_domain }}"
+    subnet: 10.0.20.0/24
+  # Hypervisor Hostgroup
+  - name: hypervisor
+    description: KVM Hypervisor Hostgroup
+    architecture: x86_64
+    operatingsystem: Ubuntu 20.04
+    medium: Ubuntu mirror
+    ptable: Preseed default LVM
+    pxe_loader: PXELinux BIOS
+    domain: "{{ www_domain }}"
+    subnet: 10.0.10.0/24
+  # CentOS Bare-Metal Hostgroup
+  - name: centos-baremetal
+    description: CentOS Installed on Physical Server
+    architecture: x86_64
+    operatingsystem: CentOS Linux release 8.4.2105
+    medium: CentOS 8 Latest KickStart Stream
+    ptable: Kickstart default
+    pxe_loader: PXELinux BIOS
+    domain: "{{ www_domain }}"
+    subnet: 10.0.10.0/24
+  # KVM Hostgroup
+  - name: kvm
+    description: KVM Guest Hostgroup
+    architecture: x86_64
+    domain: "{{ www_domain }}"
+  - name: kvm-dev
+    description: KVM Dev Guest Hostgroup
+    architecture: x86_64
+    domain: dev.{{ www_domain }}
+  # KVM Desktop-Environment Hostgroup
+  - name: kvm-desktop
+    description: KVM Guest Desktop-Environment Hostgroup
+    architecture: x86_64
+    domain: "{{ www_domain }}"
+  # Webservices Hostgroup
+  - name: webservices
+    description: Webservices Hostgroup
+    architecture: x86_64
+    domain: "{{ www_domain }}"
+  # Plexservers Hostgroup
+  - name: plexservers
+    description: Plexservers Hostgroup
+    architecture: x86_64
+    domain: "{{ www_domain }}"
+  # Postgres Hostgroup
+  - name: postgres
+    description: Postgres Hostgroup
+    architecture: x86_64
+    domain: "{{ www_domain }}"
+  # Grafana Hostgroup
+  - name: grafana
+    description: Grafana Hostgroup
+    architecture: x86_64
+    domain: "{{ www_domain }}"
+  # Timescale Hostgroup
+  - name: timescale
+    description: Timescale Hostgroup
+    architecture: x86_64
+    domain: "{{ www_domain }}"
+  # Base Hostgroup
+  - name: base
+    description: Base Hostgroup
+    architecture: x86_64
+    domain: "{{ www_domain }}"
+  # Influxdb Hostgroup
+  - name: influxdb
+    description: InfluxDB Hostgroup
+    architecture: x86_64
+    domain: "{{ www_domain }}"
+
+foreman_compute_resources:
+  - name: arthur
+    provider: libvirt
+    provider_params:
+      url: qemu+tcp://10.0.10.85/system
+      display_type: vnc
+  - name: ford
+    provider: libvirt
+    provider_params:
+      url: qemu+tcp://10.0.10.87/system
+      display_type: vnc
+  - name: trillian
+    provider: libvirt
+    provider_params:
+      url: qemu+tcp://10.0.10.86/system
+      display_type: vnc
+  - name: bumblebee
+    provider: libvirt
+    provider_params:
+      url: qemu+tcp://10.0.10.81/system
+      display_type: vnc
+  - name: optimus
+    provider: libvirt
+    provider_params:
+      url: qemu+tcp://10.0.10.140/system
+      display_type: vnc
+  - name: zaphod
+    provider: libvirt
+    provider_params:
+      url: qemu+tcp://10.0.10.88/system
+      display_type: vnc
+  - name: devastator
+    provider: libvirt
+    provider_params:
+      url: qemu+tcp://10.0.10.80/system
+      display_type: vnc
+  - name: dev01
+    provider: libvirt
+    provider_params:
+      url: qemu+tcp://10.0.10.152/system
+      display_type: vnc
+
+foreman_hosts: []
+awx_task_container_name: awx-task
+awx_web_container_name: awx-web
+
+awx_web_container_hostname: awxweb
+awx_task_container_hostname: awx
+
+awx_notification_email: 9412863602@mypixmessages.com
+
+awx_host_port: 8080
+awx_web_url: http://{{ ansible_default_ipv4.address }}:{{ awx_host_port }}
+awx_project_data_dir: /var/lib/awx
+awx_postgres_data_dir: /var/lib/pgawx
+
+awx_rabbitmq_erlang_cookie: "{{ vault_rabbitmq_erlang_cookie }}"
+awx_rabbitmq_password: "{{ vault_rabbitmq_password }}"
+
+awx_pg_password: "{{ vault_pg_password }}"
+awx_pg_admin_password: "{{ vault_pg_admin_password }}"
+
+awx_secret_key: "{{ vault_secret_key }}"
+
+awx_admin_user: admin
+awx_admin_password: "{{ vault_awx_admin_password }}"
+
+awx_rabbitmq_version: 3.7.4
+awx_rabbitmq_image: ansible/awx_rabbitmq:{{ awx_rabbitmq_version }}
+awx_rabbitmq_default_vhost: awx
+awx_rabbitmq_host: rabbitmq
+awx_rabbitmq_port: "5672"
+awx_rabbitmq_user: guest
+
+awx_postgresql_version: "10"
+awx_postgresql_image: postgres:{{ awx_postgresql_version }}
+
+awx_memcached_image: memcached
+awx_memcached_version: alpine
+awx_memcached_host: memcached
+awx_memcached_port: "11211"
+
+awx_dockerhub_base: ansible
+awx_dockerhub_version: 9.0.0
+awx_create_preload_data: true
+
+awx_docker_compose_dir: /var/lib/awxcompose
+awx_pg_username: awx
+awx_pg_database: awx
+awx_pg_port: 5432
+
+awx_web_hostname: awxweb
+awx_task_hostname: awx
+
+awx_inventories:
+  - name: home.prettybaked.com
+    description: home servers
+    organization: Default
+  - name: Demo Inventory
+    state: absent
+
+awx_inventory_scripts:
+  - name: foreman.py
+    description: Foreman Dynamic Inventory
+    script: foreman_inventory.py
+    organization: Default
+
+awx_inventory_sources:
+  ## Static Inventory
+  - name: home.prettybaked.com
+    description: home inventory file
+    inventory: home.prettybaked.com
+    source: scm
+    source_project: home-ansible-awx
+    source_path: inventory
+    overwrite: true
+    overwrite_vars: true
+    update_on_launch: false
+    update_on_project_update: true
+    update_cache_timeout: 60
+  ## Foreman dynamic inventory
+  - name: foreman.py
+    description: Foreman Dynamic Inventory
+    inventory: home.prettybaked.com
+    source: custom
+    source_script: foreman.py
+    credential: foreman.ini
+    overwrite: true
+    overwrite_vars: false
+    update_on_launch: true
+    update_cache_timeout: 60
+
+awx_hosts: []
+awx_credential_types:
+  - name: foreman.ini
+    description: Foreman Dynamic Inventory
+    kind: cloud
+    inputs: "{{ lookup('template', 'foreman_input.yml.j2') | from_yaml }}"
+    injectors: "{{ lookup('template', 'foreman_injector.yml.j2') | from_yaml }}"
+
+awx_credentials:
+  #  - name: "Demo Credential"
+  #    credential_type: Machine
+  #    state: absent
+
+  - name: ansible-root
+    credential_type: Machine
+    inputs:
+      ssh_key_data: "{{ foreman_ssh_private_key }}"
+
+  - name: ansible-github
+    credential_type: Source Control
+    inputs:
+      ssh_key_data: "{{ awx_github_deploy_key }}"
+
+  - name: ansible-vault
+    credential_type: Vault
+    inputs:
+      vault_id: ansible-vault
+      vault_password: "{{ vault_awx_vault_password }}"
+
+  - name: foreman.ini
+    credential_type: foreman.ini
+    inputs:
+      password: "{{ foreman_admin_password }}"
+      username: "{{ foreman_admin_user }}"
+      url: http://{{ ansible_default_ipv4.address }}:{{ foreman_port }}
+
+  - name: GitHub - Teagn42 - AWX
+    credential_type: GitHub Personal Access Token
+    inputs:
+      token: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        30366264643939393637376432643964646238303736323938323939656436643235306137646336
+        3638363865333064356335326338653039666439646531640a313937333037636161653335386535
+        34353864383763383732613237633365303265396637613236363363363063376632383936356564
+        3735383936663632390a613566376335616235663366626432366631323264356136363162636530
+        31393663383334353166356662363765336331393965306263323036663739653135623935666265
+        6534333837636336336433383036326639316163383165396339
+awx_projects:
+  - name: Demo Project
+    state: absent
+  # Home Ansible Project
+  - name: home-ansible-awx
+    description: Home Ansible AWX
+    scm_type: git
+    scm_credential: ansible-github
+    scm_clean: true
+    scm_branch: master
+    scm_update_on_launch: true
+    scm_url: git@github.com:ajanis/home-ansible-awx.git
+    local_path: home-ansible-awx
+  # Media Services Project
+  - name: mediaserver-project
+    description: Deploy suite of media-server components
+    scm_type: git
+    scm_credential: ansible-github
+    scm_clean: true
+    scm_branch: master
+    scm_update_on_launch: true
+    scm_update_cache_timeout: 900
+    scm_url: git@github.com:ajanis/ansible-mediaserver-project.git
+    local_path: mediaserver-project
+
+awx_job_templates:
+  - name: Demo Job Template
+    project:
+    job_type: run
+    playbook:
+    state: absent
+
+  ## Ansible Host Auto-Config Callback Job
+  - name: Host Configure
+    description: Server post-install configuration
+    job_type: run
+    host_config_key: "{{ awx_host_config_key }}"
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    project: home-ansible-awx
+    playbook: playbooks/callback_autoconfig.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+    extra_vars:
+      awx_web_url: "{{ awx_web_url }}"
+      awx_admin_user: "{{ awx_admin_user }}"
+      awx_admin_password: "{% raw %}{{ vault_awx_admin_password }}{% endraw %}"
+  ## Update AWX Project
+  - name: Update AWX Project
+    description: Update AWX Project
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    ask_tags: false
+    limit: buildservices01.home.prettybaked.com
+    job_tags: awx-projects
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/awx.yml
+    webhook_service: github
+    webhook_credential: GitHub - Teagn42 - AWX
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Server Base Configuration
+  - name: Server Base Configuration
+    description: common, ldap, cephfs playbooks
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: true
+    ask_tags: false
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/base.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## CephFS Mount Configuation
+  - name: CephFS Mount Configuration
+    description: Create systemd service or fstab mount configs for CephFS volumes
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: true
+    ask_tags: false
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/ceph-fs.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+    extra_vars:
+      awx_web_url: "{{ awx_web_url }}"
+      awx_admin_user: "{{ awx_admin_user }}"
+      awx_admin_password: "{% raw %}{{ vault_awx_admin_password }}{% endraw %}"
+  ## Server Common Configuration
+  - name: Server Common Configuration
+    description: common playbook
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: true
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/common.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Netplan Configuration
+  - name: Netplan Network Configuration
+    description: update host network settings via netplan
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: true
+    ask_extra_vars: true
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/netplan.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Telegraf Configuration
+  - name: Telegraf Configuration
+    description: configure host telegraf service
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: true
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/telegraf.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Ubiquiti Services
+  - name: Deploy Ubiquiti Services
+    description: Set up Unifi-Admin, UNMS and stats-collection
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    ask_tags: true
+    limit: unifi unms
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/unifi.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Install and configure web and build services Nginx hosts
+  - name: Web and Build Services Nginx Config
+    description: Install and configure Nginx on webservices and foreman hosts
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    ask_tags: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    limit: webservices foreman
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/nginx.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Install and configure media, nzb, and web services hosts
+  - name: Media Stack
+    description: Install and configure media, nzb, and web services hosts
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    ask_tags: true
+    limit: mediaservers nzbservices plexservers webservices
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/media-services.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## TIG Stack
+  - name: TIG Stack
+    description: InfluxDB, Kapacitor, Chronograf, Prometheus, Grafana, Grafana-backup utility
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    limit: tick grafana
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/tig-stack.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## InfluxDB
+  - name: InfluxDB Server
+    description: InfluxDB Server
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    limit: influxdb
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/influxdb.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Grafana
+  - name: Grafana Server
+    description: Grafana Server and Grafana Backup Script + Utility + Cron Job
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    limit: grafana
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/grafana.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Docker Installation / Config
+  - name: Docker
+    description: Install and configure Docker and containers
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: true
+    ask_tags: true
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/docker.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  # Crontab Configuration
+  - name: Cron
+    description: Install and configure cron jobs
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: true
+    ask_tags: false
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/cron.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  # Foreman Services
+  - name: Foreman Configuration
+    description: Install and configure Foreman services
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    ask_tags: true
+    limit: buildservices01.home.prettybaked.com
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/foreman.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## AWX Services
+  - name: AWX Configuration
+    description: Install and configure AWX services
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    skip_tags: never
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_tags: true
+    ask_limit: false
+    limit: buildservices01.home.prettybaked.com
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/awx.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Build-Server Configuration
+  - name: Build-Server Configuration
+    description: Install and configure all host-build services
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_tags: true
+    ask_limit: false
+    limit: buildservices01.home.prettybaked.com
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/build-host-configure.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Machine Learning Services
+  - name: Machine Learning
+    description: Deploy and configure machine-learning services
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    limit: machine_learning
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/machine-learning.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+  ## Recover data mounts
+  - name: Recover CephFS and Services
+    description: Recover cephfs data mount and dependant services
+    job_type: run
+    host_config_key: "{{ awx_host_config_key }}"
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    survey_enabled: false
+    project: home-ansible-awx
+    playbook: playbooks/recover-net-failure.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+    extra_vars:
+      awx_web_url: "{{ awx_web_url }}"
+      awx_admin_user: "{{ awx_admin_user }}"
+      awx_admin_password: "{% raw %}{{ vault_awx_admin_password }}{% endraw %}"
+  ## Create KVM Host
+  - name: "A: Provision New KVM Virtual Machine"
+    description: Deploy KVM guest via Foreman
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    survey_enabled: true
+    limit: "{{ ansible_fqdn }}"
+    project: home-ansible-awx
+    playbook: playbooks/build-host-deploy.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+    extra_vars:
+      foreman_hosts:
+        - name: "{% raw %}{{ survey_hostname }}{% endraw %}"
+          hostgroup: "{% raw %}{{ survey_hostgroup }}{% endraw %}"
+          compute_resource: "{%raw %}{{ survey_hypervisor|lower }}{% endraw %}"
+          provider: "{% raw %}kvm{% endraw %}"
+          cpu_cores: "{% raw %}{{ survey_cpu_cores }}{% endraw %}"
+          operatingsystem: "{% raw %}{{ survey_os }}{% endraw %}"
+          memory: "{% raw %}{{ survey_memory }}G{% endraw %}"
+          disk_size: "{% raw %}{{ survey_disk_size }}G{% endraw %}"
+          subnet: "{% raw %}{{ survey_subnet.split()[-1] }}{% endraw %}"
+          vlan_id: '{% raw %}{% if survey_subnet.split()[-3] != "10" %}{{ survey_subnet.split()[-3] }}{% else %}0{% endif %}{% endraw %}'
+          ansible_groups: "{% raw %}{{ survey_ansible_groups }}{% endraw %}"
+    survey_spec: |
+      description: "Build KVM Server Survey"
+      name: "build_kvm_server_survey"
+      spec:
+        - choices: null
+          max: 15
+          min: 0
+          question_description: "Enter a hostname for the new VM."
+          question_name: Hostname
+          required: true
+          type: text
+          variable: survey_hostname
+        - choices: "{% for fhg in foreman_hostgroups %}{{ fhg.name }}{% if not loop.last %}\n{% endif %}{% endfor %}"
+          default: "kvm"
+          max: null
+          min: null
+          question_description: "Select Foreman Host Group."
+          question_name: "Foreman Hostgroup"
+          required: True
+          type: multiplechoice
+          variable: survey_hostgroup
+        - choices: |
+            foreman
+            nginx
+            common
+            docker
+            isc_dhcp_server
+            tftp
+            awx
+            ansible-project
+            mediaserver
+            ceph-fs
+            openldap
+            chronograf
+            kapacitor
+            influxdb
+            telegraf
+            grafana
+            iot_firewall_allow
+            kvm
+            unifi
+            netplan
+            monitoring
+            isc_bind_server
+            edgetpu
+            ilo
+            nvidia-docker
+            nvidia-cuda
+            rsyslog
+            rclone
+            linux-system-roles.network
+          default: "common"
+          max: null
+          min: null
+          question_description: "Enter ansible groups for the new server."
+          question_name: "Ansible Groups"
+          required: true
+          type: multiselect
+          variable: survey_ansible_groups
+        - choices: "{% for os in foreman_operatingsystems %}{{ os.description }}{% if not loop.last %}\n{% endif %}{% endfor %}"
+          max: null
+          min: null
+          question_description: "Select an OS for new VM."
+          question_name: "Operating System"
+          required: true
+          type: multiplechoice
+          variable: survey_os
+        - choices: "{% for host in groups['kvm'] %}{{ host.split('.')[0] }}{% if not loop.last %}\n{% endif %}{% endfor %}"
+          default: {{ omit }}
+          max: null
+          min: null
+          question_description: "Which hypervisor should VM be created on?"
+          question_name: "Hypervisor / Compute Resource"
+          required: true
+          type: multiplechoice
+          variable: survey_hypervisor
+        - choices: "{% for subnet in foreman_proxy_dhcp_subnets %}{% if subnet.vlanid is defined %} vlan {{ subnet.vlanid }} : {% else %}untagged : {% endif %}{{ subnet.name }}{% if not loop.last %}\n{% endif %}{% endfor %}"
+          default: {{ omit }}
+          max: null
+          min: null
+          question_description: "Select a subnet for new VM."
+          question_name: "Subnet"
+          required: true
+          type: multiplechoice
+          variable: survey_subnet
+        - choices: {{ omit }}
+          default: 1
+          max: 16
+          min: 1
+          question_description: "Enter number of CPU Cores (1-16) for VM."
+          question_name: "vCPU Cores"
+          required: true
+          type: integer
+          variable: survey_cpu_cores
+        - choices: {{ omit }}
+          default: 2
+          max: 16
+          min: 2
+          question_description: "Enter amount of RAM (1-16)GB for VM."
+          question_name: "VM Memory"
+          required: true
+          type: integer
+          variable: survey_memory
+        - choices: {{ omit }}
+          default: 10
+          max: 150
+          min: 10
+          question_description: "Set Disk Size (10-150)GB for VM."
+          question_name: "VM Disk Size"
+          required: true
+          type: integer
+          variable: survey_disk_size
+
+  ## Create Baremetal Host
+  - name: "A: Provision New Physical Server"
+    description: Build bare-metal server via Foreman
+    job_type: run
+    fact_caching_enabled: true
+    concurrent_jobs_enabled: true
+    diff_mode_enabled: true
+    inventory: home.prettybaked.com
+    ask_limit: false
+    survey_enabled: true
+    limit: "{{ ansible_fqdn }}"
+    project: home-ansible-awx
+    playbook: playbooks/build-host-deploy.yml
+    credentials:
+      - ansible-root
+      - ansible-vault
+    extra_vars:
+      foreman_hosts:
+        - name: "{% raw %}{{ survey_hostname }}{% endraw %}"
+          hostgroup: "{% raw %}{{ survey_hostgroup }}{% endraw %}"
+          operatingsystem: "{% raw %}{% if survey_os is defined %}{{ survey_os }}{%elif survey_hostgroup is defined %}{% for hg in foreman_hostgroups %}{% if hg.name
+            == survey_hostgroup %}{{ hg.operatingsystem }}{% endif %}{% endfor %}{% endif %}{% endraw %}"
+          provider: "{% raw %}{{ survey_provider }}{% endraw %}"
+          mac_address: "{% raw %}{{ survey_mac_address }}{% endraw %}"
+          subnet: "{% raw %}{{ survey_subnet.split()[-1] }}{% endraw %}"
+          ip: "{% raw %}{{ survey_ip }}{% endraw %}"
+          ipmi_ip: "{% raw %}{{ survey_ipmi_ip }}{% endraw %}"
+          ipmi_mac_address: "{% raw %}{{ survey_ipmi_mac_address }}{% endraw %}"
+          ipmi_username: "{% raw %}{{ survey_ipmi_username }}{% endraw %}"
+          ipmi_password: "{% raw %}{{ survey_ipmi_password }}{% endraw %}"
+          ansible_groups: "{% raw %}{{ survey_ansible_groups }}{% endraw %}"
+    survey_spec: |
+      description: "Build Bare-Metal Server Survey"
+      name: "build_bare_metal_server_survey"
+      spec:
+        - choices: null
+          max: 15
+          min: 0
+          question_description: "Enter a hostname for the new server."
+          question_name: Hostname
+          required: true
+          type: text
+          variable: survey_hostname
+        - choices: "{% for group in foreman_hostgroups %}{% if '-' not in group.name %}{{ group.name }}{% if not loop.last %}\n{% endif %}{% endif %}{% endfor %}"
+          default: {{ omit }}
+          max: null
+          min: null
+          question_description: "Enter a Foreman Host-Group for the new server."
+          question_name: Hostgroup
+          required: true
+          type: multiplechoice
+          variable: survey_hostgroup
+        - choices: |
+            foreman
+            nginx
+            common
+            docker
+            isc_dhcp_server
+            tftp
+            awx
+            ansible-project
+            mediaserver
+            ceph-fs
+            openldap
+            chronograf
+            kapacitor
+            influxdb
+            telegraf
+            grafana
+            iot_firewall_allow
+            kvm
+            unifi
+            netplan
+            isc_bind_server
+            edgetpu
+            ilo
+            nvidia-docker
+            nvidia-cuda
+            rsyslog
+            rclone
+            ble-monitor
+            hitchhiker
+            linux-system-roles.network
+          default: "common"
+          max: null
+          min: null
+          question_description: "Enter ansible groups for the new server."
+          question_name: "Ansible Groups"
+          required: true
+          type: multiselect
+          variable: survey_ansible_groups
+        - choices: "{% for os in foreman_operatingsystems %}{{ os.description }}{% if not loop.last %}\n{% endif %}{% endfor %}"
+          default: {{ omit }}
+          max: null
+          min: null
+          question_description: "Select an OS for the new server."
+          question_name: OS
+          required: false
+          type: multiplechoice
+          variable: survey_os
+        - choices: "{% for subnet in foreman_proxy_dhcp_subnets %}{% if subnet.vlanid is defined %} vlan {{ subnet.vlanid }} : {% else %}untagged : {% endif %}{{ subnet.name }}{% if not loop.last %}\n{% endif %}{% endfor %}"
+          default: {{ omit }}
+          max: null
+          min: null
+          question_description: "Select a vlan and subnet for the new server."
+          question_name: "Subnet"
+          required: true
+          type: multiplechoice
+          variable: survey_subnet
+        - choices: null
+          default: {{ omit }}
+          max: 15
+          min: 0
+          question_description: "Enter IP Address for primary interface (eth0)"
+          question_name: "Primary Interface IP Address"
+          required: false
+          type: text
+          variable: survey_ip
+        - choices: null
+          max: 17
+          min: 17
+          question_description: "Enter MAC Address for primary interface (eth0)"
+          question_name: "Primary Interface MAC Address"
+          required: true
+          type: text
+          variable: survey_mac_address
+        - choices: "ipmi\nilo\nidrac\nssh\nredfish"
+          default: "ssh"
+          max: null
+          min: null
+          question_description: "Enter a Server Management Provider"
+          question_name: "Management Provider"
+          required: true
+          type: multiplechoice
+          variable: survey_provider
+        - choices: null
+          default: "10.0.5."
+          max: 15
+          min: 6
+          question_description: "Enter Management Interface IP Address"
+          question_name: "Management Interface IP Address"
+          required: true
+          type: text
+          variable: survey_ipmi_ip
+        - choices: null
+          max: 17
+          min: 17
+          question_description: "Enter MAC Address for management interface"
+          question_name: "Management Mac Address"
+          required: true
+          type: text
+          variable: survey_ipmi_mac_address
+        - choices: null
+          default: "ADMIN"
+          max: 15
+          min: 0
+          question_description: "Enter Management Username"
+          question_name: "Management Username"
+          required: true
+          type: text
+          variable: survey_ipmi_username
+        - choices: null
+          default: "ADMIN"
+          max: 15
+          min: 0
+          question_description: "Enter Management Password"
+          question_name: "Management Password"
+          required: true
+          type: password
+          variable: survey_ipmi_password
+
+awx_config_settings:
+  - name: SESSION_COOKIE_AGE
+    value: "28800"
+  - name: AUTH_LDAP_SERVER_URI
+    value: ldap://10.0.10.15:389
+  - name: AUTH_LDAP_BIND_DN
+    value: cn=Manager,dc=ldap,dc=home,dc=prettybaked,dc=com
+  - name: AUTH_LDAP_GROUP_TYPE
+    value: PosixGroupType
+  - name: AUTH_LDAP_USER_SEARCH
+    value:
+      - ou=users,dc=ldap,dc=home,dc=prettybaked,dc=com
+      - SCOPE_SUBTREE
+      - (uid=%(user)s)
+  - name: AUTH_LDAP_GROUP_SEARCH
+    value:
+      - ou=groups,dc=ldap,dc=home,dc=prettybaked,dc=com
+      - SCOPE_SUBTREE
+      - (objectClass=posixGroup)
+  - name: AUTH_LDAP_USER_ATTR_MAP
+    value:
+      first_name: givenName
+      last_name: sn
+      email: mail
+  - name: AUTH_LDAP_GROUP_TYPE_PARAMS
+    value:
+      name_attr: cn
+  - name: AUTH_LDAP_USER_FLAGS_BY_GROUP
+    value:
+      is_superuser:
+        - cn=admin,ou=groups,dc=ldap,dc=home,dc=prettybaked,dc=com
+  - name: AUTH_LDAP_ORGANIZATION_MAP
+    value:
+      Default:
+        admins: cn=admin,ou=groups,dc=ldap,dc=home,dc=prettybaked,dc=com
+        users: cn=users,ou=groups,dc=ldap,dc=home,dc=prettybaked,dc=com
+        remove_users: false
+        remove_admins: false
+  - name: AUTH_LDAP_TEAM_MAP
+    value:
+      LDAP Admins:
+        users: cn=admin,ou=groups,dc=ldap,dc=home,dc=prettybaked,dc=com
+        organization: Default
+        remove: false
+      LDAP Users:
+        users: cn=users,ou=groups,dc=ldap,dc=home,dc=prettybaked,dc=com
+        organization: Default
+        remove: false
+  - name: AUTH_LDAP_BIND_PASSWORD
+    value: "{{ openldap_server_rootpw }}"
+
+docker_containers:
+  postgres:
+    description: Foreman Postgresql DB
+    image: postgres:11
+    env:
+      PUID: "0"
+      PGID: "0"
+      VERSION: latest
+      POSTGRES_USER: "{{ foreman_db_username }}"
+      POSTGRES_PASSWORD: "{{ vault_foreman_db_password }}"
+      POSTGRES_DB: "{{ foreman_db_name }}"
+    ports:
+      - 5432:5432
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/lib/postgresql/data:/var/lib/postgresql/data
+
+docker_compose_projects:
+  - project_name: awx
+    pull: true
+
+    definition:
+      version: "3.5"
+      x-logging: &default-logging
+        driver: journald
+
+      networks:
+        awx:
+          name: awx
+          driver: bridge
+          ipam:
+            driver: default
+            config:
+              - subnet: 172.3.27.0/24
+
+      services:
+        postgres:
+          container_name: awx-postgres
+          image: postgres:10
+          hostname: awx-postgres
+          networks:
+            awx:
+              aliases:
+                - postgres
+                - awx_postgres
+          volumes:
+            - "{{ awx_postgres_data_dir }}/10/data/:/var/lib/postgresql/data/pgdata:Z"
+          environment:
+            POSTGRES_USER: "{{ awx_pg_username }}"
+            POSTGRES_PASSWORD: "{{ awx_pg_password }}"
+            POSTGRES_DB: "{{ awx_pg_database }}"
+            PGDATA: /var/lib/postgresql/data/pgdata
+            http_proxy: "{{ http_proxy | default('') }}"
+            https_proxy: "{{ https_proxy | default('') }}"
+            no_proxy: "{{ no_proxy | default('') }}"
+          logging:
+            <<: *default-logging
+            options:
+              tag: awx-postgres
+
+        rabbitmq:
+          container_name: awx-rabbitmq
+          image: "{{ awx_rabbitmq_image }}"
+          hostname: awx-rabbitmq
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+          networks:
+            awx:
+              aliases:
+                - rabbitmq
+                - awx_rabbitmq
+          environment:
+            RABBITMQ_DEFAULT_VHOST: "{{ awx_rabbitmq_default_vhost }}"
+            RABBITMQ_DEFAULT_USER: "{{ awx_rabbitmq_user }}"
+            RABBITMQ_DEFAULT_PASS: "{{ awx_rabbitmq_password | quote }}"
+            RABBITMQ_ERLANG_COOKIE: "{{ awx_rabbitmq_erlang_cookie }}"
+            http_proxy: "{{ http_proxy | default('') }}"
+            https_proxy: "{{ https_proxy | default('') }}"
+            no_proxy: "{{ no_proxy | default('') }}"
+          logging:
+            <<: *default-logging
+            options:
+              tag: awx-rabbitmq
+
+        memcached:
+          container_name: awx-memcached
+          image: "{{ awx_memcached_image }}:{{ awx_memcached_version }}"
+          hostname: awx-memcached
+          networks:
+            awx:
+              aliases:
+                - awx_memcached
+                - memcached
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+          environment:
+            http_proxy: "{{ http_proxy | default('') }}"
+            https_proxy: "{{ https_proxy | default('') }}"
+            no_proxy: "{{ no_proxy | default('') }}"
+          logging:
+            <<: *default-logging
+            options:
+              tag: awx-memcached
+
+        task:
+          container_name: awx-task
+          image: "{{ awx_dockerhub_base }}/awx_task:{{ awx_dockerhub_version }}"
+          hostname: awxtask
+          depends_on:
+            - memcached
+            - rabbitmq
+            - postgres
+          networks:
+            awx:
+              aliases:
+                - task
+                - awx_task
+                - awx
+          user: root
+          volumes:
+            - "{{ awx_docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
+            - "{{ awx_docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
+            - "{{ awx_docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
+            - "{{ awx_project_data_dir }}:/var/lib/awx/projects:rw"
+            - /etc/localtime:/etc/localtime:ro
+          environment:
+            http_proxy: "{{ http_proxy | default('') }}"
+            https_proxy: "{{ https_proxy | default('') }}"
+            no_proxy: "{{ no_proxy | default('') }}"
+          logging:
+            <<: *default-logging
+            options:
+              tag: awx-task
+
+        web:
+          container_name: awx-web
+          image: "{{ awx_dockerhub_base }}/awx_web:{{ awx_dockerhub_version }}"
+          depends_on:
+            - memcached
+            - rabbitmq
+            - postgres
+          ports:
+            - "{{ awx_host_port }}:8052"
+          networks:
+            awx:
+              aliases:
+                - web
+                - awxweb
+                - awx_web
+          hostname: awx-web
+          user: root
+          volumes:
+            - "{{ awx_docker_compose_dir }}/SECRET_KEY:/etc/tower/SECRET_KEY"
+            - "{{ awx_docker_compose_dir }}/environment.sh:/etc/tower/conf.d/environment.sh"
+            - "{{ awx_docker_compose_dir }}/credentials.py:/etc/tower/conf.d/credentials.py"
+            - "{{ awx_docker_compose_dir }}/nginx.conf:/etc/nginx/nginx.conf:ro"
+            - "{{ awx_project_data_dir }}:/var/lib/awx/projects:rw"
+            - /etc/localtime:/etc/localtime:ro
+          environment:
+            http_proxy: "{{ http_proxy | default('') }}"
+            https_proxy: "{{ https_proxy | default('') }}"
+            no_proxy: "{{ no_proxy | default('') }}"
+          logging:
+            <<: *default-logging
+            options:
+              tag: awx-web
+
+fail2ban_enable: false
+
+nginx_user: www-user
+nginx_group: www-group
+
+nginx_backends:
+  - service: foreman
+    servers:
+      - localhost:3000
+  - service: tower
+    servers:
+      - localhost:8080
+
+nginx_vhosts:
+  - servername: "{{ (foreman_hostname + '.' + www_domain) | default(ansible_fqdn) }}"
+    serveralias: "{{ ansible_default_ipv4.address }} {{ ansible_fqdn }}"
+    serverlisten: 80
+    extra_parameters: |
+      error_page 404 /404.html;
+      error_page 500 502 503 504 /50x.html;
+    locations:
+      - name: /
+        proxy: true
+        backend: foreman
+      - name: /webcon
+        proxy: true
+        backend: foreman
+        extra_parameters: |
+          proxy_set_header       Connection          "upgrade";
+          proxy_set_header        upgrade             $http_upgrade;
+      - name: 404.html
+        docroot: /usr/share/nginx/html
+      - name: 50x.html
+        docroot: /usr/share/nginx/html
+
+  - servername: awx.home.prettybaked.com
+    serveralias: awx tower tower.home.prettybaked.com
+    serverlisten: 80 default_server
+    locations:
+      - name: /
+        proxy: true
+        backend: tower
+        extra_parameters: |
+          proxy_set_header       Connection          "upgrade";
+          proxy_set_header        upgrade             $http_upgrade;
+
+nginx_vhosts_ssl:
+  - servername: "{{ (foreman_hostname + '.' + www_domain) | default(ansible_fqdn) }}"
+    serverlisten: "443"
+    extra_parameters: |
+      error_page 404 /404.html;
+      error_page 500 502 503 504 /50x.html;
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    locations:
+      - name: /
+        proxy: true
+        backend: foreman
+      - name: /webcon
+        proxy: true
+        backend: foreman
+        extra_parameters: |
+          proxy_set_header       Connection          "upgrade";
+          proxy_set_header        upgrade             $http_upgrade;
+      - name: 404.html
+        docroot: /usr/share/nginx/html
+      - name: 50x.html
+        docroot: /usr/share/nginx/html
+  - servername: awx.home.prettybaked.com
+    serveralias: tower.home.prettybaked.com
+    serverlisten: 443 default_server
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    locations:
+      - name: /
+        proxy: true
+        backend: tower
+        extra_parameters: |
+          proxy_set_header       Connection          "upgrade";
+          proxy_set_header        upgrade             $http_upgrade;
+
+nginx_accesslog_grokpattern: '%{CLIENT:client_ip} - %{NOTSPACE:ident} \[%{HTTPDATE:ts:ts-httpd}\] %{NOTSPACE:request_host:tag} "(?:%{WORD:verb:tag} %{NOTSPACE:request}
+  (?:HTTP/%{NUMBER:http_version:float})?|%{DATA})" %{NUMBER:resp_code:tag} (?:%{NUMBER:resp_bytes:int}|-) "%{NOTSPACE:referrer}" "%{DATA:agent:tag}" (?:%{NUMBER:request_time}|-)
+  (?:%{NUMBER:upstream_connect_time}|-) %{NOTSPACE:x_forwarded_for} %{NOTSPACE:upstream_cache_status:tag}'
+telegraf_plugins_extra:
+  - name: nginx
+    options:
+      urls:
+        - http://localhost/nginx_status
+  - name: procstat
+    options:
+      pattern: nginx
+      prefix: nginx
+  - name: logparser
+    options:
+      files:
+        - /var/log/nginx/*_access.log
+      from_beginning: "false"
+      grok:
+        patterns:
+          - "{{ nginx_accesslog_grokpattern }}"
+        measurement: nginx_access_log
+  - name: x509_cert
+    options:
+      sources:
+        - https://awx.home.prettybaked.com:443
+        - https://foreman.home.prettybaked.com:443
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: postgresql
+    options:
+      address: postgres://{{ awx_pg_username }}:{{ awx_pg_password }}@localhost
+      ignored_databases:
+        - template0
+        - template1
+awx_github_deploy_key: "{{ foreman_ssh_private_key }}"

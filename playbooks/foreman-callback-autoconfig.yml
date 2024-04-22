@@ -1,0 +1,79 @@
+---
+- name: "Host Auto-Configuration for Foreman+Ansible Callback"
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Wait for server to come online
+      wait_for_connection:
+        delay: 60
+        sleep: 10
+        connect_timeout: 5
+        timeout: 300
+
+    - name: print foreman hostgroups
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['foreman']['hostgroup_name'] }}"
+
+    - name: print foreman_params for ansible_roles
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list }}"
+
+    ## TODO: Set up role dependencies to avoid this hacky ordered file and use one looped import task
+    #    - include_role:
+    #        name: "{{ item }}"
+    #      loop: "{{ hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list }}"
+
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+      when: "'common' in  hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list"
+
+    - name: Add openldap role
+      ansible.builtin.import_role:
+        name: openldap
+      when:
+        - openldap_server_ip is defined and openldap_server_ip != None
+        - "'openldap' in hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list"
+
+    - name: Add ceph-fs role
+      ansible.builtin.import_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"
+        - "'ceph-fs' in hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list"
+
+    - name: Add mediaserver role
+      ansible.builtin.import_role:
+        name: mediaserver
+      when: "'mediaserver' in  hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list"
+
+    - name: Add docker role
+      ansible.builtin.import_role:
+        name: docker
+      when: "'docker' in  hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list"
+
+    - name: Add nginx role
+      ansible.builtin.import_role:
+        name: nginx
+      when: "'nginx' in  hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list"
+
+    - name: Add kvm role
+      ansible.builtin.import_role:
+        name: kvm
+      when:
+        - "'kvm' in  hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list"
+        - ansible_os_family == 'Debian'
+
+    - name: Add telegraf role
+      ansible.builtin.import_role:
+        name: telegraf
+      when: "'telegraf' in hostvars[inventory_hostname]['foreman_params']['ansible_roles'] | list"
+
+    - name: Run setup
+      ansible.builtin.setup:

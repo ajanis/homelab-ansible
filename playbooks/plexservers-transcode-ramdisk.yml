@@ -1,0 +1,37 @@
+---
+- name: Deploy media, nzb, ceph, telegraf
+  hosts:
+    - plexservers
+  remote_user: root
+  gather_facts: true
+  vars_files:
+    - vault.yml
+  vars:
+    create_docker_ramdisk: true
+    docker_ramdisk_mount_path: /transcode
+    docker_ramdisk_mount_options: defaults
+    docker_ramdisk_device_name: docker_ramdisk
+    docker_ramdisk_size_mb: 8192
+    docker_ramdisk_fstype: tmpfs
+    docker_ramdisk_file_mode: "0774"
+    docker_ramdisk_uid: 2000
+    docker_ramdisk_gid: 2000
+
+  tasks:
+    - name: Create transcode directory
+      ansible.builtin.file:
+        path: "{{ docker_ramdisk_mount_path }}"
+        state: directory
+        owner: "{{ docker_ramdisk_uid | default('2000') }}"
+        group: "{{ docker_ramdisk_gid | default('2000') }}"
+        mode: "{{ docker_ramdisk_file_mode | default('0774') }}"
+      when: docker_create_docker_ramdisk | default('false')
+
+    - name: Create mount for transcode disk
+      ansible.posix.mount:
+        name: "{{ docker_ramdisk_mount_path }}"
+        src: "{{ docker_ramdisk_device_name | default('docker_ramdisk') }}"
+        fstype: "{{ docker_ramdisk_fstype | default('tmpfs') }}"
+        state: mounted
+        opts: "{{ docker_ramdisk_mount_options | default('defaults') }}"
+      when: docker_create_docker_ramdisk | default('false')

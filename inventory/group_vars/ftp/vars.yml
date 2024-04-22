@@ -1,0 +1,27 @@
+---
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+
+docker_containers:
+  ftpd:
+    description: Pure FTP
+    image: stilliard/pure-ftpd:hardened
+    ports: 21:21, {% for port in range(30000, 30100) %}{{port}}:{{port}}{% if not loop.last %}, {% endif %}{% endfor %}
+    env:
+      PUID: "0"
+      PGID: "0"
+      VERSION: latest
+      PUBLICHOST: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+      ADDED_FLAGS: -d -d
+      FTP_MAX_CLIENTS: "50"
+      FTP_MAX_CONNECTIONS: "100"
+      FTP_PASSIVE_PORTS: 30000:30099
+    volumes:
+      - "{{ ftpusers_directory }}:/home/ftpusers"
+      - "{{ ftp_config_directory }}:/etc/pure-ftpd"
+      - /etc/localtime:/etc/localtime:ro

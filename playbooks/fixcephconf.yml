@@ -1,0 +1,56 @@
+- name: Deploy ceph
+  hosts: proxmox
+  become: true
+  gather_facts:
+    true
+
+    # Ceph group_vars used to generate minimal ceph.conf needed to mount cephfs
+
+  tasks:
+    - name: Stat ceph conf
+      ansible.builtin.stat:
+        checksum_algorithm: sha1
+        follow: false
+        get_attributes: true
+        get_checksum: true
+        get_mime: true
+        path: /etc/ceph/ceph.conf
+      register: ceph_conf_attrs
+
+    - name: Print ceph config stat
+      # Comment
+      ansible.builtin.debug:
+        var: ceph_conf_attrs
+        verbosity: 0
+
+    - name: Set ceph conf state
+      # Comment
+      ansible.builtin.set_fact:
+        ceph_conf_is_link: false
+        cacheable: false
+      when:
+        - ceph_conf_attrs.stat.islnk is defined
+        - ceph_conf_attrs.stat.islnk is false
+
+    - name: Print ceph config attributes
+      # Comment
+      ansible.builtin.debug:
+        var: ceph_conf_is_link
+        verbosity: 0
+
+    - name: Remove non-linked ceph.conf
+      ansible.builtin.file:
+        path: /etc/ceph/ceph.conf
+        state: absent
+      when:
+        - ceph_conf_is_link is false
+      register: ceph_conf_removed
+
+    - name: Create Ceph config symlink
+      ansible.builtin.file:
+        src: /etc/pve/ceph.conf
+        state: link
+        dest: /etc/ceph/ceph.conf
+        mode: "0640"
+      when:
+        - ceph_conf_removed

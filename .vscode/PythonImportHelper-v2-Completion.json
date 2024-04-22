@@ -1,0 +1,900 @@
+[
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "absolute_import",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "division",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "print_function",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "TYPE_CHECKING",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "AnsibleModule",
+        "importPath": "ansible.module_utils.basic",
+        "description": "ansible.module_utils.basic",
+        "isExtraImport": true,
+        "detail": "ansible.module_utils.basic",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "datetime",
+        "description": "datetime",
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "project",
+        "kind": 5,
+        "importPath": "doc.source.conf",
+        "description": "doc.source.conf",
+        "peekOfCode": "project = \"cephadm-ansible\"\ncopyright = \"2022, Red Hat\"\nauthor = \"Guillaume Abrioux\"\n# The full version, including alpha/beta/rc tags\nrelease = \"v2.0\"\n# -- General configuration ---------------------------------------------------\n# Add any Sphinx extension module names here, as strings. They can be\n# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom\n# ones.\nextensions = []",
+        "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "copyright",
+        "kind": 5,
+        "importPath": "doc.source.conf",
+        "description": "doc.source.conf",
+        "peekOfCode": "copyright = \"2022, Red Hat\"\nauthor = \"Guillaume Abrioux\"\n# The full version, including alpha/beta/rc tags\nrelease = \"v2.0\"\n# -- General configuration ---------------------------------------------------\n# Add any Sphinx extension module names here, as strings. They can be\n# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom\n# ones.\nextensions = []\n# Add any paths that contain templates here, relative to this directory.",
+        "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "author",
+        "kind": 5,
+        "importPath": "doc.source.conf",
+        "description": "doc.source.conf",
+        "peekOfCode": "author = \"Guillaume Abrioux\"\n# The full version, including alpha/beta/rc tags\nrelease = \"v2.0\"\n# -- General configuration ---------------------------------------------------\n# Add any Sphinx extension module names here, as strings. They can be\n# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom\n# ones.\nextensions = []\n# Add any paths that contain templates here, relative to this directory.\ntemplates_path = [\"_templates\"]",
+        "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "release",
+        "kind": 5,
+        "importPath": "doc.source.conf",
+        "description": "doc.source.conf",
+        "peekOfCode": "release = \"v2.0\"\n# -- General configuration ---------------------------------------------------\n# Add any Sphinx extension module names here, as strings. They can be\n# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom\n# ones.\nextensions = []\n# Add any paths that contain templates here, relative to this directory.\ntemplates_path = [\"_templates\"]\n# List of patterns, relative to source directory, that match files and\n# directories to ignore when looking for source files.",
+        "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "extensions",
+        "kind": 5,
+        "importPath": "doc.source.conf",
+        "description": "doc.source.conf",
+        "peekOfCode": "extensions = []\n# Add any paths that contain templates here, relative to this directory.\ntemplates_path = [\"_templates\"]\n# List of patterns, relative to source directory, that match files and\n# directories to ignore when looking for source files.\n# This pattern also affects html_static_path and html_extra_path.\nexclude_patterns = [\"_build\", \"Thumbs.db\", \".DS_Store\"]\n# -- Options for HTML output -------------------------------------------------\n# The theme to use for HTML and HTML Help pages.  See the documentation for\n# a list of builtin themes.",
+        "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "templates_path",
+        "kind": 5,
+        "importPath": "doc.source.conf",
+        "description": "doc.source.conf",
+        "peekOfCode": "templates_path = [\"_templates\"]\n# List of patterns, relative to source directory, that match files and\n# directories to ignore when looking for source files.\n# This pattern also affects html_static_path and html_extra_path.\nexclude_patterns = [\"_build\", \"Thumbs.db\", \".DS_Store\"]\n# -- Options for HTML output -------------------------------------------------\n# The theme to use for HTML and HTML Help pages.  See the documentation for\n# a list of builtin themes.\n#\nhtml_theme = \"alabaster\"",
+        "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "exclude_patterns",
+        "kind": 5,
+        "importPath": "doc.source.conf",
+        "description": "doc.source.conf",
+        "peekOfCode": "exclude_patterns = [\"_build\", \"Thumbs.db\", \".DS_Store\"]\n# -- Options for HTML output -------------------------------------------------\n# The theme to use for HTML and HTML Help pages.  See the documentation for\n# a list of builtin themes.\n#\nhtml_theme = \"alabaster\"\n# Add any paths that contain custom static files (such as style sheets) here,\n# relative to this directory. They are copied after the builtin static files,\n# so a file named \"default.css\" will overwrite the builtin \"default.css\".\nhtml_static_path = [\"_static\"]",
+        "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "html_theme",
+        "kind": 5,
+        "importPath": "doc.source.conf",
+        "description": "doc.source.conf",
+        "peekOfCode": "html_theme = \"alabaster\"\n# Add any paths that contain custom static files (such as style sheets) here,\n# relative to this directory. They are copied after the builtin static files,\n# so a file named \"default.css\" will overwrite the builtin \"default.css\".\nhtml_static_path = [\"_static\"]",
+        "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "html_static_path",
+        "kind": 5,
+        "importPath": "doc.source.conf",
+        "description": "doc.source.conf",
+        "peekOfCode": "html_static_path = [\"_static\"]",
+        "detail": "doc.source.conf",
+        "documentation": {}
+    },
+    {
+        "label": "set_option",
+        "kind": 2,
+        "importPath": "library.ceph_config",
+        "description": "library.ceph_config",
+        "peekOfCode": "def set_option(\n    module: \"AnsibleModule\", who: str, option: str, value: str\n) -> Tuple[int, List[str], str, str]:\n    cmd = build_base_cmd_shell(module)\n    cmd.extend([\"ceph\", \"config\", \"set\", who, option, value])\n    rc, out, err = module.run_command(cmd)\n    return rc, cmd, out.strip(), err\ndef get_config_dump(module: \"AnsibleModule\"):\n    cmd = build_base_cmd_shell(module)\n    cmd.extend([\"ceph\", \"config\", \"dump\", \"--format\", \"json\"])",
+        "detail": "library.ceph_config",
+        "documentation": {}
+    },
+    {
+        "label": "get_config_dump",
+        "kind": 2,
+        "importPath": "library.ceph_config",
+        "description": "library.ceph_config",
+        "peekOfCode": "def get_config_dump(module: \"AnsibleModule\"):\n    cmd = build_base_cmd_shell(module)\n    cmd.extend([\"ceph\", \"config\", \"dump\", \"--format\", \"json\"])\n    rc, out, err = module.run_command(cmd)\n    if rc:\n        fatal(\n            message=f\"Can't get current configuration via `ceph config dump`.Error:\\n{err}\",\n            module=module,\n        )\n    out = out.strip()",
+        "detail": "library.ceph_config",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_value",
+        "kind": 2,
+        "importPath": "library.ceph_config",
+        "description": "library.ceph_config",
+        "peekOfCode": "def get_current_value(who, option, config_dump):\n    for config in config_dump:\n        if config[\"section\"] == who and config[\"name\"] == option:\n            return config[\"value\"]\n    return None\ndef main() -> None:\n    module = AnsibleModule(\n        argument_spec=dict(\n            who=dict(type=\"str\", required=True),\n            action=dict(",
+        "detail": "library.ceph_config",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "library.ceph_config",
+        "description": "library.ceph_config",
+        "peekOfCode": "def main() -> None:\n    module = AnsibleModule(\n        argument_spec=dict(\n            who=dict(type=\"str\", required=True),\n            action=dict(\n                type=\"str\", required=False, choices=[\"get\", \"set\"], default=\"set\"\n            ),\n            option=dict(type=\"str\", required=True),\n            value=dict(type=\"str\", required=False),\n            fsid=dict(type=\"str\", required=False),",
+        "detail": "library.ceph_config",
+        "documentation": {}
+    },
+    {
+        "label": "__metaclass__",
+        "kind": 5,
+        "importPath": "library.ceph_config",
+        "description": "library.ceph_config",
+        "peekOfCode": "__metaclass__ = type\nfrom ansible.module_utils.basic import AnsibleModule  # type: ignore\ntry:\n    from ansible.module_utils.ceph_common import (  # type: ignore\n        build_base_cmd_shell,\n        exit_module,\n        fatal,\n    )\nexcept ImportError:\n    from module_utils.ceph_common import exit_module, build_base_cmd_shell, fatal  # type: ignore",
+        "detail": "library.ceph_config",
+        "documentation": {}
+    },
+    {
+        "label": "ANSIBLE_METADATA",
+        "kind": 5,
+        "importPath": "library.ceph_config",
+        "description": "library.ceph_config",
+        "peekOfCode": "ANSIBLE_METADATA = {\n    \"metadata_version\": \"1.1\",\n    \"status\": [\"preview\"],\n    \"supported_by\": \"community\",\n}\nDOCUMENTATION = \"\"\"\n---\nmodule: ceph_config\nshort_description: set ceph config\nversion_added: \"2.10\"",
+        "detail": "library.ceph_config",
+        "documentation": {}
+    },
+    {
+        "label": "DOCUMENTATION",
+        "kind": 5,
+        "importPath": "library.ceph_config",
+        "description": "library.ceph_config",
+        "peekOfCode": "DOCUMENTATION = \"\"\"\n---\nmodule: ceph_config\nshort_description: set ceph config\nversion_added: \"2.10\"\ndescription:\n    - Set Ceph config options.\noptions:\n    fsid:\n        description:",
+        "detail": "library.ceph_config",
+        "documentation": {}
+    },
+    {
+        "label": "EXAMPLES",
+        "kind": 5,
+        "importPath": "library.ceph_config",
+        "description": "library.ceph_config",
+        "peekOfCode": "EXAMPLES = \"\"\"\n- name: set osd_memory_target for osd.0\n  ceph_config:\n    action: set\n    who: osd.0\n    option: osd_memory_target\n    value: 5368709120\n- name: set osd_memory_target for host ceph-osd-02\n  ceph_config:\n    action: set",
+        "detail": "library.ceph_config",
+        "documentation": {}
+    },
+    {
+        "label": "RETURN",
+        "kind": 5,
+        "importPath": "library.ceph_config",
+        "description": "library.ceph_config",
+        "peekOfCode": "RETURN = \"\"\"#  \"\"\"\ndef set_option(\n    module: \"AnsibleModule\", who: str, option: str, value: str\n) -> Tuple[int, List[str], str, str]:\n    cmd = build_base_cmd_shell(module)\n    cmd.extend([\"ceph\", \"config\", \"set\", who, option, value])\n    rc, out, err = module.run_command(cmd)\n    return rc, cmd, out.strip(), err\ndef get_config_dump(module: \"AnsibleModule\"):\n    cmd = build_base_cmd_shell(module)",
+        "detail": "library.ceph_config",
+        "documentation": {}
+    },
+    {
+        "label": "apply_spec",
+        "kind": 2,
+        "importPath": "library.ceph_orch_apply",
+        "description": "library.ceph_orch_apply",
+        "peekOfCode": "def apply_spec(module: \"AnsibleModule\", data: str) -> Tuple[int, List[str], str, str]:\n    cmd = build_base_cmd_orch(module)\n    cmd.extend([\"apply\", \"-i\", \"-\"])\n    rc, out, err = module.run_command(cmd, data=data)\n    if rc:\n        raise RuntimeError(err)\n    return rc, cmd, out, err\ndef main():\n    module = AnsibleModule(\n        argument_spec=dict(",
+        "detail": "library.ceph_orch_apply",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "library.ceph_orch_apply",
+        "description": "library.ceph_orch_apply",
+        "peekOfCode": "def main():\n    module = AnsibleModule(\n        argument_spec=dict(\n            fsid=dict(type=\"str\", required=False),\n            spec=dict(type=\"str\", required=True),\n            docker=dict(type=bool, required=False, default=False),\n            image=dict(type=\"str\", required=False),\n        ),\n        supports_check_mode=True,\n    )",
+        "detail": "library.ceph_orch_apply",
+        "documentation": {}
+    },
+    {
+        "label": "__metaclass__",
+        "kind": 5,
+        "importPath": "library.ceph_orch_apply",
+        "description": "library.ceph_orch_apply",
+        "peekOfCode": "__metaclass__ = type\nfrom ansible.module_utils.basic import AnsibleModule  # type: ignore\ntry:\n    from ansible.module_utils.ceph_common import (  # type: ignore\n        build_base_cmd_orch,\n        exit_module,\n    )\nexcept ImportError:\n    from module_utils.ceph_common import exit_module, build_base_cmd_orch\nimport datetime",
+        "detail": "library.ceph_orch_apply",
+        "documentation": {}
+    },
+    {
+        "label": "ANSIBLE_METADATA",
+        "kind": 5,
+        "importPath": "library.ceph_orch_apply",
+        "description": "library.ceph_orch_apply",
+        "peekOfCode": "ANSIBLE_METADATA = {\n    \"metadata_version\": \"1.1\",\n    \"status\": [\"preview\"],\n    \"supported_by\": \"community\",\n}\nDOCUMENTATION = \"\"\"\n---\nmodule: ceph_orch_apply\nshort_description: apply service spec\nversion_added: \"2.9\"",
+        "detail": "library.ceph_orch_apply",
+        "documentation": {}
+    },
+    {
+        "label": "DOCUMENTATION",
+        "kind": 5,
+        "importPath": "library.ceph_orch_apply",
+        "description": "library.ceph_orch_apply",
+        "peekOfCode": "DOCUMENTATION = \"\"\"\n---\nmodule: ceph_orch_apply\nshort_description: apply service spec\nversion_added: \"2.9\"\ndescription:\n    - apply a service spec\noptions:\n    fsid:\n        description:",
+        "detail": "library.ceph_orch_apply",
+        "documentation": {}
+    },
+    {
+        "label": "EXAMPLES",
+        "kind": 5,
+        "importPath": "library.ceph_orch_apply",
+        "description": "library.ceph_orch_apply",
+        "peekOfCode": "EXAMPLES = \"\"\"\n- name: apply osd spec\n  ceph_orch_apply:\n    spec: |\n      service_type: osd\n      service_id: osd\n      placement:\n        label: osds\n      spec:\n        data_devices:",
+        "detail": "library.ceph_orch_apply",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_state",
+        "kind": 2,
+        "importPath": "library.ceph_orch_daemon",
+        "description": "library.ceph_orch_daemon",
+        "peekOfCode": "def get_current_state(\n    module: \"AnsibleModule\", daemon_type: str, daemon_id: str\n) -> Tuple[int, List[str], str, str]:\n    cmd = build_base_cmd_orch(module)\n    cmd.extend(\n        [\n            \"ps\",\n            \"--daemon_type\",\n            daemon_type,\n            \"--daemon_id\",",
+        "detail": "library.ceph_orch_daemon",
+        "documentation": {}
+    },
+    {
+        "label": "update_daemon_status",
+        "kind": 2,
+        "importPath": "library.ceph_orch_daemon",
+        "description": "library.ceph_orch_daemon",
+        "peekOfCode": "def update_daemon_status(\n    module: \"AnsibleModule\", action: str, daemon_name: str\n) -> Tuple[int, List[str], str, str]:\n    cmd = build_base_cmd_orch(module)\n    cmd.extend([\"daemon\", action, daemon_name])\n    rc, out, err = module.run_command(cmd)\n    return rc, cmd, out, err\n@retry(RuntimeError)\ndef validate_updated_status(\n    module: \"AnsibleModule\", action: str, daemon_type: str, daemon_id: str",
+        "detail": "library.ceph_orch_daemon",
+        "documentation": {}
+    },
+    {
+        "label": "validate_updated_status",
+        "kind": 2,
+        "importPath": "library.ceph_orch_daemon",
+        "description": "library.ceph_orch_daemon",
+        "peekOfCode": "def validate_updated_status(\n    module: \"AnsibleModule\", action: str, daemon_type: str, daemon_id: str\n) -> None:\n    rc, cmd, out, err = get_current_state(module, daemon_type, daemon_id)\n    expected_state = 1 if action == \"start\" else 0\n    if not json.loads(out)[0][\"status\"] == expected_state:\n        raise RuntimeError(\n            \"Status for {}.{} isn't reported as expected.\".format(\n                daemon_type, daemon_id\n            )",
+        "detail": "library.ceph_orch_daemon",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "library.ceph_orch_daemon",
+        "description": "library.ceph_orch_daemon",
+        "peekOfCode": "def main() -> None:\n    module = AnsibleModule(\n        argument_spec=dict(\n            state=dict(\n                type=\"str\", required=True, choices=[\"started\", \"stopped\", \"restarted\"]\n            ),\n            daemon_id=dict(type=\"str\", required=True),\n            daemon_type=dict(type=\"str\", required=True),\n            docker=dict(type=bool, required=False, default=False),\n            fsid=dict(type=\"str\", required=False),",
+        "detail": "library.ceph_orch_daemon",
+        "documentation": {}
+    },
+    {
+        "label": "__metaclass__",
+        "kind": 5,
+        "importPath": "library.ceph_orch_daemon",
+        "description": "library.ceph_orch_daemon",
+        "peekOfCode": "__metaclass__ = type\nfrom ansible.module_utils.basic import AnsibleModule  # type: ignore\ntry:\n    from ansible.module_utils.ceph_common import (  # type: ignore\n        build_base_cmd_orch,\n        exit_module,\n        fatal,\n        retry,\n    )\nexcept ImportError:",
+        "detail": "library.ceph_orch_daemon",
+        "documentation": {}
+    },
+    {
+        "label": "ANSIBLE_METADATA",
+        "kind": 5,
+        "importPath": "library.ceph_orch_daemon",
+        "description": "library.ceph_orch_daemon",
+        "peekOfCode": "ANSIBLE_METADATA = {\n    \"metadata_version\": \"1.1\",\n    \"status\": [\"preview\"],\n    \"supported_by\": \"community\",\n}\nDOCUMENTATION = \"\"\"\n---\nmodule: ceph_orch_daemon\nshort_description: stop/start daemon\nversion_added: \"2.9\"",
+        "detail": "library.ceph_orch_daemon",
+        "documentation": {}
+    },
+    {
+        "label": "DOCUMENTATION",
+        "kind": 5,
+        "importPath": "library.ceph_orch_daemon",
+        "description": "library.ceph_orch_daemon",
+        "peekOfCode": "DOCUMENTATION = \"\"\"\n---\nmodule: ceph_orch_daemon\nshort_description: stop/start daemon\nversion_added: \"2.9\"\ndescription:\n    - Start, stop or restart ceph daemon\noptions:\n    fsid:\n        description:",
+        "detail": "library.ceph_orch_daemon",
+        "documentation": {}
+    },
+    {
+        "label": "EXAMPLES",
+        "kind": 5,
+        "importPath": "library.ceph_orch_daemon",
+        "description": "library.ceph_orch_daemon",
+        "peekOfCode": "EXAMPLES = \"\"\"\n- name: start osd.0\n  ceph_orch_daemon:\n    state: started\n    daemon_id: 0\n    daemon_type: osd\n- name: stop mon.ceph-node0\n  ceph_orch_daemon:\n    state: stopped\n    daemon_id: ceph-node0",
+        "detail": "library.ceph_orch_daemon",
+        "documentation": {}
+    },
+    {
+        "label": "RETURN",
+        "kind": 5,
+        "importPath": "library.ceph_orch_daemon",
+        "description": "library.ceph_orch_daemon",
+        "peekOfCode": "RETURN = \"\"\"#  \"\"\"\ndef get_current_state(\n    module: \"AnsibleModule\", daemon_type: str, daemon_id: str\n) -> Tuple[int, List[str], str, str]:\n    cmd = build_base_cmd_orch(module)\n    cmd.extend(\n        [\n            \"ps\",\n            \"--daemon_type\",\n            daemon_type,",
+        "detail": "library.ceph_orch_daemon",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_state",
+        "kind": 2,
+        "importPath": "library.ceph_orch_host",
+        "description": "library.ceph_orch_host",
+        "peekOfCode": "def get_current_state(module: \"AnsibleModule\") -> Tuple[int, List[str], str, str]:\n    cmd = build_base_cmd_orch(module)\n    cmd.extend([\"host\", \"ls\", \"--format\", \"json\"])\n    rc, out, err = module.run_command(cmd)\n    if rc:\n        raise RuntimeError(err)\n    return rc, cmd, out, err\ndef update_label(\n    module: \"AnsibleModule\", action: str, host: str, label: str = \"\"\n) -> Tuple[int, List[str], str, str]:",
+        "detail": "library.ceph_orch_host",
+        "documentation": {}
+    },
+    {
+        "label": "update_label",
+        "kind": 2,
+        "importPath": "library.ceph_orch_host",
+        "description": "library.ceph_orch_host",
+        "peekOfCode": "def update_label(\n    module: \"AnsibleModule\", action: str, host: str, label: str = \"\"\n) -> Tuple[int, List[str], str, str]:\n    cmd = build_base_cmd_orch(module)\n    cmd.extend([\"host\", \"label\", action, host, label])\n    rc, out, err = module.run_command(cmd)\n    if rc:\n        raise RuntimeError(err)\n    return rc, cmd, out, err\ndef update_host(",
+        "detail": "library.ceph_orch_host",
+        "documentation": {}
+    },
+    {
+        "label": "update_host",
+        "kind": 2,
+        "importPath": "library.ceph_orch_host",
+        "description": "library.ceph_orch_host",
+        "peekOfCode": "def update_host(\n    module: \"AnsibleModule\",\n    action: str,\n    name: str,\n    address: str = \"\",\n    labels: Optional[List[str]] = None,\n) -> Tuple[int, List[str], str, str]:\n    cmd = build_base_cmd_orch(module)\n    cmd.extend([\"host\", action, name])\n    if action == \"add\" and address:",
+        "detail": "library.ceph_orch_host",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "library.ceph_orch_host",
+        "description": "library.ceph_orch_host",
+        "peekOfCode": "def main() -> None:\n    module = AnsibleModule(\n        argument_spec=dict(\n            name=dict(type=\"str\", required=True),\n            address=dict(type=\"str\", required=False),\n            set_admin_label=dict(type=bool, required=False, default=False),\n            labels=dict(type=\"list\", required=False, default=[]),\n            state=dict(\n                type=\"str\",\n                required=False,",
+        "detail": "library.ceph_orch_host",
+        "documentation": {}
+    },
+    {
+        "label": "__metaclass__",
+        "kind": 5,
+        "importPath": "library.ceph_orch_host",
+        "description": "library.ceph_orch_host",
+        "peekOfCode": "__metaclass__ = type\nfrom ansible.module_utils.basic import AnsibleModule  # type: ignore\ntry:\n    from ansible.module_utils.ceph_common import (  # type: ignore\n        build_base_cmd_orch,\n        exit_module,\n    )\nexcept ImportError:\n    from module_utils.ceph_common import exit_module, build_base_cmd_orch\nimport datetime",
+        "detail": "library.ceph_orch_host",
+        "documentation": {}
+    },
+    {
+        "label": "ANSIBLE_METADATA",
+        "kind": 5,
+        "importPath": "library.ceph_orch_host",
+        "description": "library.ceph_orch_host",
+        "peekOfCode": "ANSIBLE_METADATA = {\n    \"metadata_version\": \"1.1\",\n    \"status\": [\"preview\"],\n    \"supported_by\": \"community\",\n}\nDOCUMENTATION = \"\"\"\n---\nmodule: ceph_orch_host\nshort_description: add/remove hosts\nversion_added: \"2.9\"",
+        "detail": "library.ceph_orch_host",
+        "documentation": {}
+    },
+    {
+        "label": "DOCUMENTATION",
+        "kind": 5,
+        "importPath": "library.ceph_orch_host",
+        "description": "library.ceph_orch_host",
+        "peekOfCode": "DOCUMENTATION = \"\"\"\n---\nmodule: ceph_orch_host\nshort_description: add/remove hosts\nversion_added: \"2.9\"\ndescription:\n    - Add or remove hosts from ceph orchestration.\noptions:\n    fsid:\n        description:",
+        "detail": "library.ceph_orch_host",
+        "documentation": {}
+    },
+    {
+        "label": "EXAMPLES",
+        "kind": 5,
+        "importPath": "library.ceph_orch_host",
+        "description": "library.ceph_orch_host",
+        "peekOfCode": "EXAMPLES = \"\"\"\n- name: add a host\n  ceph_orch_host:\n    name: my-node-01\n    address: 10.10.10.101\n- name: add a host\n  ceph_orch_host:\n    name: my-node-02\n    labels:\n      - mon",
+        "detail": "library.ceph_orch_host",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "library.cephadm_bootstrap",
+        "description": "library.cephadm_bootstrap",
+        "peekOfCode": "def main() -> None:\n    module = AnsibleModule(\n        argument_spec=dict(\n            mon_ip=dict(type=\"str\", required=True),\n            image=dict(type=\"str\", required=False),\n            docker=dict(type=\"bool\", required=False, default=False),\n            fsid=dict(type=\"str\", required=False),\n            pull=dict(type=\"bool\", required=False, default=True),\n            dashboard=dict(type=\"bool\", required=False, default=True),\n            dashboard_user=dict(type=\"str\", required=False),",
+        "detail": "library.cephadm_bootstrap",
+        "documentation": {}
+    },
+    {
+        "label": "__metaclass__",
+        "kind": 5,
+        "importPath": "library.cephadm_bootstrap",
+        "description": "library.cephadm_bootstrap",
+        "peekOfCode": "__metaclass__ = type\nfrom ansible.module_utils.basic import AnsibleModule  # type: ignore\ntry:\n    from ansible.module_utils.ceph_common import exit_module  # type: ignore\nexcept ImportError:\n    from module_utils.ceph_common import exit_module\nimport datetime\nimport os\nANSIBLE_METADATA = {\n    \"metadata_version\": \"1.1\",",
+        "detail": "library.cephadm_bootstrap",
+        "documentation": {}
+    },
+    {
+        "label": "ANSIBLE_METADATA",
+        "kind": 5,
+        "importPath": "library.cephadm_bootstrap",
+        "description": "library.cephadm_bootstrap",
+        "peekOfCode": "ANSIBLE_METADATA = {\n    \"metadata_version\": \"1.1\",\n    \"status\": [\"preview\"],\n    \"supported_by\": \"community\",\n}\nDOCUMENTATION = \"\"\"\n---\nmodule: cephadm_bootstrap\nshort_description: Bootstrap a Ceph cluster via cephadm\nversion_added: \"2.8\"",
+        "detail": "library.cephadm_bootstrap",
+        "documentation": {}
+    },
+    {
+        "label": "DOCUMENTATION",
+        "kind": 5,
+        "importPath": "library.cephadm_bootstrap",
+        "description": "library.cephadm_bootstrap",
+        "peekOfCode": "DOCUMENTATION = \"\"\"\n---\nmodule: cephadm_bootstrap\nshort_description: Bootstrap a Ceph cluster via cephadm\nversion_added: \"2.8\"\ndescription:\n    - Bootstrap a Ceph cluster via cephadm\noptions:\n    mon_ip:\n        description:",
+        "detail": "library.cephadm_bootstrap",
+        "documentation": {}
+    },
+    {
+        "label": "EXAMPLES",
+        "kind": 5,
+        "importPath": "library.cephadm_bootstrap",
+        "description": "library.cephadm_bootstrap",
+        "peekOfCode": "EXAMPLES = \"\"\"\n- name: bootstrap a cluster via cephadm (with default values)\n  cephadm_bootstrap:\n    mon_ip: 192.168.42.1\n- name: bootstrap a cluster via cephadm (with custom values)\n  cephadm_bootstrap:\n    mon_ip: 192.168.42.1\n    fsid: 3c9ba63a-c7df-4476-a1e7-317dfc711f82\n    image: quay.ceph.io/ceph/daemon-base:latest-main-devel\n    dashboard: false",
+        "detail": "library.cephadm_bootstrap",
+        "documentation": {}
+    },
+    {
+        "label": "RETURN",
+        "kind": 5,
+        "importPath": "library.cephadm_bootstrap",
+        "description": "library.cephadm_bootstrap",
+        "peekOfCode": "RETURN = \"\"\"#  \"\"\"\ndef main() -> None:\n    module = AnsibleModule(\n        argument_spec=dict(\n            mon_ip=dict(type=\"str\", required=True),\n            image=dict(type=\"str\", required=False),\n            docker=dict(type=\"bool\", required=False, default=False),\n            fsid=dict(type=\"str\", required=False),\n            pull=dict(type=\"bool\", required=False, default=True),\n            dashboard=dict(type=\"bool\", required=False, default=True),",
+        "detail": "library.cephadm_bootstrap",
+        "documentation": {}
+    },
+    {
+        "label": "build_base_container_cmd",
+        "kind": 2,
+        "importPath": "library.cephadm_registry_login",
+        "description": "library.cephadm_registry_login",
+        "peekOfCode": "def build_base_container_cmd(\n    module: \"AnsibleModule\", action: str = \"login\"\n) -> List[str]:\n    docker = module.params.get(\"docker\")\n    container_binary = \"podman\"\n    if docker:\n        container_binary = \"docker\"\n    cmd = [container_binary, action]\n    return cmd\ndef is_logged(module: \"AnsibleModule\") -> bool:",
+        "detail": "library.cephadm_registry_login",
+        "documentation": {}
+    },
+    {
+        "label": "is_logged",
+        "kind": 2,
+        "importPath": "library.cephadm_registry_login",
+        "description": "library.cephadm_registry_login",
+        "peekOfCode": "def is_logged(module: \"AnsibleModule\") -> bool:\n    registry_url = module.params.get(\"registry_url\")\n    registry_username = module.params.get(\"registry_username\")\n    cmd = build_base_container_cmd(module)\n    cmd.extend([\"--get-login\", registry_url])\n    rc, out, err = module.run_command(cmd)\n    if not rc and out.strip() == registry_username:\n        return True\n    return False\ndef do_login_or_logout(",
+        "detail": "library.cephadm_registry_login",
+        "documentation": {}
+    },
+    {
+        "label": "do_login_or_logout",
+        "kind": 2,
+        "importPath": "library.cephadm_registry_login",
+        "description": "library.cephadm_registry_login",
+        "peekOfCode": "def do_login_or_logout(\n    module: \"AnsibleModule\", action: str = \"login\"\n) -> Tuple[int, List[str], str, str]:\n    registry_url = module.params.get(\"registry_url\")\n    registry_username = module.params.get(\"registry_username\")\n    registry_password = module.params.get(\"registry_password\")\n    cmd = build_base_container_cmd(module, action)\n    if action == \"login\":\n        cmd.extend([\"--username\", registry_username, \"--password-stdin\", registry_url])\n    else:",
+        "detail": "library.cephadm_registry_login",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "library.cephadm_registry_login",
+        "description": "library.cephadm_registry_login",
+        "peekOfCode": "def main() -> None:\n    module = AnsibleModule(\n        argument_spec=dict(\n            state=dict(\n                type=\"str\", required=False, default=\"login\", choices=[\"login\", \"logout\"]\n            ),\n            docker=dict(type=bool, required=False, default=False),\n            registry_url=dict(type=\"str\", required=True),\n            registry_username=dict(type=\"str\", required=False),\n            registry_password=dict(type=\"str\", required=False, no_log=True),",
+        "detail": "library.cephadm_registry_login",
+        "documentation": {}
+    },
+    {
+        "label": "__metaclass__",
+        "kind": 5,
+        "importPath": "library.cephadm_registry_login",
+        "description": "library.cephadm_registry_login",
+        "peekOfCode": "__metaclass__ = type\nfrom typing import List, Tuple\nfrom ansible.module_utils.basic import AnsibleModule  # type: ignore\ntry:\n    from ansible.module_utils.ceph_common import (  # type: ignore\n        build_base_cmd,\n        exit_module,\n        fatal,\n    )\nexcept ImportError:",
+        "detail": "library.cephadm_registry_login",
+        "documentation": {}
+    },
+    {
+        "label": "ANSIBLE_METADATA",
+        "kind": 5,
+        "importPath": "library.cephadm_registry_login",
+        "description": "library.cephadm_registry_login",
+        "peekOfCode": "ANSIBLE_METADATA = {\n    \"metadata_version\": \"1.1\",\n    \"status\": [\"preview\"],\n    \"supported_by\": \"community\",\n}\nDOCUMENTATION = \"\"\"\n---\nmodule: cephadm_registry_login\nshort_description: Log in to container registry\nversion_added: \"2.9\"",
+        "detail": "library.cephadm_registry_login",
+        "documentation": {}
+    },
+    {
+        "label": "DOCUMENTATION",
+        "kind": 5,
+        "importPath": "library.cephadm_registry_login",
+        "description": "library.cephadm_registry_login",
+        "peekOfCode": "DOCUMENTATION = \"\"\"\n---\nmodule: cephadm_registry_login\nshort_description: Log in to container registry\nversion_added: \"2.9\"\ndescription:\n    - Call cephadm registry-login command for logging in to container registry\noptions:\n    state:\n        description:",
+        "detail": "library.cephadm_registry_login",
+        "documentation": {}
+    },
+    {
+        "label": "EXAMPLES",
+        "kind": 5,
+        "importPath": "library.cephadm_registry_login",
+        "description": "library.cephadm_registry_login",
+        "peekOfCode": "EXAMPLES = \"\"\"\n- name: log in to quay.io registry\n  cephadm_registry_login:\n    registry_url: quay.io\n    registry_username: my_login\n    registry_password: my_password\n- name: log out from quay.io registry\n  cephadm_registry_login:\n    state: logout\n    registry_url: quay.io",
+        "detail": "library.cephadm_registry_login",
+        "documentation": {}
+    },
+    {
+        "label": "RETURN",
+        "kind": 5,
+        "importPath": "library.cephadm_registry_login",
+        "description": "library.cephadm_registry_login",
+        "peekOfCode": "RETURN = \"\"\"#  \"\"\"\ndef build_base_container_cmd(\n    module: \"AnsibleModule\", action: str = \"login\"\n) -> List[str]:\n    docker = module.params.get(\"docker\")\n    container_binary = \"podman\"\n    if docker:\n        container_binary = \"docker\"\n    cmd = [container_binary, action]\n    return cmd",
+        "detail": "library.cephadm_registry_login",
+        "documentation": {}
+    },
+    {
+        "label": "retry",
+        "kind": 2,
+        "importPath": "module_utils.ceph_common",
+        "description": "module_utils.ceph_common",
+        "peekOfCode": "def retry(exceptions, retries=20, delay=1):\n    def decorator(f):\n        def _retry(*args, **kwargs):\n            _tries = retries\n            while _tries > 1:\n                try:\n                    print(\"{}\".format(_tries))\n                    return f(*args, **kwargs)\n                except exceptions:\n                    time.sleep(delay)",
+        "detail": "module_utils.ceph_common",
+        "documentation": {}
+    },
+    {
+        "label": "build_base_cmd",
+        "kind": 2,
+        "importPath": "module_utils.ceph_common",
+        "description": "module_utils.ceph_common",
+        "peekOfCode": "def build_base_cmd(module: \"AnsibleModule\") -> List[str]:\n    cmd = [\"cephadm\"]\n    docker = module.params.get(\"docker\")\n    image = module.params.get(\"image\")\n    if docker:\n        cmd.append(\"--docker\")\n    if image:\n        cmd.extend([\"--image\", image])\n    return cmd\ndef build_base_cmd_shell(module: \"AnsibleModule\") -> List[str]:",
+        "detail": "module_utils.ceph_common",
+        "documentation": {}
+    },
+    {
+        "label": "build_base_cmd_shell",
+        "kind": 2,
+        "importPath": "module_utils.ceph_common",
+        "description": "module_utils.ceph_common",
+        "peekOfCode": "def build_base_cmd_shell(module: \"AnsibleModule\") -> List[str]:\n    cmd = build_base_cmd(module)\n    fsid = module.params.get(\"fsid\")\n    cmd.append(\"shell\")\n    if fsid:\n        cmd.extend([\"--fsid\", fsid])\n    return cmd\ndef build_base_cmd_orch(module: \"AnsibleModule\") -> List[str]:\n    cmd = build_base_cmd_shell(module)\n    cmd.extend([\"ceph\", \"orch\"])",
+        "detail": "module_utils.ceph_common",
+        "documentation": {}
+    },
+    {
+        "label": "build_base_cmd_orch",
+        "kind": 2,
+        "importPath": "module_utils.ceph_common",
+        "description": "module_utils.ceph_common",
+        "peekOfCode": "def build_base_cmd_orch(module: \"AnsibleModule\") -> List[str]:\n    cmd = build_base_cmd_shell(module)\n    cmd.extend([\"ceph\", \"orch\"])\n    return cmd\ndef exit_module(\n    module: \"AnsibleModule\",\n    rc: int,\n    cmd: List[str],\n    startd: datetime.datetime,\n    out: str = \"\",",
+        "detail": "module_utils.ceph_common",
+        "documentation": {}
+    },
+    {
+        "label": "exit_module",
+        "kind": 2,
+        "importPath": "module_utils.ceph_common",
+        "description": "module_utils.ceph_common",
+        "peekOfCode": "def exit_module(\n    module: \"AnsibleModule\",\n    rc: int,\n    cmd: List[str],\n    startd: datetime.datetime,\n    out: str = \"\",\n    err: str = \"\",\n    changed: bool = False,\n    diff: Dict[str, str] = None,\n) -> None:",
+        "detail": "module_utils.ceph_common",
+        "documentation": {}
+    },
+    {
+        "label": "fatal",
+        "kind": 2,
+        "importPath": "module_utils.ceph_common",
+        "description": "module_utils.ceph_common",
+        "peekOfCode": "def fatal(message: str, module: \"AnsibleModule\") -> None:\n    \"\"\"\n    Report a fatal error and exit\n    \"\"\"\n    if module:\n        module.fail_json(msg=message, rc=1)\n    else:\n        raise Exception(message)",
+        "detail": "module_utils.ceph_common",
+        "documentation": {}
+    }
+]

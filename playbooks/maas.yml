@@ -1,0 +1,34 @@
+---
+- name: "[MAAS - Metal as a Service] :: Set up Canonnical MAAS with libvirt support and SSL. Includes Ansible roles OpenLDAP-Client, CephFS/NFS, Telegraf"
+  hosts: maas
+  become: true
+  tasks:
+    - name: Add common role
+      ansible.builtin.include_role:
+        name: common
+    - name: Add openldap role
+      ansible.builtin.include_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    - name: Add ceph-fs role
+      ansible.builtin.include_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"
+    - name: Add nfs role
+      ansible.builtin.include_role:
+        name: nfs
+      when:
+        - shared_storage
+        - storage_backend == "nfs"
+    - name: Add maas role
+      ansible.builtin.include_role:
+        name: maas
+    - name: Add kvm role
+      ansible.builtin.include_role:
+        name: kvm
+    - name: Add telegraf role
+      ansible.builtin.include_role:
+        name: telegraf
+      when: "'telegraf' in group_names"

@@ -1,0 +1,12 @@
+---
+- name: Verify {{ assertion_task }}
+  ansible.builtin.assert:
+    fail_msg: |
+      Failed: {{ assertion_task.msg }}
+      Debug: {{ assertion_task }}
+    quiet: false
+    success_msg: |
+      Success: {{ assertion_task.msg }}
+      Debug: {{ assertion_task }}
+    that:
+      - assertion_task is not failed

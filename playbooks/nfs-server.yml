@@ -1,0 +1,16 @@
+---
+- name: Deploy NFS Server
+  hosts: nfsservers
+  remote_user: root
+  become: true
+  tasks:
+    - name: Add common role
+      ansible.builtin.include_role:
+        name: common
+    - name: Add openldap role
+      ansible.builtin.include_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    - name: Add nfs role
+      ansible.builtin.include_role:
+        name: nfs

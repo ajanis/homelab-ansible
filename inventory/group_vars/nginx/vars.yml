@@ -1,0 +1,647 @@
+---
+nginx_proxy_cache_regex: ~* (^/(photo|media|image|images|mediacover|pms_image_proxy)|\.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc|css|js)$)
+ssl_key_slurp_path: /root/acme-letsencrypt/prettybaked.com/prettybaked.com_ecc/prettybaked.com.key
+ssl_cert_slurp_path: /root/acme-letsencrypt/prettybaked.com/prettybaked.com_ecc/fullchain.cer
+nginx_default_docroot: /var/www/html
+nginx_access_log: /var/log/nginx/access.log  main
+
+nginx_log_format_main: |
+  log_format main escape=json '{'
+      '"time_local":"$time_local",'
+      '"remote_addr": "$remote_addr",'                            # client IP
+      '"request":"$request",'                                     # full path no arguments if the request
+      '"status": "$status",'                                      # response status code
+      '"request_time":"$request_time",'                           # request processing time in seconds with msec resolution
+      '"remote_user": "$remote_user",'                            # client HTTP username
+      '"remote_port": "$remote_port",'                            # client port
+      '"body_bytes_sent": "$body_bytes_sent",'                    # the number of body bytes exclude headers sent to a client
+      '"bytes_sent": "$bytes_sent", '                             # the number of bytes sent to a client
+      '"request_length": "$request_length", '                     # request length (including headers and body)
+      '"connection_requests": "$connection_requests",'            # number of requests made in connection
+      '"http_host": "$http_host", '                               # the request Host: header
+      '"http_referrer":"$http_referer",'
+      '"upstream": "$upstream_addr", '                            # upstream backend server for proxied requests
+      '"upstream_connect_time": "$upstream_connect_time", '       # upstream handshake time incl. TLS
+      '"upstream_header_time": "$upstream_header_time", '         # time spent receiving upstream headers
+      '"upstream_response_time": "$upstream_response_time", '     # time spend receiving upstream body
+      '"upstream_response_length": "$upstream_response_length", ' # upstream response length
+      '"upstream_cache_status": "$upstream_cache_status", '       # cache HIT/MISS where applicable
+      '"ssl_protocol": "$ssl_protocol", '                         # TLS protocol
+      '"ssl_cipher": "$ssl_cipher", '                             # TLS cipher
+      '"scheme": "$scheme", '                                     # http or https
+      '"http_user_agent":"$http_user_agent"'
+  '}';
+
+
+nginx_module_pkgs:
+  - libnginx-mod-http-fancyindex
+  - libnginx-mod-rtmp
+  - libnginx-mod-http-auth-pam
+  - libnginx-mod-http-cache-purge
+  - libnginx-mod-http-echo
+  - libnginx-mod-http-geoip
+  - libnginx-mod-http-geoip2
+  - libnginx-mod-http-ndk
+  - libnginx-mod-http-geoip
+  - libnginx-mod-http-headers-more-filter
+  - libnginx-mod-http-image-filter
+  - libnginx-mod-http-subs-filter
+  - libnginx-mod-http-perl
+  - libnginx-mod-http-xslt-filter
+  - libnginx-mod-mail
+  - libnginx-mod-nchan
+  - libnginx-mod-http-upstream-fair
+  - libnginx-mod-stream-geoip2
+  - libnginx-mod-stream-geoip
+  - libnginx-mod-stream
+  - libnginx-mod-rtmp
+  - libnginx-mod-http-uploadprogress
+
+nginx_modules_enabled:
+  - ngx_http_fancyindex_module.so
+  # - ngx_rtmp_module.so
+  # - ngx_http_auth_pam_module.so
+  # - ngx_http_cache_purge_module.so
+  # - ngx_http_echo_module.so
+  # - ngx_http_geoip_module.so
+  # - ngx_http_geoip2_module.so
+  # - ngx_http_ndk_module.so
+  # - ngx_http_geoip_module.so
+  # - ngx_http_headers_more_filter_module.so
+  # - ngx_http_image_filter_module.so
+  # - ngx_http_subs_filter_module.so
+  # - ngx_http_perl_module.so
+  # - ngx_http_xslt_filter_module.so
+  # - ngx_mail_module.so
+  # - ngx_nchan_module.so
+  # - ngx_http_upstream_fair_module.so
+  # - ngx_stream_geoip2_module.so
+  # - ngx_stream_geoip_module.so
+  # - ngx_stream_module.so
+  # - ngx_rtmp_module.so
+  # - ngx_http_uploadprogress_module.so
+  # - ngx_http_fancyindex_module.so
+  # - ngx_rtmp_module.so
+
+nginx_enable_rtmp: false
+nginx_rtsp_camera_feed: rtsps://192.168.1.175:7441/SX9sqfYgBX3VCwnk?enableSrtp
+nginx_hls_camera_feed_transcode_dir: /etc/nginx/stream.d
+nginx_rtmp_listen_port: 1935
+nginx_rtsp_transport_proto: tcp
+nginx_hls_camera_transcode_index: index.{{ nginx_hls_segment_list_type }}
+nginx_hls_camera_transcode_path: "{{ nginx_hls_camera_feed_transcode_dir }}/{{ nginx_hls_camera_transcode_index }}"
+nginx_hls_segment_list_type: m3u8
+nginx_hls_segment_format: mpegts
+nginx_hls_segment_list_entry_prefix: /
+nginx_fflags: |
+  nobuffer -rtsp_transport tcp -i {{ nginx_rtsp_camera_feed }} \
+  -vsync 0 -copyts -vcodec copy \
+  -movflags frag_keyframe+empty_moov -an \
+  -hls_flags delete_segments+append_list \
+  -f segment -segment_list_flags live \
+  -segment_time 15 -segment_list_size 10 -segment_format {{ nginx_hls_segment_format }} \
+  -segment_list {{ nginx_hls_camera_transcode_path }} \
+  -segment_list_type {{ nginx_hls_segment_list_type }} \
+  -segment_list_entry_prefix {{ nginx_hls_segment_list_entry_prefix }} \
+  {{ nginx_hls_camera_feed_transcode_dir }}/%d.ts > /var/log/ffmpeg 2>&1
+
+nginx_rtmp_ffmpeg_command: "{{ nginx_ffmpeg_path }} -fflags {{ nginx_fflags }}"
+nginx_ffmpeg_path: /usr/bin/ffmpeg
+nginx_user: www-user
+nginx_group: www-group
+nginx_index:
+  - index.php
+  - index.html
+  - index.htm
+  - index.m3u8
+
+# nginx_custom_css_theme: Nord
+
+# ## Available base themes
+# #Organizr
+# #Dark
+# #Dracula
+# #Aquamarine
+# #Space Gray
+# #Plex
+# #Hotline
+# #Hotpink
+# #Overseerr
+# Nord
+
+nginx_backends:
+  - service: pve-dashboard-pool
+    servers:
+      - 10.0.10.201:8006 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.202:8006 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.203:8006 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.204:8006 weight=100 max_fails=5 fail_timeout=300
+    options:
+      - ip_hash
+
+  - service: ceph-dashboard-pool
+    servers:
+      - 10.0.10.101:8080 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.102:8080 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.104:8080 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.103:8080 weight=100 max_fails=5 fail_timeout=300
+    options:
+      - ip_hash
+  - service: ceph-alert-pool
+    servers:
+      - 10.0.10.101:9093 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.102:9093 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.104:9093 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.103:9093 weight=100 max_fails=5 fail_timeout=300
+    options:
+      - ip_hash
+  - service: ceph-prometheus-pool
+    servers:
+      - 10.0.10.101:9095 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.102:9095 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.104:9095 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.103:9095 weight=100 max_fails=5 fail_timeout=300
+    options:
+      - ip_hash
+  - service: ceph-grafana-pool
+    servers:
+      - 10.0.10.101:3000 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.102:3000 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.104:3000 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.103:3000 weight=100 max_fails=5 fail_timeout=300
+    options:
+      - ip_hash
+  - service: pveceph-dashboard-pool
+    servers:
+      - 10.0.10.204:8080 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.203:8080 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.204:8080 weight=100 max_fails=5 fail_timeout=300
+      - 10.0.10.203:8080 weight=100 max_fails=5 fail_timeout=300
+    options:
+      - ip_hash
+
+nginx_vhosts:
+  # Internally accessible NON-SSL vhosts
+
+  - servername: 127.0.0.1
+    serverlisten: 80
+    locations:
+      - name: /nginx_status
+        extra_parameters: |
+          stub_status;
+          access_log off;
+          allow 127.0.0.1;
+          deny all;
+
+  - servername: home.prettybaked.com
+    serveralias: www.home.prettybaked.com {{ ansible_default_ipv4.address }} home.constructorfleet.stream
+    serverlisten: 80 default_server
+    locations:
+      - name: /
+        docroot: "{{ nginx_default_docroot }}"
+        extra_parameters: |
+          fancyindex on;
+          fancyindex_show_path off;
+          fancyindex_name_length 255;
+          fancyindex_localtime on; #on for local time zone. off for GMT
+          fancyindex_exact_size off; #off for human-readable. on for exact size in bytes
+          fancyindex_header "/theme/header.html";
+          fancyindex_footer "/theme/footer.html";
+          fancyindex_ignore "theme"; #ignore this directory when showing list
+          fancyindex_ignore "robots.txt";
+      - name: /theme
+        extra_parameters: |
+          alias /var/www/html/nginx-fancyindex-flat-theme-1.1/build;
+
+  - servername: ceph.home.prettybaked.com
+    serveralias: ceph.home.constructorfleet.stream
+    serverlisten: "80"
+    extra_parameters: |
+      proxy_redirect  off;
+      large_client_header_buffers 4 16k;
+    locations:
+      - name: /
+        extra_parameters: |
+          proxy_pass              http://ceph-dashboard-pool;
+          if_modified_since off;
+          add_header Last-Modified "";
+          # Disable buffering to serve data immediately to clients.
+          # Increase timeouts from default 60 seconds to 5 minutes for the console not to close when no data is transferred.
+          # Additionally the max_body_size was increased to 5 GB to allow uploads of huge ISOs via the Web UI.
+          proxy_buffering         off;
+          proxy_buffer_size       4k;
+          client_max_body_size    5g;
+          proxy_connect_timeout   3600s;
+          proxy_read_timeout      3600s;
+          proxy_send_timeout      3600s;
+          send_timeout            3600s;
+
+          # Enable proxy websockets for the noVNC console to work
+          proxy_http_version      1.1;
+          proxy_set_header        upgrade             $http_upgrade;
+          proxy_set_header        Connection          "Upgrade";
+
+          # Standard proxying headers
+          proxy_set_header        Host            	  $host;
+          proxy_set_header        X-Real-IP       	  $remote_addr;
+          proxy_set_header        X-Forwarded-Host    $server_name;
+          proxy_set_header        X-Forwarded-For 	  $proxy_add_x_forwarded_for;
+
+  - servername: pveceph.home.prettybaked.com
+    serveralias: pveceph.home.constructorfleet.stream
+    serverlisten: "80"
+    extra_parameters: |
+      proxy_redirect  off;
+      large_client_header_buffers 4 16k;
+    locations:
+      - name: /
+        extra_parameters: |
+          proxy_pass              http://pveceph-dashboard-pool;
+          if_modified_since off;
+          add_header Last-Modified "";
+          # Disable buffering to serve data immediately to clients.
+          # Increase timeouts from default 60 seconds to 5 minutes for the console not to close when no data is transferred.
+          # Additionally the max_body_size was increased to 5 GB to allow uploads of huge ISOs via the Web UI.
+          proxy_buffering         off;
+          proxy_buffer_size       4k;
+          client_max_body_size    5g;
+          proxy_connect_timeout   3600s;
+          proxy_read_timeout      3600s;
+          proxy_send_timeout      3600s;
+          send_timeout            3600s;
+
+          # Enable proxy websockets for the noVNC console to work
+          proxy_http_version      1.1;
+          proxy_set_header        upgrade             $http_upgrade;
+          proxy_set_header        Connection          "Upgrade";
+
+          # Standard proxying headers
+          proxy_set_header        Host            	  $host;
+          proxy_set_header        X-Real-IP       	  $remote_addr;
+          proxy_set_header        X-Forwarded-Host    $server_name;
+          proxy_set_header        X-Forwarded-For 	  $proxy_add_x_forwarded_for;
+
+# Externally accessible NON-SSL vhosts
+
+nginx_vhosts_ssl:
+  # Internally accessible SSL vhosts
+
+  - servername: home.prettybaked.com
+    serveralias: www.home.prettybaked.com home.constructorfleet.stream www.home.constructorfleet.stream
+    serverlisten: "443"
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    locations:
+      - name: /
+        docroot: "{{ nginx_default_docroot }}"
+        extra_parameters: |
+          fancyindex on;
+          fancyindex_show_path off;
+          fancyindex_name_length 255;
+          fancyindex_localtime on; #on for local time zone. off for GMT
+          fancyindex_exact_size off; #off for human-readable. on for exact size in bytes
+          fancyindex_header "/theme/header.html";
+          fancyindex_footer "/theme/footer.html";
+          fancyindex_ignore "theme"; #ignore this directory when showing list
+          fancyindex_ignore "robots.txt";
+      - name: /theme
+        extra_parameters: |
+          alias /var/www/html/nginx-fancyindex-flat-theme-1.1/build;
+
+  - servername: pvedash.home.prettybaked.com
+    serveralias: pvedash.home.constructorfleet.stream proxmox.home.prettybaked.com proxmox.home.constructorfleet.stream
+    serverlisten: "443"
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    extra_parameters: |
+      proxy_redirect  off;
+      large_client_header_buffers 4 16k;
+    locations:
+      - name: /
+        extra_parameters: |
+          proxy_pass              https://pve-dashboard-pool;
+
+          # Disable buffering to serve data immediately to clients.
+          # Increase timeouts from default 60 seconds to 5 minutes for the console not to close when no data is transferred.
+          # Additionally the max_body_size was increased to 5 GB to allow uploads of huge ISOs via the Web UI.
+          proxy_buffering         off;
+          proxy_buffer_size       4k;
+          client_max_body_size    5g;
+          proxy_connect_timeout   3600s;
+          proxy_read_timeout      3600s;
+          proxy_send_timeout      3600s;
+          send_timeout            3600s;
+
+          # Enable proxy websockets for the noVNC console to work
+          proxy_http_version      1.1;
+          proxy_set_header        upgrade             $http_upgrade;
+          proxy_set_header        Connection          "Upgrade";
+
+          # Standard proxying headers
+          proxy_set_header        Host            	  $host;
+          proxy_set_header        X-Real-IP       	  $remote_addr;
+          proxy_set_header        X-Forwarded-Host    $server_name;
+          proxy_set_header        X-Forwarded-For 	  $proxy_add_x_forwarded_for;
+
+          # SSL proxying headers
+          proxy_set_header        X-Forwarded-Proto 	$scheme;
+          proxy_set_header        X-Forwarded-Ssl     on;
+
+  - servername: pveceph.home.prettybaked.com
+    serveralias: pveceph.home.constructorfleet.stream pveceph.home.constructorfleet.stream
+    serverlisten: "443"
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    extra_parameters: |
+      proxy_redirect  off;
+      large_client_header_buffers 4 16k;
+    locations:
+      - name: /
+        extra_parameters: |
+          proxy_pass              http://pveceph-dashboard-pool;
+
+          # Disable buffering to serve data immediately to clients.
+          # Increase timeouts from default 60 seconds to 5 minutes for the console not to close when no data is transferred.
+          # Additionally the max_body_size was increased to 5 GB to allow uploads of huge ISOs via the Web UI.
+          proxy_buffering         off;
+          proxy_buffer_size       4k;
+          client_max_body_size    5g;
+          proxy_connect_timeout   3600s;
+          proxy_read_timeout      3600s;
+          proxy_send_timeout      3600s;
+          send_timeout            3600s;
+
+          # Enable proxy websockets for the noVNC console to work
+          proxy_http_version      1.1;
+          proxy_set_header        upgrade             $http_upgrade;
+          proxy_set_header        Connection          "Upgrade";
+
+          # Standard proxying headers
+          proxy_set_header        Host            	  $host;
+          proxy_set_header        X-Real-IP       	  $remote_addr;
+          proxy_set_header        X-Forwarded-Host    $server_name;
+          proxy_set_header        X-Forwarded-For 	  $proxy_add_x_forwarded_for;
+
+          # SSL proxying headers
+          proxy_set_header        X-Forwarded-Proto 	$scheme;
+          proxy_set_header        X-Forwarded-Ssl     on;
+
+  - servername: ceph.home.prettybaked.com
+    serveralias: ceph.home.constructorfleet.stream ceph.home.constructorfleet.stream
+    serverlisten: "443"
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    extra_parameters: |
+      proxy_redirect  off;
+      large_client_header_buffers 4 16k;
+    locations:
+      - name: /
+        extra_parameters: |
+          proxy_pass              http://ceph-dashboard-pool;
+
+          # Disable buffering to serve data immediately to clients.
+          # Increase timeouts from default 60 seconds to 5 minutes for the console not to close when no data is transferred.
+          # Additionally the max_body_size was increased to 5 GB to allow uploads of huge ISOs via the Web UI.
+          proxy_buffering         off;
+          proxy_buffer_size       4k;
+          client_max_body_size    5g;
+          proxy_connect_timeout   3600s;
+          proxy_read_timeout      3600s;
+          proxy_send_timeout      3600s;
+          send_timeout            3600s;
+
+          # Enable proxy websockets for the noVNC console to work
+          proxy_http_version      1.1;
+          proxy_set_header        upgrade             $http_upgrade;
+          proxy_set_header        Connection          "Upgrade";
+
+          # Standard proxying headers
+          proxy_set_header        Host            	  $host;
+          proxy_set_header        X-Real-IP       	  $remote_addr;
+          proxy_set_header        X-Forwarded-Host    $server_name;
+          proxy_set_header        X-Forwarded-For 	  $proxy_add_x_forwarded_for;
+
+          # SSL proxying headers
+          proxy_set_header        X-Forwarded-Proto 	$scheme;
+          proxy_set_header        X-Forwarded-Ssl     on;
+
+  - servername: ceph-alertmanager.home.prettybaked.com
+    serverlisten: "443"
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    extra_parameters: |
+      proxy_redirect  off;
+      large_client_header_buffers 4 16k;
+    locations:
+      - name: /
+        extra_parameters: |
+          proxy_pass              http://ceph-alert-pool;
+
+          # Disable buffering to serve data immediately to clients.
+          # Increase timeouts from default 60 seconds to 5 minutes for the console not to close when no data is transferred.
+          # Additionally the max_body_size was increased to 5 GB to allow uploads of huge ISOs via the Web UI.
+          proxy_buffering         off;
+          proxy_buffer_size       4k;
+          client_max_body_size    5g;
+          proxy_connect_timeout   3600s;
+          proxy_read_timeout      3600s;
+          proxy_send_timeout      3600s;
+          send_timeout            3600s;
+
+          # Enable proxy websockets for the noVNC console to work
+          proxy_http_version      1.1;
+          proxy_set_header        upgrade             $http_upgrade;
+          proxy_set_header        Connection          "Upgrade";
+
+          # Standard proxying headers
+          proxy_set_header        Host            	  $host;
+          proxy_set_header        X-Real-IP       	  $remote_addr;
+          proxy_set_header        X-Forwarded-Host    $server_name;
+          proxy_set_header        X-Forwarded-For 	  $proxy_add_x_forwarded_for;
+
+          # SSL proxying headers
+          proxy_set_header        X-Forwarded-Proto 	$scheme;
+          proxy_set_header        X-Forwarded-Ssl     on;
+  - servername: ceph-prometheus.home.prettybaked.com
+    serverlisten: "443"
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    extra_parameters: |
+      proxy_redirect  off;
+      large_client_header_buffers 4 16k;
+    locations:
+      - name: /
+        extra_parameters: |
+          proxy_pass              http://ceph-prometheus-pool;
+
+          # Disable buffering to serve data immediately to clients.
+          # Increase timeouts from default 60 seconds to 5 minutes for the console not to close when no data is transferred.
+          # Additionally the max_body_size was increased to 5 GB to allow uploads of huge ISOs via the Web UI.
+          proxy_buffering         off;
+          proxy_buffer_size       4k;
+          client_max_body_size    5g;
+          proxy_connect_timeout   3600s;
+          proxy_read_timeout      3600s;
+          proxy_send_timeout      3600s;
+          send_timeout            3600s;
+
+          # Enable proxy websockets for the noVNC console to work
+          proxy_http_version      1.1;
+          proxy_set_header        upgrade             $http_upgrade;
+          proxy_set_header        Connection          "Upgrade";
+
+          # Standard proxying headers
+          proxy_set_header        Host            	  $host;
+          proxy_set_header        X-Real-IP       	  $remote_addr;
+          proxy_set_header        X-Forwarded-Host    $server_name;
+          proxy_set_header        X-Forwarded-For 	  $proxy_add_x_forwarded_for;
+
+          # SSL proxying headers
+          proxy_set_header        X-Forwarded-Proto 	$scheme;
+          proxy_set_header        X-Forwarded-Ssl     on;
+
+  - servername: ceph-grafana.home.prettybaked.com
+    serverlisten: "443"
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    extra_parameters: |
+      proxy_redirect  off;
+      large_client_header_buffers 4 16k;
+    locations:
+      - name: /
+        extra_parameters: |
+          proxy_pass              http://ceph-grafana-pool;
+
+          # Disable buffering to serve data immediately to clients.
+          # Increase timeouts from default 60 seconds to 5 minutes for the console not to close when no data is transferred.
+          # Additionally the max_body_size was increased to 5 GB to allow uploads of huge ISOs via the Web UI.
+          proxy_buffering         off;
+          proxy_buffer_size       4k;
+          client_max_body_size    5g;
+          proxy_connect_timeout   3600s;
+          proxy_read_timeout      3600s;
+          proxy_send_timeout      3600s;
+          send_timeout            3600s;
+
+          # Enable proxy websockets for the noVNC console to work
+          proxy_http_version      1.1;
+          proxy_set_header        upgrade             $http_upgrade;
+          proxy_set_header        Connection          "Upgrade";
+
+          # Standard proxying headers
+          proxy_set_header        Host            	  $host;
+          proxy_set_header        X-Real-IP       	  $remote_addr;
+          proxy_set_header        X-Forwarded-Host    $server_name;
+          proxy_set_header        X-Forwarded-For 	  $proxy_add_x_forwarded_for;
+
+          # SSL proxying headers
+          proxy_set_header        X-Forwarded-Proto 	$scheme;
+          proxy_set_header        X-Forwarded-Ssl     on;
+
+  # Externally accessible SSL vhosts
+
+  - servername: prettybaked.com
+    serveralias: www.prettybaked.com constructorfleet.stream www.constructorfleet.stream
+    serverlisten: "8443"
+    ssl_certchain: "{{ ssl_certchain }}"
+    ssl_privkey: "{{ ssl_privkey }}"
+    ssl_certpath: "{{ ssl_certpath }}"
+    ssl_keypath: "{{ ssl_keypath }}"
+    locations:
+      - name: /
+        docroot: "{{ nginx_default_docroot }}"
+        extra_parameters: |
+          fancyindex on;
+          fancyindex_show_path off;
+          fancyindex_name_length 255;
+          fancyindex_localtime on; #on for local time zone. off for GMT
+          fancyindex_exact_size off; #off for human-readable. on for exact size in bytes
+          fancyindex_header "/theme/header.html";
+          fancyindex_footer "/theme/footer.html";
+          fancyindex_ignore "theme"; #ignore this directory when showing list
+          fancyindex_ignore "robots.txt";
+      - name: /theme
+        extra_parameters: |
+          alias /var/www/html/nginx-fancyindex-flat-theme-1.1/build;
+
+telegraf_template_configuration: true
+telegraf_plugins_extra:
+  - name: nginx
+    options:
+      urls:
+        - http://127.0.0.1/nginx_status
+  - name: procstat
+    options:
+      pattern: nginx
+      prefix: nginx
+  - name: x509_cert
+    options:
+      timeout: 30s
+      interval: 300s
+      exclude_root_certs: "true"
+      sources:
+        - https://plex.home.prettybaked.com:443
+        - https://automation.home.prettybaked.com:443
+        - https://pveceph.home.prettybaked.com:443
+        - https://pvedash.home.prettybaked.com:443
+        - https://ceph.home.prettybaked.com:443
+      tls_cert: /data/ssl/home.prettybaked.com.cert
+      tls_key: /data/ssl/home.prettybaked.com.key
+      tls_server_name: home.prettybaked.com
+  - name: tail
+    options:
+      files:
+        - /var/log/nginx/*_access.log
+      name_override: nginx_access_log
+      from_beginning: "true"
+      max_undelivered_lines: 100
+      character_encoding: utf-8
+      data_format: json
+      tag_keys:
+        - scheme
+        - status
+        - http_host
+        - upstream
+        - ssl_protocol
+        - upstream_cache_status
+      json_string_fields:
+        - remote_addr
+        - request
+        - ssl_cipher
+        - http_referrer
+        - http_user_agent
+        - remote_user
+        - remote_port
+        - body_bytes_sent
+        - bytes_sent
+        - request_length
+        - upstream_connect_time
+        - upstream_header_time
+        - upstream_response_time
+        - upstream_response_length
+
+nginx_allowed_ports:
+  - port: 80
+    proto: tcp
+  - port: 443
+    proto: tcp
+  - port: 8443
+    proto: tcp
+  - port: 8080
+    proto: tcp
+  - port: 22
+    proto: tcp

@@ -1,0 +1,129 @@
+---
+- name: Configure Timescale database and scripts
+  hosts: timescale,promscale
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Base host configuraton
+      tags:
+        - base-setup
+      block:
+        - name: Add common role
+          ansible.builtin.import_role:
+            name: common
+          tags:
+            - common-role-import
+        - name: Add openldap role
+          ansible.builtin.import_role:
+            name: openldap
+          when: openldap_server_ip is defined and openldap_server_ip != None
+          tags:
+            - openldap-role-import
+        - name: Add ceph-fs role
+          ansible.builtin.import_role:
+            name: ceph-fs
+          when:
+            - shared_storage
+            - storage_backend == "cephfs"
+          tags: ceph-fs-role-import
+
+    - name: Docker Installation, Configuration, Container/Compose creation
+      tags:
+        - docker-setup
+      block:
+        - name: Add docker role
+          ansible.builtin.import_role:
+            name: docker
+          tags:
+            - docker-role-import
+
+    - name: Timescale Specific Tasks
+      tags:
+        - timescale-setup
+      block:
+        - name: Install postgresql client and devel packages on docker host
+          ansible.builtin.package:
+            name:
+              - postgresql-client
+              - libpq-dev
+            state: present
+
+        - name: Install python modules needed for ansible-postgresql interaction
+          ansible.builtin.pip:
+            name: psycopg2
+            state: present
+
+        - name: Create timescale db prune script
+          ansible.builtin.copy:
+            dest: /usr/local/bin/timescale-retention.sh
+            mode: "0700"
+            content: |
+              #!/bin/bash
+              export INT="8 hours"
+              export PGPASSWORD={{ telegraf_timescale_password }}
+              export DBCONNECT="psql -w -U {{ telegraf_timescale_user }} -d {{ telegraf_timescale_dbname }} -h {{ telegraf_timescale_host }} -p 5432 -c"
+              export TSTABLES=$($DBCONNECT "select table_name from information_schema.tables where table_catalog = '{{ telegraf_timescale_dbname }}' and table_schema = '{{ telegraf_timescale_schema }}' order by table_name;" | head -n -2 | tail -n +3)
+              exec >> /var/log/timescale-retention.log
+              exec 2>&1
+              for TABLE in $TSTABLES
+              do
+                echo "$(date -Iseconds)"
+                echo "Dropping records older than $INT from $TABLE"
+                $DBCONNECT "SELECT drop_chunks('$TABLE', INTERVAL '$INT hours');"
+                #$DBCONNECT "drop table $TABLE;"
+              done
+
+        - name: Set up Timescale data prune cronjob
+          ansible.builtin.cron:
+            name: timescale-retention
+            hour: "0,6,12,18"
+            job: /usr/local/bin/timescale-retention.sh
+
+        - name: Create timescaledb user
+          ansible.builtin.postgresql_user:
+            name: "{{ telegraf_timescale_user }}"
+            password: "{{ telegraf_timescale_password }}"
+            db: "{{ telegraf_timescale_dbname }}"
+            # fail_on_user: yes # not required. If C(yes), fail when user (role) can't be removed. Otherwise just log and continue.
+            priv: ALL
+            state: present # not required. choices: absent;present. The user (role) state.
+            encrypted: true # not required. Whether the password is stored hashed in the database. Passwords can be passed already hashed or unhashed, and postgresql ensures the stored password is hashed when C(encrypted) is set. Note: Postgresql 10 and newer doesn't support unhashed passwords. Previous to Ansible 2.6, this was C(no) by default.
+            login_user: postgres # not required. The username used to authenticate with.
+            login_host: "{{ telegraf_timescale_host }}"
+            login_password: "{{ telegraf_timescale_password }}"
+            port: 5432 # not required. Database port to connect to.
+
+        - name: Create timescaledb database
+          ansible.builtin.postgresql_db:
+            name: "{{ telegraf_timescale_dbname }}"
+            owner: "{{ telegraf_timescale_user }}"
+            state: present
+            maintenance_db: postgres
+            login_user: postgres
+            login_password: "{{ telegraf_timescale_password }}"
+            login_host: "{{ telegraf_timescale_host }}"
+            port: 5432
+
+        - name: Ensure timescaledb extension is present
+          community.postgresql.postgresql_query:
+            db: "{{ telegraf_timescale_dbname }}"
+            query: CREATE EXTENSION IF NOT EXISTS timescaledb;
+            login_user: postgres
+            login_password: "{{ telegraf_timescale_password }}"
+            login_host: "{{ telegraf_timescale_host }}"
+            port: 5432
+
+    - name: Telegraf installation and configuration
+      tags:
+        - telegraf-setup
+      block:
+        - name: Add telegraf role
+          ansible.builtin.import_role:
+            name: telegraf
+          when: "'telegraf' in group_names"
+          tags:
+            - telegraf-role-import

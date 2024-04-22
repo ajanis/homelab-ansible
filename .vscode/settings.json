@@ -1,0 +1,9 @@
+{
+  "trunk.addToolsToPath": true,
+  "ansible.ansible.reuseTerminal": true,
+  "ansible.lightspeed.enabled": true,
+  "ansible.lightspeed.suggestions.enabled": true,
+  "ansible.python.interpreterPath": "/home/vscode/.pyenv/versions/3.12.3/bin/python",
+  "a-file-icon-vscode.folderTheme": "specific",
+  "CodeGPT.Autocomplete.provider": "CodeGPT Plus - Plus"
+}

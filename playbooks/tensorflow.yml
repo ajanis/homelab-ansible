@@ -1,0 +1,30 @@
+---
+- name: Tensorflow Configs
+  hosts: tensorflow
+  become: true
+  tasks:
+    - name: Add common role
+      ansible.builtin.include_role:
+        name: common
+    - name: Add openldap role
+      ansible.builtin.include_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    - name: Add ceph-fs role
+      ansible.builtin.include_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+    - name: Add nfs role
+      ansible.builtin.include_role:
+        name: nfs
+      when:
+        - shared_storage
+        - storage_backend == "nfs"
+    - name: Add docker role
+      ansible.builtin.include_role:
+        name: docker
+    - name: Add telegraf role
+      ansible.builtin.include_role:
+        name: telegraf
+      when: "'telegraf' in group_names"

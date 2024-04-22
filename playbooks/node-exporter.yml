@@ -1,0 +1,94 @@
+---
+- name: Deploy grafanaservices01 test environment
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+  vars:
+    prometheus_url: http://prometheus:9009/api/prom/push
+    loki_url: http://loki:3100/loki/api/v1/pus
+
+  tasks:
+    - name: Install Grafana Agent
+      ansible.builtin.include_role:
+        name: grafana.grafana.grafana_agent
+      vars:
+        grafana_agent_mode: flow
+        grafana_agent_config_filename: config.river
+        grafana_agent_provisioned_config_file: /etc/agent/
+        grafana_agent_metrics_config:
+          configs:
+            - name: integrations
+              remote_write:
+                - basic_auth:
+                    password: "{{ grafana_cloud_api_key }}"
+                    username: "{{ metrics_username }}"
+                  url: "{{ prometheus_url }}"
+              global:
+                scrape_interval: 60s
+                wal_directory: /tmp/grafana-agent-wal
+        grafana_agent_logs_config:
+          configs:
+            - name: default
+              clients:
+                - url: "{{ loki_url }}"
+              positions:
+                filename: /tmp/positions.yaml
+              target_config:
+                sync_period: 10s
+              scrape_configs:
+                - job_name: varlogs
+                  static_configs:
+                    - targets: [localhost]
+                      labels:
+                        instance: ${HOSTNAME:-default}
+                        job: varlogs
+                        __path__: /var/log/*log
+        grafana_agent_integrations_config:
+          node_exporter:
+            enabled: true
+            instance: ${HOSTNAME:-default}
+          prometheus_remote_write:
+            - url: "{{ prometheus_url }}"
+    - name: Install Grafana Server
+      ansible.builtin.include_role:
+        name: grafana.grafana.grafana
+      vars:
+        grafana_use_provisioning: true
+        grafana_provisionijg_synced: true
+        grafana_manage_repo: false
+        grafana_url: http://10.0.10.30:3000
+        grafana_server:
+          protocol: http
+        grafana_security:
+          admin_user: admin
+          admin_password: ""
+          cookie_username: grafana_user
+          cookie_remember_name: grafana_remember
+          cookie_secure: "true"
+          cookie_samesite: none
+          login_remember_days: "7"
+          session_life_time: "86400"
+          allow_embedding: "true"
+        grafana_database:
+          type: postgres
+          host: "0.0.0.0"
+          name: grafana
+          user: postgres
+          password: pgstats
+          ssl_mode: disable
+          max_idle_conn: "25"
+          max_open_conn: "300"
+          conn_max_lifetime: "14400"
+          log_queries: "true"
+        grafana_remote_cache:
+          type: redis
+          connstr: addr=redis:6379,pool_size=100,db=0,ssl=insecure
+        grafana_session:
+          provider: redis
+          provider_config: addr=redis:6379,pool_size=100,db=grafana,ssl=insecure
+          cookie_name: grafana_sess
+          cookie_secure: "false"
+          session_life_time: "86400"

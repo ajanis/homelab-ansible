@@ -1,0 +1,56 @@
+---
+openldap_server_uri: ldapi:///
+openldap_server_domain_name: ldap-lxc.home.prettybaked.com
+openldap_server_ip: 10.0.10.221
+openldap_server_dc: dc={{ ',dc='.join(openldap_server_domain_name.split('.')) }}
+# openldap_server_dc: 'dc=ldaptest,dc=home,dc=prettybaked,dc=com'
+openldap_server_bind_dn: cn=admin,{{ openldap_server_dc }}
+
+#### LDAP AUTOMOUNT CONFIG
+admin_ou: ou=admin,{{ openldap_server_dc }}
+groups_ou: ou=Groups,{{ openldap_server_dc }}
+users_ou: ou=Users,{{ openldap_server_dc }}
+automount_ou: ou=automount,{{ admin_ou }}
+auto_master_ou: ou=auto.master,{{ automount_ou }}
+auto_data_ou: ou=auto.data,{{ automount_ou }}
+auto_home_ou: ou=auto.home,{{ automount_ou }}
+openldap_server_enable_sshkeys: true
+### LDAP SERVER CONFIG
+
+#### The ldif file
+openldap_server_rootpw: "{{ vault_openldap_server_rootpw }}"
+openldap_server_enable_tls: false
+openldap_server_enable_samba: false
+openldap_server_enable_afpd: false
+afp_ldap_auth: false
+openldap_server_enable_autofs: true
+openldap_client_enable: true
+
+openldap_server_hosts_entry: "{{ openldap_server_ip }} {{ openldap_server_domain_name }} ldap ldap-lxc"
+
+cephfs_autofs_mount:
+  mount: /homedirs
+  fsname: "{{ ceph_cephfs_fsname }}"
+  fsid: 87b07c72-f989-11ea-b03b-002590f5526e
+  ms_mode: "{{ ceph_cephfs_ms_mode }}"
+  mon:
+    - 10.0.20.128
+    - 10.0.20.129
+    - 10.0.20.130
+    - 10.0.20.131
+  port: "{{ ceph_cephfs_mds_port }}"
+  user: "{{ ceph_cephfs_user }}"
+  secret: "{{ cephfs_data_secret }}"
+  secretfile: "{{ ceph_cephfs_data_secretfile }}"
+
+cephfs_mount_options: mon_addr={%- for host in cephfs_autofs_mount.mon | list -%}{{ host }}:{{ cephfs_autofs_mount.port }}{%- if not loop.last -%}/{%- endif -%}{%-
+  endfor -%},ms_mode={{ cephfs_autofs_mount.ms_mode }},secret={{ cephfs_autofs_mount.secret }}
+
+telegraf_plugins_extra:
+  - name: openldap
+    options:
+      host: localhost
+      port: 389
+      bind_dn: "{{ openldap_server_bind_dn }}"
+      bind_password: "{{ openldap_server_rootpw }}"
+      reverse_metric_names: true

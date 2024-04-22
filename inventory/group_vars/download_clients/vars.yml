@@ -1,0 +1,394 @@
+---
+docker_install_community_edition: true
+
+# ramdisk:
+#   create: false
+#   mount_path: /media-processing
+#   uid: 2000
+#   gid: 2000
+#   size: 70G
+#   mode: 774
+
+media_disk_mnt: /media
+queued_dir: "{{ data_mount_root }}/queued"
+transcoding_dir: "{{ data_mount_root }}/transcoding"
+complete_dir: "{{ data_mount_root }}/complete"
+incomplete_dir: "{{ data_mount_root }}/incomplete"
+
+nzbhydra2:
+  version: latest
+  ports:
+    web_ui: 5076:5076/tcp
+sabnzbd:
+  version: latest
+  ports:
+    web_ui: 8080:8080/tcp
+
+makemkv:
+  version: latest
+  ports:
+    web_ui: 5800:5800/tcp
+    vnc_ui: 5900:5900/tcp
+
+youtube_downloader:
+  version: nightly
+  ports:
+    web_ui: 8998:8998/tcp
+mongodb:
+  version: 4.4.9
+  ports:
+    db: 27017:27017/tcp
+qbittorrent:
+  version: latest
+  ports:
+    remote_connection: 8082:8082/tcp
+    web_ui: 9000:9000/tcp
+
+docker_compose_projects:
+  - project_name: downloadclients
+    pull: "{{ docker_recreate | default(False) }}"
+    recreate: "{{ docker_recreate | default(False) }}"
+    definition:
+      version: "3.9"
+      x-logging: &default-logging
+        driver: journald
+      networks:
+        downloadclients:
+          name: downloadclients
+          driver: bridge
+      services:
+        sabnzbd:
+          hostname: sabnzbd
+          container_name: sabnzbd
+          image: linuxserver/sabnzbd:{{ sabnzbd.version }}
+          privileged: true
+          networks:
+            downloadclients:
+              aliases:
+                - sabnzbd
+                - sab
+          ports:
+            - "{{ sabnzbd.ports.web_ui }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/sabnzbd:/config
+            - "{{ queued_dir }}:/queued"
+            - "{{ complete_dir }}:/complete"
+            - "{{ incomplete_dir }}:/incomplete"
+          environment:
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:sabnzbd
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+          sysctls:
+            net.ipv6.conf.all.disable_ipv6: 1
+          logging:
+            <<: *default-logging
+            options:
+              tag: sabnzbd
+        nzbhydra2:
+          container_name: nzbhydra2
+          hostname: nzbhydra2
+          image: linuxserver/nzbhydra2:{{ nzbhydra2.version }}
+          networks:
+            downloadclients:
+              aliases:
+                - nzbhydra2
+                - nzbhydra
+          ports:
+            - "{{ nzbhydra2.ports.web_ui }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/nzbhydra2/config:/config
+            - "{{ complete_dir }}:/complete"
+          environment:
+            PUID: "{{ media_user_uid }}"
+            PGID: "{{ media_user_gid }}"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:nzbhydra2
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+          sysctls:
+            net.ipv6.conf.all.disable_ipv6: 1
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: nzbhydra2
+        youtube_downloader:
+          hostname: youtube_downloader
+          container_name: youtube_downloader
+          image: tzahi12345/youtubedl-material:{{ youtube_downloader.version }}
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/youtube_dl:/app/appdata'
+            - "{{ queued_dir }}:/queued"
+            - "{{ complete_dir }}:/complete"
+          networks:
+            downloadclients:
+              aliases:
+                - youtube_downloader
+          ports:
+            - "{{ youtube_downloader.ports.web_ui }}"
+          environment:
+            ALLOW_CONFIG_MUTATIONS: "true"
+            ytdl_mongodb_connection_string: mongodb://youtube_downloader_db:27017
+            ytdl_use_local_db: "false"
+            write_ytdl_config: "true"
+            ytdl_default_theme: dark
+            ytdl_allow_advanced_download: "true"
+            ytdl_use_youtube_api: "true"
+            ytdl_youtube_api_key: "{{ youtube_apikey }}"
+            UID: "{{ media_user_uid }}"
+            GID: "{{ media_user_gid }}"
+          privileged: true
+          depends_on:
+            - youtube_downloader_db
+          logging:
+            <<: *default-logging
+            options:
+              tag: youtube_downloader
+        youtube_downloader_db:
+          hostname: youtube_downloader_db
+          container_name: youtube_downloader_db
+          image: mongo:{{ mongodb.version }}
+          privileged: true
+          networks:
+            downloadclients:
+              aliases:
+                - youtube_downloader_db
+                - mongodb
+                - mongo
+          ports:
+            - "{{ mongodb.ports.db }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+          logging:
+            <<: *default-logging
+            options:
+              tag: youtube_downloader_db
+        makemkv:
+          hostname: makemkv
+          container_name: makemkv
+          image: jlesage/makemkv:{{ makemkv.version }}
+          networks:
+            downloadclients:
+              aliases:
+                - makemkv
+                - mkv
+          ports:
+            - "{{ makemkv.ports.vnc_ui }}"
+            - "{{ makemkv.ports.web_ui }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/makemkv:/config'
+            - "{{ queued_dir }}:/queued"
+            - "{{ complete_dir }}:/complete"
+          environment:
+            PUID: "0"
+            PGID: "0"
+            USER_ID: "0"
+            GROUP_ID: "0"
+            SUP_GROUP_IDS: "{{ media_user_gid }}"
+            UMASK: "0777"
+            TZ: "{{ timezone }}"
+            MAKEMKV_KEY: "{{ makemkv_key }}"
+            X11VNC_EXTRA_OPTS: -noxdamage
+          sysctls:
+            net.ipv6.conf.all.disable_ipv6: 1
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: makemkv
+
+# docker_compose_projects:
+#   - project_name: downloadclients
+#     pull: '{{ docker_recreate | default(false) }}'
+#     definition:
+#       version: '3.8'
+#       x-logging: &default-logging
+#         driver: journald
+#       networks:
+#         default:
+#           driver: bridge
+#       services:
+#         youtube_downloader:
+#           hostname: youtube_downloader
+#           container_name: youtube_downloader
+#           image: 'tzahi12345/youtubedl-material:{{ youtube_downloader.version }}'
+#           volumes:
+#             - /etc/localtime:/etc/localtime:ro
+#             - /opt/youtube_dl:/app/appdata'
+#             - '{{ queued_dir }}:/queued'
+#             - '{{ complete_dir }}:/complete'
+#           networks:
+#             default:
+#               aliases:
+#                 - youtube_downloader
+#           ports:
+#             - '{{ youtube_downloader.ports.web_ui }}:17442'
+#           environment:
+#             ALLOW_CONFIG_MUTATIONS: 'true'
+#             ytdl_mongodb_connection_string: 'mongodb://youtube_downloader_db:27017'
+#             ytdl_use_local_db: 'false'
+#             write_ytdl_config: 'true'
+#             ytdl_default_theme: 'dark'
+#             ytdl_allow_advanced_download: 'true'
+#             ytdl_use_youtube_api: 'true'
+#             ytdl_youtube_api_key: '{{ youtube_apikey }}'
+#             UID: '{{ media_user_uid }}'
+#             GID: '{{ media_user_gid }}'
+#           privileged: true
+#           depends_on:
+#             - youtube_downloader_db
+#           logging:
+#             <<: *default-logging
+#             options:
+#               tag: youtube_downloader
+#         youtube_downloader_db:
+#           hostname: youtube_downloader_db
+#           container_name: youtube_downloader_db
+#           networks:
+#             default:
+#               aliases:
+#                 - youtube_downloader_db
+#           image: 'mongo:4.4.9'
+#           # image: 'boerderij/varken:{{ varken.version }}'
+#           volumes:
+#             - /etc/localtime:/etc/localtime:ro
+#           privileged: true
+#           logging:
+#             <<: *default-logging
+#             options:
+#               tag: youtube_downloader_db
+#         makemkv:
+#           hostname: makemkv
+#           container_name: makemkv
+#           image: 'jlesage/makemkv:{{ makemkv.version }}'
+#           networks:
+#             default:
+#               aliases:
+#                 - makemkv
+#           ports:
+#             - '{{ makemkv.ports.vnc_ui }}:5900'
+#             - '{{ makemkv.ports.web_ui }}:5800'
+#           volumes:
+#             - /etc/localtime:/etc/localtime:ro
+#             - /opt/makemkv:/config'
+#             - '{{ queued_dir }}:/queued'
+#             - '{{ complete_dir }}:/complete'
+#           environment:
+#             PUID: '0'
+#             PGID: '0'
+#             USER_ID: '0'
+#             GROUP_ID: '0'
+#             SUP_GROUP_IDS: '{{ media_user_gid }}'
+#             UMASK: '0777'
+#             TZ: '{{ timezone }}'
+#             MAKEMKV_KEY: '{{ makemkv_key }}'
+#             X11VNC_EXTRA_OPTS: '-noxdamage'
+#           sysctls:
+#             "net.ipv6.conf.all.disable_ipv6": 1
+#           privileged: true
+#           logging:
+#             <<: *default-logging
+#             options:
+#               tag: makemkv
+#         qbittorrent:
+#           hostname: qbittorrent
+#           container_name: qbittorrent
+#           networks:
+#             default:
+#               aliases:
+#                 - qbittorrent
+#           image: 'linuxserver/qbittorrent:{{ qbittorrent.version }}'
+#           ports:
+#             - '{{ qbittorrent.ports.remote_connection }}:6881'
+#             - '{{ qbittorrent.ports.remote_connection }}:6881:6881/udp'
+#             - '{{ qbittorrent.ports.web_ui }}:9000'
+#           volumes:
+#             - /etc/localtime:/etc/localtime:ro
+#             - /opt/qbittorrent:/config
+#             - '{{ queued_dir }}:/queued'
+#             - '{{ complete_dir }}:/complete'
+#           environment:
+#             PUID: '{{ media_user_uid }}'
+#             PGID: '{{ media_user_gid }}'
+#             WEBUI_PORT: '9000'
+#             DOCKER_MODS: "ghcr.io/gilbn/theme.park:qbittorrent"
+#             TP_THEME: "{{ tp_theme }}"
+#           sysctls:
+#             "net.ipv6.conf.all.disable_ipv6": 1
+#           privileged: true
+#           logging:
+#             <<: *default-logging
+#             options:
+#               tag: qbittorrent
+#         sabnzbd:
+#           hostname: sabnzbd
+#           container_name: sabnzbd
+#           networks:
+#             default:
+#               aliases:
+#                 - sabnzbd
+#           image: 'linuxserver/sabnzbd:{{ sabnzbd.version }}'
+#           ports:
+#             - '{{ sabnzbd.ports.web_ui }}:8080'
+#           volumes:
+#             - /etc/localtime:/etc/localtime:ro
+#             - /opt/sabnzbd:/config
+#             - '{{ queued_dir }}:/queued'
+#             - '{{ complete_dir }}:/complete'
+#             - '{{ incomplete_dir }}:/incomplete'
+#           environment:
+#             PUID: '{{ media_user_uid }}'
+#             PGID: '{{ media_user_gid }}'
+#             DOCKER_MODS: ghcr.io/gilbn/theme.park:sabnzbd
+#             TP_THEME: "{{ tp_theme }}"
+#           sysctls:
+#             "net.ipv6.conf.all.disable_ipv6": 1
+#           privileged: true
+#           logging:
+#             <<: *default-logging
+#             options:
+#               tag: sabnzbd
+#         nzbhydra2:
+#           container_name: nzbhydra2
+#           hostname: nzbhydra2
+#           image: 'linuxserver/nzbhydra2:{{ nzbhydra2.version }}'
+#           networks:
+#             default:
+#               aliases:
+#                 - nzbhydra2
+#           ports:
+#             - '{{ nzbhydra2.ports.webui }}:5076'
+#           volumes:
+#             - '/etc/localtime:/etc/localtime:ro'
+#             - '/opt/nzbhydra2/config:/config'
+#             - '{{ complete_dir }}:/complete'
+#           environment:
+#             PUID: '{{ media_user_uid }}'
+#             PGID: '{{ media_user_gid }}'
+#             DOCKER_MODS: 'ghcr.io/gilbn/theme.park:nzbhydra2'
+#             TP_THEME: "{{ tp_theme }}"
+#           sysctls:
+#             "net.ipv6.conf.all.disable_ipv6": 1
+#           privileged: true
+#           logging:
+#             <<: *default-logging
+#             options:
+#               tag: nzbhydra2
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"

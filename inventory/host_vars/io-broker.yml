@@ -1,0 +1,95 @@
+---
+enable_mdns_reflection: true
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+
+docker_networks:
+  io-broker:
+    scope: local
+    driver: bridge
+    attachable: true
+    ipam_config:
+      - subnet: 172.20.0.0/24
+        gateway: 172.20.0.2
+        iprange: 172.20.0.3/26
+
+docker_compose_projects:
+  - project_name: io-broker
+    pull: false
+    definition:
+      version: "3.5"
+
+      networks:
+        io-broker:
+          external: true
+
+      services:
+        iobroker_master:
+          image: buanet/iobroker:v5.0.0-amd64
+          container_name: master
+          networks:
+            - io-broker
+          volumes:
+            - /data/configs/ioBroker/master:/opt/iobroker
+            - /etc/localtime:/etc/localtime:ro
+          devices:
+            - /dev/ttyUSB0:/dev/ttyUSB0
+            - /dev/ttyUSB1:/dev/ttyUSB1
+          ports:
+            - 8080:8081
+          privileged: true
+          environment:
+            TZ: America/Denver
+            AVAHI: "true"
+            IOB_ADMINPORT: "8081"
+            IOB_MULTIHOST: master
+            LANG: en_US.UTF8
+            LANGUAGE: en_US:en
+            LC_ALL: en_US.UTF-8
+            USBDEVICES: /dev/ttyUSB0;/dev/ttyUSB1
+            PACKAGES: vim htop
+            SETGID: "2001"
+            SETUID: "2001"
+          logging:
+            driver: journald
+            options:
+              tag: ioBroker-master
+#        iobroker_slave_1:
+#          image: buanet/iobroker:v5.0.0-amd64
+#          container_name: slave1
+#          networks:
+#            - io-broker
+#          volumes:
+#            - /var/ioBroker/slave1:/opt/iobroker
+#            - /etc/localtime:/etc/localtime:ro
+#          devices:
+#            - /dev/ttyUSB0:/dev/ttyUSB0
+#            - /dev/ttyUSB1:/dev/ttyUSB1
+#          ports:
+#            - 8081:8081
+#          depends_on:
+#            - iobroker_master
+#          environment:
+#            TZ: "America/Denver"
+#            AVAHI: "true"
+#            IOB_MULTIHOST: "slave"
+#            IOB_OBJECTSDB_HOST: "master"
+#            IOB_OBJECTSDB_PORT: "9001"
+#            IOB_OBJECTSDB_TYPE: "redis"
+#            IOB_STATESDB_HOST: "master"
+#            IOB_STATESDB_PORT: "9000"
+#            IOB_STATESDB_TYPE: "redis"
+#            LANG: "en_US.UTF8"
+#            LANGUAGE: "en_US:en"
+#            LC_ALL: "en_US.UTF-8"
+#            # PACKAGES: "" 	[not set] 	Installs additional linux packages to your container, packages should be seperated by whitespace like this: "package1 package2 package3"
+#          logging:
+#            driver: journald
+#            options:
+#              tag: ioBroker-slave1

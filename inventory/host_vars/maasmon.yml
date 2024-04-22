@@ -1,0 +1,266 @@
+# trunk-ignore-all(yamllint/quoted-strings)
+---
+grafana_admin_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  34626237306536396132363932383761333963313130353866343963313236653731626134653364
+  6232353331393838343434393637396263633135663063650a653932636163633266626431666661
+  34643965373665303632383032303563633865653838343365616366303765616636366265393335
+  3763356266613539340a666462613931323861363934343939616536383762643361663731316432
+  3564
+
+grafana_pg_pass: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  66306438383234343465306537323532636366633364303938366464346165663966613632666164
+  6339313936353334386134313164373661626336333965310a393637343363383334313939373539
+  30626532333137386166313830383130343031343932313863613137376232323461303662636332
+  6362303633343635380a613665616363666337313637656131393061376337633532643263623063
+  3135
+
+grafana_default_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  34626237306536396132363932383761333963313130353866343963313236653731626134653364
+  6232353331393838343434393637396263633135663063650a653932636163633266626431666661
+  34643965373665303632383032303563633865653838343365616366303765616636366265393335
+  3763356266613539340a666462613931323861363934343939616536383762643361663731316432
+  3564
+
+grafana_api_token: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  39383366616235656462613965343934386137646364393438616466306361356234313336323432
+  6661336366336531323434373833336233333336643236320a376636303639633761636636393664
+  32323161303239343465326332326537316533653161303330656563663764306539353661623439
+  6163663434636430370a373737303436623631333936656234333337623563396463366565633263
+  38396131623838656136333934356433653534313361306335613936633030643937316632373461
+  3461336366633761623632653337373762363831343937306238
+
+docker_install_community_edition: true
+
+### Grafana Configurations
+grafana_enable_auth_ldap: false
+grafana_enable_auth_anonymous: true
+grafana_enable_smtp: false
+# grafana_smtp_host: "smtp.gmail.com"
+# grafana_smtp_port: "587"
+# grafana_smtp_user: "eddie.heartofgold.galaxy@gmail.com"
+# grafana_smtp_password: "{{ vault_eddie_gmail_password }}"
+# grafana_smtp_from_address: "eddie.heartofgold.galaxy@gmail.com"
+# grafana_smtp_from_name: "Grafana Alerts"
+grafana_install_release: latest
+grafana_database_host: "{{ ansible_default_ipv4.address | default('postgres') }}"
+grafana_database_type: postgres
+grafana_database_user: postgres
+grafana_database_name: grafana
+grafana_database_user_password: "{{ vault_grafana_pg_pass }}"
+grafana_database_log_queries: false
+grafana_remote_cache: redis
+grafana_cache_connstr: addr=redis:6379,pool_size=100,db=0,ssl=insecure
+grafana_postgres_ssl_mode: disable
+grafana_session_provider: redis
+grafana_provider_config: addr=redis:6379,pool_size=100,db=grafana,ssl=insecure
+grafana_database_max_idle_conn: 25
+grafana_database_max_open_conn: 300
+
+# Docker Compose Project for Grafana Ecosystem
+docker_compose_projects:
+  - project_name: metrics
+
+    pull: "{{ docker_recreate | default(False) }}"
+
+    definition:
+      version: "3.9"
+
+      x-logging: &default-logging
+        driver: journald
+
+      networks:
+        metrics:
+          name: metrics
+          driver: bridge
+
+      services:
+        grafana:
+          hostname: grafana
+          container_name: grafana
+          privileged: true
+          restart: unless-stopped
+          networks:
+            metrics:
+              aliases:
+                - grafana
+                - grafana-server
+          ports:
+            - 9000:3000
+          image: grafana/grafana-oss:latest
+          depends_on:
+            - redis
+            - postgres
+          volumes:
+            - /opt/grafana/data:/var/lib/grafana
+            - /opt/grafana/config:/etc/grafana
+            - /opt/grafana/log:/var/log/grafana
+            - /etc/localtime:/etc/localtime:ro
+          environment:
+            GF_PATHS_CONFIG: /etc/grafana/grafana.ini
+            GF_PATHS_DATA: /var/lib/grafana
+            GF_PATHS_HOME: /usr/share/grafana
+            GF_PATHS_LOGS: /var/log/grafana
+            GF_PATHS_PLUGINS: /var/lib/grafana/plugins
+            GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+            GF_DATABASE_TYPE: postgres
+            GF_USERS_DEFAULT_THEME: dark
+            GF_LOG_LEVEL: info
+            PUID: "0"
+            PGID: "0"
+            VERSION: latest
+            GF_DATABASE_NAME: grafana
+            GF_DATABASE_USER: "{{ grafana_database_user | default('admin') }}"
+            GF_DATABASE_PASSWORD: "{{ grafana_database_user_password | default('admin') }}"
+            GF_AUTH_ANONYMOUS_ENABLED: true
+            GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+            GF_INSTALL_PLUGINS: >-
+              "grafana-clock-panel,grafana-simple-json-datasource,briangann-gauge-panel,grafana-polystat-panel,grafana-piechart-panel,ntop-ntopng-datasource,vonage-status-panel,grafana-worldmap-panel,natel-discrete-panel,petrslavotinek-carpetplot-panel"
+            entrypoint:
+              - sh
+              - -euc
+              - |
+                mkdir -p /etc/grafana/provisioning/datasources
+                cat <<EOF > /etc/grafana/provisioning/datasources/provisioning-datasources.yaml
+                apiVersion: 1
+                datasources:
+                - name: Loki
+                  type: loki
+                  access: proxy
+                  orgId: 1
+                  url: http://loki:3100
+                  basicAuth: false
+                  isDefault: false
+                  version: 1
+                  editable: true
+                - name: Prometheus
+                  type: prometheus
+                  access: proxy
+                  # Access mode - proxy (server in the UI) or direct (browser in the UI).
+                  url: http://localhost:9090
+                  jsonData:
+                    httpMethod: POST
+                    manageAlerts: true
+                    prometheusType: Prometheus
+                    prometheusVersion: 2.44.0
+                    cacheLevel: 'High'
+                    disableRecordingRules: false
+                    incrementalQueryOverlapWindow: 10m
+                EOF
+                /run.sh
+          logging:
+            <<: *default-logging
+            options:
+              tag: grafana
+        # Redis Service
+        redis:
+          hostname: redis
+          container_name: redis
+          privileged: true
+          restart: unless-stopped
+          image: redis:latest
+          networks:
+            metrics:
+              aliases:
+                - redis
+          ports:
+            - 6379:6379
+          volumes:
+            - /opt/redis/data:/data
+            - /opt/redis/config:/etc/redis
+          environment:
+            DOCKER_CLIENT_TIMEOUT: "300"
+          logging:
+            <<: *default-logging
+            options:
+              tag: redis
+        # Postgres Service
+        postgres:
+          hostname: postgres
+          container_name: postgres
+          privileged: true
+          restart: unless-stopped
+          image: postgres:15
+          networks:
+            metrics:
+              aliases:
+                - postgres
+                - postgresql
+          ports:
+            - 5432:5432
+          environment:
+            PUID: 0
+            PGID: 0
+            VERSION: latest
+            POSTGRES_PASSWORD: "{{ grafana_database_user_password | default('admin') }}"
+            POSTGRES_DB: grafana
+            POSTGRES_USER: postgres
+          volumes:
+            - /opt/postgresql/data:/var/lib/postgresql
+            - /opt/postgresql/etc:/etc/postgresql
+            - /opt/postgresql/logs:/var/log/postgresql
+            - /etc/localtime:/etc/localtime:ro
+          logging:
+            <<: *default-logging
+            options:
+              tag: postgres
+        # Prometheus Servics
+        prometheus:
+          image: prom/prometheus:latest
+          volumes:
+            - /opt/prometheus/config:/etc/prometheus
+            - /opt/prometheus/data:/var/lib/prometheus
+          ports:
+            - 9090:9090
+          entrypoint:
+            - sh
+            - -euc
+            - |
+              cat <<EOF > /etc/prometheus/prometheus.yml
+              global:
+                scrape_interval: 15s
+                scrape_timeout: 10s
+                evaluation_interval: 15s
+              EOF
+          logging:
+            <<: *default-logging
+            options:
+              tag: prometheus
+        # Loki Service
+        loki:
+          container_name: loki
+          hostname: loki
+          image: grafana/loki:latest
+          restart: unless-stopped
+          privileged: true
+          networks:
+            metrics:
+              aliases:
+                - loki
+          ports:
+            - 3100:3100
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/loki/log:/var/log/loki
+            - /opt/loki/config:/etc/loki
+            - /opt/loki/data:/var/lib/loki
+          command: -config.file=/etc/loki/local-config.yaml
+          logging:
+            <<: *default-logging
+            options:
+              tag: loki
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"

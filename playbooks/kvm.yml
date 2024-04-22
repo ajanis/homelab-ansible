@@ -1,0 +1,76 @@
+---
+- name: Install and configure Libvirtd/KVM/QEMU
+  hosts: kvm
+  remote_user: root
+  gather_facts: true
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+    - name: Add openldap role
+      ansible.builtin.import_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    - name: Add ceph-fs role
+      ansible.builtin.import_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"
+    - name: Add linux-system-roles.network role
+      ansible.builtin.import_role:
+        name: linux-system-roles.network
+      when:
+        - ansible_os_family == 'RedHat'
+    - name: Add netplan role
+      ansible.builtin.import_role:
+        name: netplan
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_distribution_major_version is version('18','>=')
+    - name: Add kvm role
+      ansible.builtin.import_role:
+        name: kvm
+    - name: Add rsyslog role
+      ansible.builtin.import_role:
+        name: rsyslog
+    - name: Add telegraf role
+      ansible.builtin.import_role:
+        name: telegraf
+      when: "'telegraf' in group_names"
+
+    - name: Kmod
+      modprobe:
+        name: "{{ item }}"
+        state: "{{ item.state }}"
+        params: "{{ item.params }}"
+      loop: "{{ kvm_kmod_tuning_parameters }}"
+
+    - name: Set sysctl tuning parameters
+      sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        state: present
+        ignoreerrors: false
+        reload: true
+        sysctl_file: /etc/sysctl.conf
+        sysctl_set: true
+      loop: "{{ kvm_sysctl_tuning_parameters }}"
+
+    - name: KVM Services
+      service:
+        name: "{{ item }}"
+        enabled: "{{ item.enabled }}"
+        state: "{{ item.state }}"
+      loop: "{{ kvm_performance_tuning_services }}"
+
+    - name: KVM sysfs tuning parameters
+      command:
+        cmd: echo {{ item.value }} > {{ item.path }}
+      loop: "{{ kvm_sysfs_tuning_parameters }}"
+
+    - name: Run setup
+      ansible.builtin.setup:

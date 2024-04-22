@@ -1,0 +1,78 @@
+---
+- name: |
+    Create QEMU or LXC 'Golden Image' Templates for Proxmox.
+    Base image configration handled by libguestFS (Cloud-Init)
+    Templates are pre-configured with our Ansible Roles:
+      - Common (Distro/Python Pakage` Auth Configs, SSHD / Login Coonfigs, Sudoers, OS/Package Autoupdate/Cloud-Init, QEMU Guest-Agent, Serial-Over-Lan configs)
+      - OpenLDAP (Client Configurations provide Users/Groups, User SSH Keys and User Home Directory AutoFS Configurations via CephFS)
+      - CephFS (Client Configurations, Data.mount and Media.mount services, User Home Directories)
+  hosts: template_builder
+  remote_user: root
+  gather_facts: true
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Add pve-template main
+      ansible.builtin.include_role:
+        name: pve-template
+        tasks_from: main.yml
+
+    - name: Add pve-template main
+      ansible.builtin.include_role:
+        name: pve-template
+        tasks_from: pve_template_interactive.yml
+      when:
+        - (interactive | bool) | default(true)
+
+    - name: Add pve-template main
+      ansible.builtin.include_role:
+        name: pve-template
+        tasks_from: pve_template_automated.yml
+      when:
+        - not (interactive | bool) | default(true)
+
+    - name: Add pve-template main
+      ansible.builtin.include_role:
+        name: pve-template
+        tasks_from: pve_template_preinstall.yml
+
+- name: Run custom Ansible roles for {{ groups.template_tmp }}
+  hosts: template_tmp
+  remote_user: root
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Run Setup
+      ansible.builtin.setup: {}
+
+    - name: Add Common Role
+      ansible.builtin.include_role:
+        name: common
+
+    - name: Include OpenLDAP Client Role
+      ansible.builtin.include_role:
+        name: openldap
+
+    - name: Include CephFS Role
+      ansible.builtin.include_role:
+        name: ceph-fs
+
+    - name: Wait for any background processes to complete
+      ansible.builtin.wait_for:
+        timeout: 15
+
+    - name: Move ahead to next playbook
+      ansible.builtin.meta: end_play
+
+- name: Stop temporary instance and update name, pool, tags and set network to DHCP
+  hosts: template_builder
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Add pve-template main1
+      ansible.builtin.include_role:
+        name: pve-template
+        tasks_from: pve_template_postinstall.yml

@@ -1,0 +1,189 @@
+---
+- name: Install nVidia vGPU Drivers on Proxmox
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Setup
+      tags:
+        - nvidia-setup
+
+      block:
+        - name: Ensure Proxmox Community Repository Is Present
+          ansible.builtin.apt_repository:
+            repo: deb http://download.proxmox.com/debian/pve bullseye pve-no-subscription
+            filename: pve-community.list
+            state: present
+
+        - name: Ensure Proxmox Enterprise Repository Is Absent
+          ansible.builtin.file:
+            path: /etc/apt/sources.list.d/pve-enterprise.list
+            state: absent
+
+        - name: Ensure Packages Are Installed
+          ansible.builtin.apt:
+            name:
+              - git
+              - build-essential
+              - dkms
+              - pve-headers
+              - mdevctl
+            state: latest
+            update_cache: true
+
+        - name: Check If cargo Is Installed
+          ansible.builtin.shell:
+            cmd: command -v cargo
+          register: cargo_exists
+          ignore_errors: true
+
+        - name: Download Rust Compiler Installer
+          ansible.builtin.get_url:
+            url: https://sh.rustup.rs
+            dest: /tmp/sh.rustup.rs
+            mode: "0755"
+            force: true
+          when:
+            - cargo_exists is failed
+
+        - name: Install Rust/cargo
+          ansible.builtin.shell:
+            cmd: /tmp/sh.rustup.rs -y
+          when:
+            - cargo_exists is failed
+
+        - name: Clone vGPU-Proxmox Repository
+          ansible.builtin.git:
+            dest: /root/vgpu-proxmox
+            repo: https://gitlab.com/polloloco/vgpu-proxmox.git
+            clone: true
+            version: d1009fd47a5f683348c14a240c082eef1e265cde
+
+        - name: Clone vGPU Unlock Rust Repository
+          ansible.builtin.git:
+            dest: /opt/vgpu_unlock-rs
+            repo: https://github.com/mbilker/vgpu_unlock-rs.git
+            clone: true
+            version: master
+
+        - name: Build the vGPU Unlocker
+          ansible.builtin.shell:
+            cmd: . /root/.cargo/env && cargo build --release
+            chdir: /opt/vgpu_unlock-rs/
+
+        - name: Ensure vGPU Unlocker Profile Config Directory Exists
+          ansible.builtin.file:
+            path: /etc/vgpu_unlock
+            state: directory
+
+        - name: Ensure vGPU Unlocker Profile Config Exists
+          ansible.builtin.file:
+            path: /etc/vgpu_unlock/profile_override.toml
+            state: touch
+
+        - name: Ensure vGPU Unlocker systemd Service Config Directories Exists
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: directory
+          with_items:
+            - /etc/systemd/system/nvidia-vgpud.service.d
+            - /etc/systemd/system/nvidia-vgpu-mgr.service.d
+
+        - name: Create vGPU Unlocker systemd Service Unit Config
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/nvidia-vgpud.service.d/vgpu_unlock.conf
+            content: |-
+              [Service]
+              Environment=LD_PRELOAD=/opt/vgpu_unlock-rs/target/release/libvgpu_unlock_rs.so
+
+        - name: Create vGPU Unlocker systemd Service Manager Unit Config
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/nvidia-vgpu-mgr.service.d/vgpu_unlock.conf
+            content: |-
+              [Service]
+              Environment=LD_PRELOAD=/opt/vgpu_unlock-rs/target/release/libvgpu_unlock_rs.so
+
+        - name: Ensure IOMMU Enabled In Grub
+          ansible.builtin.replace:
+            regexp: ^GRUB_CMDLINE_LINUX_DEFAULT="quiet"$
+            replace: GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"
+            path: /etc/default/grub
+
+        - name: Update Grub
+          ansible.builtin.shell:
+            cmd: update-grub
+
+        - name: Ensure Required Kernel Modules
+          ansible.builtin.blockinfile:
+            path: /etc/modules
+            block: |
+              vfio
+              nvfio_iommu_type1
+              nvfio_pci
+              nvfio_virqfd
+            state: present
+
+        - name: Ensure Blacklisted Kernel Modules
+          community.general.kernel_blacklist:
+            name: nouveau
+            blacklist_file: /etc/modprobe.d/blacklist.conf
+            state: present
+
+        - name: Update initramfs
+          ansible.builtin.shell:
+            cmd: update-initramfs -u -k all
+
+        - name: Upgrade pve-headers
+          ansible.builtin.shell:
+            cmd: apt upgrade -y pve-headers
+
+        - name: Issue reboot command
+          ansible.builtin.reboot:
+            connect_timeout: 10
+            reboot_timeout: 600
+            msg: Rebooting system via Ansible
+
+        - name: Wait for server to come back online
+          ansible.builtin.wait_for_connection:
+            delay: 30
+    - name: Copy Patched NVidia Driver Script
+      ansible.builtin.copy:
+        dest: /opt/NVIDIA-Linux-x86_64-525.60.12-vgpu-kvm-custom.run
+        src: /data/NVIDIA-Linux-x86_64-525.60.12-vgpu-kvm-custom.run
+        mode: "0777"
+        remote_src: true
+
+    - name: Run NVidia Driver Script
+      ansible.builtin.shell:
+        cmd: ./NVIDIA-Linux-x86_64-525.60.12-vgpu-kvm-custom.run --dkms -q -s
+        chdir: /opt
+      register: nvidia_driver
+
+    - name: Assert Driver Script Success
+      ansible.builtin.assert:
+        that:
+          - nvidia_driver is not failed
+
+    - name: Issue reboot command
+      ansible.builtin.reboot:
+        connect_timeout: 10
+        reboot_timeout: 600
+        msg: Rebooting system via Ansible
+
+    - name: Wait for server to come back online
+      ansible.builtin.wait_for_connection:
+        delay: 30
+
+    - name: Gather mdevctl Types
+      ansible.builtin.shell:
+        cmd: mdevctl types
+      register: mdevctl_types
+
+    - name: Assert Mediated Device Types Exist
+      ansible.builtin.assert:
+        that:
+          - mdevctl_types.stdout_lines | length > 0

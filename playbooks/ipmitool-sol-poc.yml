@@ -1,0 +1,88 @@
+- name: "POC: Test connection and run commands via 'ipmitool'"
+  hosts: localhost
+  become: false
+  gather_facts: false
+  vars_files:
+    - vault.yml
+  vars:
+    sol_poc: True
+    ipmi_host_url: "devastator-ipmi.home.prettybaked.com"
+    ipmi_admin_user: ADMIN
+    ipmi_admin_password: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      33363437316333643038616633353234313666626332303032666237356131303030313132383362
+      3761393939363864336565653433373161663830663530320a366132616633316562303163336661
+      39366534646465313863386265633262313965623937346530363764343637633663343765353662
+      3238663030363965370a363932623332633162343866646564306231613362643865316430373534
+      3830
+    system_root_user: root
+    system_root_user_password: !vault |
+      $ANSIBLE_VAULT;1.1;AES256
+      64333538343838303763633031393361396538656162376334656561333231343835363935633863
+      3237643262326231303361666439363634666332366261610a323039663735303735313964373361
+      31316634656131626361326463303264353731323234383635343263346338366437643265326562
+      3161656266373261340a666466346630613339643031663834316630396566613763353637653739
+      3866
+    system_prompt: "*# $"
+  tasks:
+    - name: "POC using 'expect' shell for spawning ipmi serial console and running commmands"
+      ansible.builtin.shell: |
+        set -o pipefail
+        spawn ipmitool -I lanplus -U {{ ipmi_admin_user }} -P {{ ipmi_admin_password }} -H {{ ipmi_host_url }} sol activate
+
+        expect "*help]"
+        send "\r"
+        sleep 3
+
+        expect {
+          "{{ system_prompt }}" {
+            send_user "User logged in\r"
+            exp_continue
+          }
+        }
+
+        expect {
+          "login: $" {
+            send "{{ system_root_user }}\r"
+            exp_continue
+          }
+          "Password: $" {
+            send "{{ system_root_user_password }}\r"
+            exp_continue
+          }
+        }
+
+        expect "{{ system_prompt }}"
+        send_user "checking system hostname\n"
+        expect "{{ system_prompt }}"
+        send "hostname -f\r"
+        expect "{{ system_prompt }}"
+        send_user "testing broadcast\n"
+        expect "{{ system_prompt }}"
+        send "wall Holy shit it works\r"
+        expect "{{ system_prompt }}"
+        send_user "test command to get mac address of eth0\n"
+        expect "{{ system_prompt }}"
+        send  "ifconfig eth0 | awk \'/ether/ \{print \$2\}\'\r"
+        expect "{{ system_prompt }}"
+        send_user "exiting OS\n"
+        expect "{{ system_prompt }}"
+        send "exit\r"
+
+        sleep 5
+
+        expect "login: "
+        send_user "exiting IPMI serial console\n"
+        expect "login: "
+        send "~."
+
+        exit 0
+      args:
+        executable: /usr/bin/expect
+      delegate_to: localhost
+      register: ipmi_output
+      when: sol_poc | default(True)
+
+    - name: Debug output
+      ansible.builtin.debug:
+        msg: "{{ ipmi_output }}"

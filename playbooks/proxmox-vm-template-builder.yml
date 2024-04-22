@@ -1,0 +1,363 @@
+---
+- name: Create new Linux KVM template from cloud-image or Update existing Linux KVM Template
+  hosts: template_builder
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Install proxmoxer
+      ansible.builtin.apt:
+        name: python3-proxmoxer
+        state: present
+
+    - name: Prompt for new or existing template
+      ansible.builtin.pause:
+        prompt: |
+          Are you creating a [1]New or [2]UpdateExisting template?
+          1 : NEW Template from Cloud Image
+          2 : UPDATE Existing Proxmox Template
+      register: template_type_selection
+
+    - name: Set Template Type # noqa no-free-form
+      ansible.builtin.set_fact:
+        proxmox_template_type: "{{ template_type_selection.user_input | int }}"
+      register: template_type_set
+      when:
+        - template_type_selection is defined
+        - template_type_selection != None
+
+    - name: Print Template Type # noqa no-handler
+      ansible.builtin.debug:
+        msg: "Selection: {{ proxmox_template_type }}"
+      when:
+        - template_type_set is changed
+
+    - name: Include Proxmox Template Build from image source
+      ansible.builtin.include_tasks:
+        file: "{{ playbook_dir }}/proxmox-template-from-image.yml"
+      when:
+        - proxmox_template_type | int == 1
+
+    - name: Include Proxmox Template Rebuild from Template Clone
+      ansible.builtin.include_tasks:
+        file: "{{ playbook_dir }}/proxmox-template-rebuild.yml"
+      when:
+        - proxmox_template_type | int == 2
+
+    - name: Set proxmox_temporary_vm_vmid
+      ansible.builtin.set_fact:
+        proxmox_temporary_vm_vmid: "{{ temporary_vm_info.vmid }}"
+
+    - name: Print proxmox_temporary_vm_vmid
+      ansible.builtin.debug:
+        msg: |
+          VMID for {{ proxmox_temporary_vm_name }}: {{ proxmox_temporary_vm_vmid }}
+        verbosity: 1
+
+    - name: Update template-builder VM configuration
+      community.general.proxmox_kvm:
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_api_host }}"
+        node: "{{ proxmox_pve_node }}"
+        name: "{{ proxmox_temporary_vm_name }}"
+        vmid: "{{ proxmox_temporary_vm_vmid }}"
+        ipconfig:
+          ipconfig0: ip={{ proxmox_temporary_vm_cidr }},gw={{ proxmox_temporary_vm_cidr | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}
+        update: true
+        timeout: 120
+      register: temporary_vm_static_update
+      retries: 0
+      timeout: 120
+      until: temporary_vm_static_update is not failed
+
+    - name: Validate VM configuration update
+      ansible.builtin.assert:
+        fail_msg: |
+          Failed: {{ temporary_vm_static_update.msg }}
+          Debug: {{ temporary_vm_static_update }}
+        quiet: false
+        success_msg: |
+          Success: {{ temporary_vm_static_update.msg }}
+          Debug: {{ temporary_vm_static_update }}
+        that:
+          - temporary_vm_static_update is not failed
+
+    - name: Start proxmox_temporary_vm_name
+      community.general.proxmox_kvm:
+        name: "{{ proxmox_temporary_vm_name }}"
+        vmid: "{{ proxmox_temporary_vm_vmid }}"
+        node: "{{ proxmox_pve_node }}"
+        state: started
+        api_user: "{{ proxmox_api_user }}"
+        api_password: "{{ proxmox_api_password }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_api_host }}"
+        timeout: 300
+      register: temporary_vm_start
+      retries: 0
+      timeout: 330
+      until: temporary_vm_start is not failed
+
+    - name: Verify that proxmox_temporary_vm is started
+      ansible.builtin.assert:
+        fail_msg: |
+          Failed: {{ temporary_vm_start.msg }}
+          Debug: {{ temporary_vm_start }}
+        quiet: false
+        success_msg: |
+          Success: {{ temporary_vm_start.msg }}
+          Debug: {{ temporary_vm_start }}
+        that:
+          - temporary_vm_start is not failed
+
+    - name: Wait for proxmox_temporary_vm_name to come online
+      ansible.builtin.wait_for:
+        host: "{{  proxmox_temporary_vm_cidr | ansible.utils.ipaddr('address') }}"
+        port: 22
+        timeout: 600
+
+    - name: Add proxmox_temporary_vm to template group
+      ansible.builtin.add_host:
+        groups:
+          - template_tmp
+        proxmox_temporary_vm_name: "{{ proxmox_temporary_vm_name }}"
+        name: "{{ proxmox_temporary_vm_name }}"
+        ansible_host: "{{ proxmox_temporary_vm_cidr | ansible.utils.ipaddr('address') }}"
+        ansible_python_interpreter: /usr/bin/env python3
+        proxmox_temporary_vm_vmid: "{{ proxmox_temporary_vm_vmid }}"
+
+    - name: Move ahead to next playbook
+      ansible.builtin.meta: end_play
+
+- name: Configuire temporary VM with Ansible
+  hosts: template_tmp
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+
+    - name: Include OpenLDAP role
+      ansible.builtin.import_role:
+        name: openldap
+
+    - name: Include CephFS playbook
+      ansible.builtin.import_role:
+        name: ceph-fs
+
+    - name: Wait for any background processes to complete
+      ansible.builtin.wait_for:
+        timeout: 15
+
+    - name: Move ahead to next playbook
+      ansible.builtin.meta: end_play
+
+- name: Shut down temporary VM, set network to DHCP and rename
+  hosts: template_builder
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+  # vars:
+  #   vault_proxmox_ci_password: !vault |
+  #     $ANSIBLE_VAULT;1.1;AES256
+  #     64393566356362353763626439613837333261343961653331313464646235333631356536303336
+  #     6430633938636562626434333637313037343336633730610a353438633261636564386661393839
+  #     35623134326337366637356237396332356662383235383766353038386131666365306362326239
+  #     6133653061323238360a303866643831313065356266386438396133616135636636303536376434
+  #     3131
+  #   proxmox_api_host: 10.0.10.204
+  #   proxmox_pve_node: pve01
+  #   proxmox_api_user: root@pam
+  #   proxmox_api_token_id: "{{ vault_proxmox_api_token_id }}"
+  #   proxmox_api_token_secret: "{{ vault_proxmox_api_token_secret }}"
+  #   proxmox_api_password: "{{ vault_proxmox_api_password }}"
+  #   proxmox_temporary_vm_name: "{{ proxmox_template_name }}-builder"
+  #   proxmox_temporary_vm_hostname: "{{ proxmox_temporary_vm_name }}.{{ www_domain }}"
+  #   proxmox_temporary_vm_cidr: 10.0.10.10/24
+  #   proxmox_vm_storage: ceph-rbd
+  #   proxmox_vm_storage_format: raw
+  #   proxmox_vm_storage_default_size: 20
+  #   proxmox_ci_password: "{{ vault_proxmox_ci_password }}"
+  #   proxmox_template_basedir: /mnt/pve/cephfs/template
+  #   proxmox_iso_directory: "{{ proxmox_template_basedir }}/iso"
+  #   proxmox_lxd_directory: "{{ proxmox_template_basedir }}/cache"
+
+  tasks:
+    - name: Shut down proxmox_temporary_vm_name
+      community.general.proxmox_kvm:
+        name: "{{ proxmox_temporary_vm_name }}"
+        vmid: "{{ proxmox_temporary_vm_vmid }}"
+        node: "{{ proxmox_pve_node }}"
+        state: stopped
+        force: true
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_api_host }}"
+        timeout: 60
+      register: temporary_vm_stop
+      retries: 0
+      timeout: 80
+      until: temporary_vm_stop is not failed
+
+    - name: Verify that proxmox_temporary_vm is stopped
+      ansible.builtin.assert:
+        fail_msg: |
+          Failed: {{ temporary_vm_stop.msg }}
+          Debug: {{ temporary_vm_stop }}
+        quiet: false
+        success_msg: |
+          Success: {{ temporary_vm_stop.msg }}
+          Debug: {{ temporary_vm_stop }}
+        that:
+          - temporary_vm_stop is not failed
+
+    - name: Wait for any background processes to complete
+      ansible.builtin.wait_for:
+        timeout: 15
+
+    - name: Update IP/DHCP settings, Pool and VM name for proxmox_temporary_vm
+      community.general.proxmox_kvm:
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_api_host }}"
+        name: "{{ proxmox_template_name }}"
+        vmid: "{{ proxmox_temporary_vm_vmid }}"
+        pool: Templates
+        node: "{{ proxmox_pve_node }}"
+        sshkeys: "{{ proxmox_ci_ssh_keys }}"
+        ciuser: root
+        cipassword: "{{ proxmox_ci_password }}"
+        nameservers:
+          - 10.0.10.222
+          - 192.168.1.1
+        searchdomains:
+          - home.prettybaked.com
+        cpu: host,flags=+md-clear;+pcid;+spec-ctrl;+ssbd;+pdpe1gb;+aes
+        sockets: 2
+        cores: 2
+        vcpus: 4
+        memory: 4096
+        balloon: 0
+        numa_enabled: true
+        scsihw: virtio-scsi-single
+        boot: order=scsi0;net0
+        ostype: l26
+        machine: q35
+        bios: seabios
+        acpi: true
+        hotplug: disk,network,usb,memory,cpu,cloudinit
+        kvm: true
+        agent: enabled=1,fstrim_cloned_disks=1
+        ipconfig:
+          ipconfig0: ip=dhcp
+        net:
+          net0: virtio,bridge=vmbr0,mtu=9000,queues=4
+        update: true
+        tags:
+          - kvm
+          - telegraf
+          - "{{ proxmox_template_name | replace('-template', '') }}"
+      register: temporary_vm_update
+      retries: 0
+      timeout: 60
+      until: temporary_vm_update is not failed
+
+    - name: Validate IP/DHCP settings and VM name were updated successfully
+      ansible.builtin.assert:
+        fail_msg: |
+          Failed: {{ temporary_vm_update.msg }}
+          Debug: {{ temporary_vm_update }}
+        quiet: false
+        success_msg: |
+          Success: {{ temporary_vm_update.msg }}
+          Debug: {{ temporary_vm_update }}
+        that:
+          - temporary_vm_update is not failed
+
+    - name: Wait for any background processes to complete
+      ansible.builtin.wait_for:
+        timeout: 15
+
+    - name: Convert VM to template
+      community.general.proxmox_kvm:
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_api_host }}"
+        name: "{{ proxmox_template_name }}"
+        vmid: "{{ proxmox_temporary_vm_vmid }}"
+        node: "{{ proxmox_pve_node }}"
+        template: true
+        state: template
+        timeout: 300
+      register: template_conversion
+      until: template_conversion is not failed
+      timeout: 300
+
+    - name: Validate that new template has been successfully created
+      ansible.builtin.assert:
+        fail_msg: |
+          Failed: {{ template_conversion.msg }}
+          Debug: {{ template_conversion }}
+        quiet: false
+        success_msg: |
+          Success: {{ template_conversion.msg }}
+          Debug: {{ template_conversion }}
+        that:
+          - template_conversion is not failed
+
+    - name: Pausing to confirm template creation from temporary VM
+      ansible.builtin.pause:
+        prompt: |
+          CAUTION: The following step will remove the SOURCE TEMPLATE with VMID: {{ proxmox_current_template_vmid }}!!
+          Please verify the creation/configuration of NEW TEMPLATE {{ proxmox_template_name }} with VMID: {{ proxmox_temporary_vm_vmid }}
+          Press [ENTER/RETURN] to REMOVE THE SOURCE TEMPLATE if you are satisfied.
+      when:
+        - proxmox_temporary_vm_vmid is defined
+        - proxmox_current_template_vmid is defined
+
+    - name: Remove old template
+      community.general.proxmox_kvm:
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        api_host: "{{ proxmox_api_host }}"
+        vmid: "{{ proxmox_current_template_vmid }}"
+        node: "{{ proxmox_pve_node }}"
+        template: true
+        state: absent
+        timeout: 300
+      when:
+        - proxmox_current_template_vmid is defined
+      register: template_destroy
+      until: template_destroy is not failed
+      timeout: 300
+
+    - name: Confirm that old template is successfully destroyed
+      ansible.builtin.assert:
+        fail_msg: |
+          Failed: {{ template_destroy.msg }}
+          Debug: {{ template_destroy }}
+        quiet: false
+        success_msg: |
+          Success: {{ template_destroy.msg }}
+          Debug: {{ template_destroy }}
+        that:
+          - template_destroy is not failed
+      when:
+        - proxmox_current_template_vmid is defined

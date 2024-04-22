@@ -1,0 +1,50 @@
+---
+plugin: community.general.proxmox
+url: https://pve01.home.prettybaked.com:8006
+user: root@pam
+password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  31633864666535663331306630363338633636633036633832313931663138393834343432386562
+  3836636534313035346661343063313262636561636464320a613865306262663435333731306366
+  35383333313163366135373466333263343732303736616663363834303463636261333333306337
+  6162393932333637320a313163616164303935656661333666656339636534626633623639383162
+  3537
+validate_certs: true
+cache: true
+group_prefix: proxmox__
+fact_prefix: proxmox__
+want_proxmox_nodes_ansible_host: true
+qemu_extended_status: true
+want_facts: true
+use_extra_vars: true
+compose:
+  ansible_host: proxmox_agent_interfaces | map(attribute='ip-addresses') | flatten | ansible.utils.reduce_on_network('10.0.0.0/8') | first | ansible.utils.ipaddr('address')
+keyed_groups:
+  - key: proxmox_tags_parsed
+    separator: ""
+
+# groups:
+#   tdarr_node: (proxmox_tags_parsed|list)|select('match', 'tdarr_node')
+#   tdarr_server: (proxmox_tags_parsed|list)|select('match', 'tdarr_server')
+#   nginx: "(proxmox_tags_parsed|list)|select('match', 'nginx')"
+#   nginx_proxy: "(proxmox_tags_parsed|list)|select('match', 'nginx_proxy')"
+#   plexservers: "(proxmox_tags_parsed|list)|select('match', 'plex')"
+#   ldapservers: "(proxmox_tags_parsed|list)|select('match', 'ldap')"
+#   ldap_test: "(proxmox_tags_parsed|list)|select('match', 'ldap_test')"
+#   download_clients: "(proxmox_tags_parsed|list)|select('match', 'download_clients')"
+#   media_services: "(proxmox_tags_parsed|list)|select('match', 'media_services')"
+#   hass: "(proxmox_tags_parsed|list)|select('match', 'hass')"
+#   metrics_collectors: "(proxmox_tags_parsed|list)|select('match', 'metrics_collectors')"
+#   media: "(proxmox_tags_parsed|list)|select('match', 'media')"
+#   grafana: "(proxmox_tags_parsed|list)|select('match', 'grafana')"
+#   centos: "(proxmox_tags_parsed|list)|select('match', 'centos8')"
+#   ubuntu: "(proxmox_tags_parsed|list)|select('match', 'ubuntu2204')"
+#   pihole: "(proxmox_tags_parsed|list)|select('match', 'pihole')"
+#   nvidia: "(proxmox_tags_parsed|list)|select('match', 'gpu')"
+#   promscale: "(proxmox_tags_parsed|list)|select('match', 'promscale')"
+#   telegraf: "(proxmox_tags_parsed|list)|select('match', 'telegraf')"
+#   docker: "(proxmox_tags_parsed|list)|select('match', 'docker')"
+#   template_tmp: "proxmox__name|search('-template')"
+#   template_master: "(proxmox_tags_parsed|list)|select('match', 'master')"
+#   emqx: "(proxmox_tags_parsed|list)|select('match', 'emqx')"
+#   cts.test: "(proxmox_tags_parsed|list)|select('match', 'cts_test')"

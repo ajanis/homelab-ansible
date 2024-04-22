@@ -1,0 +1,29 @@
+---
+- name: Deploy containerized automation and machine learning services
+  hosts:
+    - machine_learning
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add docker role
+      ansible.builtin.import_role:
+        name: docker
+    - name: Add edgetpu role
+      ansible.builtin.import_role:
+        name: edgetpu
+    - name: Add nvidia-docker role
+      ansible.builtin.import_role:
+        name: nvidia-docker
+    - name: Add rsyslog role
+      ansible.builtin.import_role:
+        name: rsyslog
+    - name: Add telegraf role
+      ansible.builtin.import_role:
+        name: telegraf
+      when: "'telegraf' in group_names"
+    - name: Run setup
+      ansible.builtin.setup:

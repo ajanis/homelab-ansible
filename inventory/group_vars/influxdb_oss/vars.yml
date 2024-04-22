@@ -1,0 +1,116 @@
+---
+docker_install_community_edition: true
+
+docker_compose_projects:
+  - project_name: tickstack
+    pull: "{{ docker_recreate | default(False) }}"
+    recreate: "{{ docker_recreate | default(False) }}"
+    definition:
+      version: "3.9"
+      x-logging: &default-logging
+        driver: journald
+
+      networks:
+        tickstack:
+          name: tickstack
+          driver: bridge
+
+      services:
+        chronograf:
+          hostname: chronograf
+          container_name: chronograf
+          image: chronograf:latest
+          environment:
+            INFLUXDB_URL: http://influxdb2:8086
+            KAPACITOR_URL: http://kapacitor:9092
+            RESOURCES_PATH: /usr/share/chronograf/resources
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/chronograf/data:/var/lib/chronograf
+            - /opt/chronograf/config:/etc/chronograf
+          ports:
+            - 8888:8888/tcp
+          links:
+            - influxdb2
+            - kapacitor
+          logging:
+            <<: *default-logging
+            options:
+              tag: chronograf
+          networks:
+            tickstack:
+              aliases:
+                - chronograf
+          command: [chronograf, --influxdb-url=http://influxdb2:8086]
+        # Define a Kapacitor service
+        kapacitor:
+          hostname: kapacitor
+          container_name: kapacitor
+          image: kapacitor:latest
+          environment:
+            KAPACITOR_HOSTNAME: kapacitor
+            KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb2:8086
+          links:
+            - influxdb2
+          volumes:
+            # Mount for kapacitor data directory
+            - /opt/kapacitor/data:/var/lib/kapacitor
+            - /opt/kapacitor/config:/etc/kapacitor
+            - /etc/localtime:/etc/localtime:ro
+          ports:
+            - 9092:9092/tcp
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: kapacitor
+          networks:
+            tickstack:
+              aliases:
+                - kapacitor
+        influxdb2:
+          hostname: influxdb2
+          container_name: influxdb2
+          image: influxdb:latest
+          networks:
+            tickstack:
+              aliases:
+                - influxdb
+                - influx
+                - influxdb2
+                - influxdbv2
+          volumes:
+            - /opt/influxdb2/data:/var/lib/influxdb2
+            - /opt/influxdb2/config:/etc/influxdb2
+            - /etc/localtime:/etc/localtime:ro
+          ports:
+            - 8086:8086/tcp
+            - 8082:8082/tcp
+            # UDP Port
+            - 8089:8089/udp
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: influxdb2
+          environment:
+            DOCKER_INFLUXDB_INIT_MODE: setup
+            DOCKER_INFLUXDB_INIT_USERNAME: influxdb2
+            DOCKER_INFLUXDB_INIT_PASSWORD: "{{ vault_influxdb2_init_password }}"
+            DOCKER_INFLUXDB_INIT_ORG: constructorfleet
+            DOCKER_INFLUXDB_INIT_BUCKET: metrics
+            DOCKER_INFLUXDB_INIT_RETENTION: 4w
+            DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "{{ vault_influxdb2_init_admin_token }}"
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"

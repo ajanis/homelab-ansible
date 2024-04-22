@@ -1,0 +1,25 @@
+---
+docker_containers:
+  api:
+    description: Cannabis Transport - Metrc Automation API
+    container_name: api
+    image: 785623647738.dkr.ecr.us-east-1.amazonaws.com/cts-manifests:latest
+    restart: unless_stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    env:
+      BASE_URL: "{{ api_base_url }}"
+      DEBUG: "1"
+      USE_SECRETS_MANAGER: "true"
+      MQTT_BROKER: "{{ mqtt_broker }}"
+      MQTT_CLIENT_ID: metrc-api
+      POSTGRES_HOST: "{{ db_host }}"
+      POSTGRES_DB: "{{ db_name }}"
+      API_BASE_URL: "{{ api_base_url }}"
+      API_STAGE: "{{ api_stage }}"
+    logging:
+      driver: journald
+      options:
+        tag: api

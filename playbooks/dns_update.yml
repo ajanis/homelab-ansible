@@ -1,0 +1,106 @@
+---
+- name: Reconfigure netplan
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars:
+    netplan_directory: /etc/netplan
+    netplan_files:
+      - "{{ netplan_directory }}/00-installer-config.yaml"
+      - "{{ netplan_directory}}/50-cloud-init.yaml"
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Check for netplan onfiguration file in list of expected paths
+      block:
+        - name: Check for existing netplan daemon config
+          ansible.builtin.stat:
+            path: "{{ item }}"
+          loop: "{{ netplan_files }}"
+          loop_control:
+            label: "{{ item }}"
+          register: netplan_daemon_yaml
+
+        - name: If netplan config is found, set file path and set has_netplan=True
+          ansible.builtin.set_fact:
+            netplan_filepath: "{{ item.stat.path }}"
+            has_netplan: true
+          when: item.stat.exists
+          loop: "{{ netplan_daemon_yaml.results }}"
+          loop_control:
+            label: "{{ item.item }}"
+
+    - name: Slurp contents of netplan config file
+      when:
+        - has_netplan|default(False)
+      block:
+        - name: Print netplan file path
+          ansible.builtin.debug:
+            var: netplan_filepath
+            verbosity: 1
+
+        - name: Slurp YAML from file
+          ansible.builtin.slurp:
+            src: "{{ netplan_filepath }}"
+          register: netplan_daemon_configfile
+
+        - name: Print original netplan config content
+          ansible.builtin.debug:
+            var: netplan_daemon_configfile.content|b64decode|from_yaml
+            verbosity: 1
+
+    - name: Update Netplan daemon config
+      when:
+        - has_netplan|default(False)
+      block:
+        - name: Register an empty array for netplan config file contents
+          ansible.builtin.set_fact:
+            netplan_daemon_config: {}
+
+        - name: Set daemon config to existing file content
+          ansible.builtin.set_fact:
+            netplan_daemon_config: "{{ netplan_daemon_configfile.content | b64decode }}"
+
+        - name: Print updated netplan config content
+          ansible.builtin.debug:
+            var: netplan_daemon_config
+            verbosity: 1
+
+        - name: Replace old DNS server IPs with new DNS server IPs in netplan configuration
+          ansible.builtin.set_fact:
+            # netplan_daemon_config: "{{ netplan_daemon_config | regex_replace('(192.168.1.1|10.0.10.225)', '10.0.10.222') | regex_replace('9.9.9.9', '9.9.9.11') }}"
+            netplan_daemon_config: "{{ netplan_daemon_config | regex_replace('(.*nameservers:\\n.*addresses:\\n)([\\s-]+)(?:[\\s-]+[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+$\\\
+              n)+(\\s+search:\n.*$)', '\\1\\210.0.10.222\\n\\3', multiline=True) }}"
+
+        - name: Print newly modified netplan configuration
+          ansible.builtin.debug:
+            var: netplan_daemon_config
+            verbosity: 1
+
+    - name: Write modified Netplan configuration to the previously detected file
+      ansible.builtin.copy:
+        content: "{{ netplan_daemon_config }}"
+        dest: "{{ netplan_filepath }}"
+        backup: true
+        mode: "0644"
+      register: netplan_daemon_updated
+      when:
+        - has_netplan|default(False)
+
+    - name: Generate network config files via 'netplan generate' command
+      ansible.builtin.command:
+        cmd: netplan generate
+      register: netplan_generate
+      when:
+        - has_netplan|default(False)
+        - netplan_daemon_updated.changed
+
+    - name: Apply new network settings via 'netplan apply' command
+      ansible.builtin.command:
+        cmd: netplan apply
+      register: netplan_apply
+      when:
+        - has_netplan|default(False)
+        - netplan_generate is not failed

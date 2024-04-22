@@ -1,0 +1,25 @@
+---
+- name: Install Ceph client packages and configure mounts for CephFS
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Clean up old ceph files if present
+      ansible.builtin.file:
+        path: /etc/systemd/system/cephfs.service
+        state: absent
+
+    - name: Reload systemd cache
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Install Ceph client packages and CephFS mount configs
+      ansible.builtin.import_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"

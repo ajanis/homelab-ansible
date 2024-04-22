@@ -1,0 +1,40 @@
+---
+- name: Cluster configuration options
+  hosts: ceph001
+  become: true
+  gather_facts: false
+  tags:
+    - cephadm-cluster-settings
+  tasks:
+    - name: Import ceph_defaults role
+      ansible.builtin.import_role:
+        name: ceph_defaults
+
+    - name: Debug print vars
+      ansible.builtin.debug:
+        msg: |
+          {{ item.0.key ~ ' : ' ~ item.1.name ~ ' = ' ~ item.1.value }}
+      loop: "{{ (cephadm_config_options | dict2items) | subelements('value') }}"
+      loop_control:
+        label: "{{ item.1.name ~ ' : ' ~ item.1.value }}"
+
+    - name: Confirm vars
+      # Comment
+      ansible.builtin.pause:
+        prompt: |2
+
+          Confirm vars with 'yes'
+      register: vars_confirm
+
+    - name: Set ceph configuration {{ cephadm_config_options }}
+      ceph_config:
+        fsid: "{{ fsid }}"
+        action: set
+        who: "{{ item.0.key }}"
+        option: "{{ item.1.name }}"
+        value: "{{ item.1.value }}"
+      loop: "{{ (cephadm_config_options | dict2items) | subelements('value') }}"
+      loop_control:
+        label: "{{ item.1.name ~ ' : ' ~ item.1.value }}"
+      when:
+        - vars_confirm.user_input == 'yes' | default('no')

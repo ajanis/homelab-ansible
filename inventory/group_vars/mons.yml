@@ -1,0 +1,7 @@
+---
+dummy:
+monitor_secret: "{{ monitor_keyring.stdout }}"
+admin_secret: admin_secret
+mgr_secret: mgr_secret
+secure_cluster: false
+crush_rule_config: false

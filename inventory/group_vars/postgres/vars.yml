@@ -1,0 +1,88 @@
+---
+docker_install_community_edition: true
+postgres_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  32646336613030633163386234396136316335616265316462316264366335363834383134366665
+  3864353462663864656333333933323565363066663430330a303532316435643038323033393866
+  39616632633862653331343035623630373666663736636638666566376135376663663138626135
+  3233623433386339620a333264656361623266643337386434353033636433393866316362326234
+  39656565386132653938633465626132326238346665643334323233636362303735
+myql_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  39393834376638616232616563333431343831376530326539396230333932623364633633343331
+  3139663734376334333937623061336238623765363635320a633566346462303465323234326431
+  39336461636665396233316461386131306433303936343064343665386334616361306462656663
+  3130333733383661380a616338373263666437613161333832646362396237386338643962356234
+  31653235616633306535323165316163666238636431363838356663643166656261
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"
+  - name: postgresql
+    options:
+      address: postgres://postgres:{{ postgres_password }}@localhost
+      ignored_databases:
+        - template0
+        - template1
+  - name: mysql
+    options:
+      servers:
+        - root:{{ mysql_password }}@tcp(localhost:3306)?tls=false
+
+docker_compose_projects:
+  - project_name: databases
+    pull: "{{ docker_recreate | default(False) }}"
+    definition:
+      version: "3.4"
+
+      services:
+        postgres:
+          container_name: postgres
+          hostname: postgres
+          image: bitnami/postgresql
+          restart: unless-stopped
+          environment:
+            PUID: "0"
+            PGID: "0"
+            VERSION: latest
+            POSTGRESQL_PASSWORD: "{{ postgres_password }}"
+            POSTGRESQL_DATABASE: postgres
+          ports:
+            - 5432:5432
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/postgres:/bitnami/postgresql
+          logging:
+            driver: journald
+            options:
+              tag: postgres
+
+        mysql:
+          container_name: mysql
+          hostname: mysql
+          image: bitnami/mysql
+          restart: unless-stopped
+          ports:
+            - 3306:3306
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/mysql/:/bitnami/mysql/data
+          environment:
+            PGID: "0"
+            PUID: "0"
+            MYSQL_ROOT_PASSWORD: "{{ myql_password }}"
+            MYSQL_ROOT_USER: root
+            MYSQL_DATABASE: mysql
+          logging:
+            driver: journald
+            options:
+              tag: postgres

@@ -1,0 +1,270 @@
+---
+
+telegraf_template_configuration: true
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"
+  - name: nginx
+    options:
+      urls:
+        - http://localhost/nginx_status
+  - name: procstat
+    options:
+      pattern: nginx
+      prefix: nginx
+  - name: x509_cert
+    options:
+      timeout: 30s
+      interval: 300s
+      exclude_root_certs: "true"
+      sources:
+        - https://plex.home.prettybaked.com:443
+        - https://automation.home.prettybaked.com:443
+        - https://pveceph.home.prettybaked.com:443
+        - https://pvedash.home.prettybaked.com:443
+        - https://ceph.home.prettybaked.com:443
+      tls_cert: /data/ssl/home.prettybaked.com.cert
+      tls_key: /data/ssl/home.prettybaked.com.key
+      tls_server_name: home.prettybaked.com
+  - name: tail
+    options:
+      files:
+        - /opt/nginx_proxy/data/logs/all_proxy_access.log
+      name_override: nginx_access_log
+      from_beginning: "true"
+      max_undelivered_lines: 100
+      character_encoding: utf-8
+      data_format: json
+      tag_keys:
+        - scheme
+        - status
+        - http_host
+        - upstream
+        - ssl_protocol
+        - upstream_cache_status
+      json_string_fields:
+        - remote_addr
+        - request
+        - ssl_cipher
+        - http_referrer
+        - http_user_agent
+        - remote_user
+        - remote_port
+        - body_bytes_sent
+        - bytes_sent
+        - request_length
+        - upstream_connect_time
+        - upstream_header_time
+        - upstream_response_time
+        - upstream_response_length
+
+vault_nginx_pw: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  65623862663931616435636535623237636539623235386335356538333034346436303964636566
+  3439343961353236383964353564386366616433396435370a316532313264313662383431323130
+  61643662326136616461363163663538613431376632666437666365323034356565363363656537
+  3361393534623862330a303066343636643663633362313437613036623466653139613835663161
+  34333762343334663437386363323330643737663161306338623236643236663934
+
+nginx_proxy_manager:
+  version: latest
+  ports:
+    internal_http: 80:80/tcp # Internal HTTP Port
+    internal_https: 443:443/tcp # Internal HTTPS Port
+    web_ui: 81:81/tcp # Admin Web Port
+    ftp: 21:21/tcp # FTP
+    external_http: 8080:8080/tcp # External HTTP Port
+    external_https: 8443:8443/tcp #
+mariadb_aria:
+  version: latest
+  ports:
+    mysql: 3306:3306/tcp
+
+# acme_dns:
+#   version: latest
+#   ports:
+#     https: "443"
+#     dns: "53"
+#     http: "80"
+
+docker_compose_projects:
+  - project_name: nginx_proxy
+    pull: "{{ docker_recreate | default(False) }}"
+    recreate: "{{ docker_recreate | default(False) }}"
+    definition:
+      version: "3.9"
+      networks:
+        nginx_proxy:
+          name: nginx_proxy
+          driver: bridge
+      x-logging: &default-logging
+        driver: journald
+      services:
+        # NGINX Webserver with Reverse-Proxy Management Frontend and LetsEncrypt Support
+        nginx:
+          hostname: nginx
+          container_name: nginx
+          image: jc21/nginx-proxy-manager:{{ nginx_proxy_manager.version }}
+          restart: unless-stopped
+          privileged: true
+          user: "0:0"
+          networks:
+            nginx_proxy:
+              aliases:
+                - app
+                - nginx
+                - npm
+                - web
+          ports:
+            - "{{ nginx_proxy_manager.ports.internal_http }}"
+            - "{{ nginx_proxy_manager.ports.internal_https }}"
+            - "{{ nginx_proxy_manager.ports.web_ui }}"
+            - "{{ nginx_proxy_manager.ports.ftp }}"
+            - "{{ nginx_proxy_manager.ports.external_http }}"
+            - "{{ nginx_proxy_manager.ports.external_https }}"
+          environment:
+            TZ: "{{ timezone }}"
+            PUID: 1000
+            PGID: 1000
+            DB_MYSQL_HOST: mysql
+            DB_MYSQL_PORT: "3306"
+            DB_MYSQL_USER: nginx
+            DB_MYSQL_PASSWORD: "{{ vault_nginx_pw }}"
+            DB_MYSQL_NAME: nginx
+            DISABLE_IPV6: "true"
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+            X_FRAME_OPTIONS: sameorigin
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/nginx_proxy/data:/data
+            - /opt/nginx_proxy/etc/cont-init.d:/etc/cont-init.d
+            - /opt/nginx_proxy/letsencrypt/config:/etc/letsencrypt
+          depends_on:
+            - mysql
+          logging:
+            <<: *default-logging
+            options:
+              tag: nginx
+        # MySQL Container for Nginx Reverse-Proxy configurations
+        mysql:
+          hostname: mysql
+          container_name: mysql
+          image: jc21/mariadb-aria:{{ mariadb_aria.version }}
+          restart: unless-stopped
+          privileged: true
+          user: "0:0"
+          networks:
+            nginx_proxy:
+              aliases:
+                - mysql
+                - mariadb
+                - db
+          ports:
+            - "{{ mariadb_aria.ports.mysql }}"
+          environment:
+            TZ: "{{ timezone }}"
+            PUID: 1000
+            PGID: 1000
+            MYSQL_ROOT_PASSWORD: "{{ vault_nginx_pw }}"
+            MYSQL_DATABASE: nginx
+            MYSQL_USER: nginx
+            MYSQL_PASSWORD: "{{ vault_nginx_pw }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/nginx_proxy/mysql/data:/var/lib/mysql
+          logging:
+            <<: *default-logging
+            options:
+              tag: mysql
+
+nginx_log_format_main: |
+  log_format main escape=json '{'
+      '"time_local":"$time_local",'
+      '"remote_addr": "$remote_addr",'                            # client IP
+      '"request":"$request",'                                     # full path no arguments if the request
+      '"status": "$status",'                                      # response status code
+      '"request_time":"$request_time",'                           # request processing time in seconds with msec resolution
+      '"remote_user": "$remote_user",'                            # client HTTP username
+      '"remote_port": "$remote_port",'                            # client port
+      '"body_bytes_sent": "$body_bytes_sent",'                    # the number of body bytes exclude headers sent to a client
+      '"bytes_sent": "$bytes_sent", '                             # the number of bytes sent to a client
+      '"request_length": "$request_length", '                     # request length (including headers and body)
+      '"connection_requests": "$connection_requests",'            # number of requests made in connection
+      '"http_host": "$http_host", '                               # the request Host: header
+      '"http_referrer":"$http_referer",'
+      '"upstream": "$upstream_addr", '                            # upstream backend server for proxied requests
+      '"upstream_connect_time": "$upstream_connect_time", '       # upstream handshake time incl. TLS
+      '"upstream_header_time": "$upstream_header_time", '         # time spent receiving upstream headers
+      '"upstream_response_time": "$upstream_response_time", '     # time spend receiving upstream body
+      '"upstream_response_length": "$upstream_response_length", ' # upstream response length
+      '"upstream_cache_status": "$upstream_cache_status", '       # cache HIT/MISS where applicable
+      '"ssl_protocol": "$ssl_protocol", '                         # TLS protocol
+      '"ssl_cipher": "$ssl_cipher", '                             # TLS cipher
+      '"scheme": "$scheme", '                                     # http or https
+      '"http_user_agent":"$http_user_agent"'
+  '}';
+
+
+docker_config_files:
+  - path: /opt/nginx_proxy/data/nginx/custom/http_top.conf
+    config: |
+      {% raw %}
+      log_format json escape=json '{'
+              '"time_local":"$time_local",'
+              '"remote_addr": "$remote_addr",'                            # client IP
+              '"request":"$request",'                                     # full path no arguments if the request
+              '"status": "$status",'                                      # response status code
+              '"request_time":"$request_time",'                           # request processing time in seconds with msec resolution
+              '"remote_user": "$remote_user",'                            # client HTTP username
+              '"remote_port": "$remote_port",'                            # client port
+              '"body_bytes_sent": "$body_bytes_sent",'                    # the number of body bytes exclude headers sent to a client
+              '"bytes_sent": "$bytes_sent", '                             # the number of bytes sent to a client
+              '"request_length": "$request_length", '                     # request length (including headers and body)
+              '"connection_requests": "$connection_requests",'            # number of requests made in connection
+              '"http_host": "$http_host", '                               # the request Host: header
+              '"http_referrer":"$http_referer",'
+              '"upstream": "$upstream_addr", '                            # upstream backend server for proxied requests
+              '"upstream_connect_time": "$upstream_connect_time", '       # upstream handshake time incl. TLS
+              '"upstream_header_time": "$upstream_header_time", '         # time spent receiving upstream headers
+              '"upstream_response_time": "$upstream_response_time", '     # time spend receiving upstream body
+              '"upstream_response_length": "$upstream_response_length", ' # upstream response length
+              '"upstream_cache_status": "$upstream_cache_status", '       # cache HIT/MISS where applicable
+              '"ssl_protocol": "$ssl_protocol", '                         # TLS protocol
+              '"ssl_cipher": "$ssl_cipher", '                             # TLS cipher
+              '"scheme": "$scheme", '                                     # http or https
+              '"http_user_agent":"$http_user_agent"'
+          '}';
+      {% endraw %}
+
+  - path: /opt/nginx_proxy/data/nginx/custom/server_proxy.conf
+    config: |
+      {% raw %}
+      proxy_ignore_headers Set-Cookie;
+      add_header X-Cache-Status $upstream_cache_status;
+      proxy_no_cache $http_x_no_cache;
+      proxy_cache_key $scheme$host$proxy_host$request_uri;
+      proxy_cache_valid 200 302 1M;
+      proxy_cache_valid 404 1m;
+      proxy_cache_min_uses 1;
+      proxy_cache_background_update on;
+      proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+      proxy_cache_revalidate on;
+      proxy_cache_lock on;
+      proxy_max_temp_file_size       0;
+      proxy_buffers 240 240k;
+      proxy_busy_buffers_size 240k;
+      proxy_buffer_size 240k;
+      access_log /data/logs/all_proxy_access.log json;
+      error_log /data/logs/all_proxy_error.log warn;
+      {% endraw %}

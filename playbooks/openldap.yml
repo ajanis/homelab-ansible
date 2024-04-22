@@ -1,0 +1,34 @@
+---
+- name: Deploy OpenLDAP Server with users, ssh keys, autoFS configurations
+  hosts: all
+  remote_user: root
+  gather_facts: true
+  vars_files:
+    - vault.yml
+
+  tasks:
+    # TODO: FIX FOR Proxmox!
+    # - name: Ensure variable is set for common `when` condition
+    #   ansible.builtin.set_fact:
+    #     ansible_virtualization_tech_guest: '{{ ansible_virtualization_tech_guest | default(ansible_virtualization_type) | default("") }}'
+
+    # - name: Add common role
+    #   ansible.builtin.import_role:
+    #     name: common
+    - name: Add openldap role
+      ansible.builtin.import_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    # - name: Add ceph-fs role
+    #   ansible.builtin.import_role:
+    #     name: ceph-fs
+    #   when:
+    #     - shared_storage
+    #     - storage_backend == "cephfs"
+    # - name: Add telegraf role
+    #   ansible.builtin.import_role:
+    #     name: telegraf
+    #   when: "'telegraf' in group_names"
+    # - name: Run setup
+
+    #   ansible.builtin.setup:

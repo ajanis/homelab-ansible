@@ -1,0 +1,15 @@
+---
+- name: Install drivers and dependencies for EdgeTPU devices
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add edgetpu role
+      ansible.builtin.import_role:
+        name: edgetpu
+      when:
+        - edgetpu_m2 or edgetpu_pcie

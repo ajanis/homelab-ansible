@@ -1,0 +1,90 @@
+---
+- name: Install Btop on hosts
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars:
+    btop_git_repo: https://github.com/aristocratos/btop.git
+    btop_source_path: /opt/btop
+    btop_version: 1.3.2
+    btop_build_prereqs_rhel: >-
+      ['autoconf', 'automake', 'binutils', 'bison', 'flex', 'gcc', 'gcc-c++', 'gdb', 'glibc-devel', 'libtool', 'make', 'pkgconf', 'pkgconf-m4',
+      'pkgconf-pkg-config', 'redhat-rpm-config', 'rpm-build', 'rpm-sign', 'strace', 'asciidoc', 'byacc', 'diffstat', 'git', 'intltool', 'jna',
+      'ltrace', 'patchutils', 'perl-Fedora-VSP', 'perl-generators', 'pesign', 'source-highlight', 'systemtap', 'valgrind', 'valgrind-devel',
+      'cmake', 'expect', 'rpmdevtools', 'rpmlint', 'sed']
+    btop_build_prereqs_debian: >-
+      ['autoconf', 'autoconf-archive', 'autoconf-doc', 'automake', 'autotools-dev', 'bcc', 'build-essential', 'clang', 'cmake', 'cmake-data',
+      'cmake-doc', 'cmake-format', 'cpp', 'debianutils', 'diffstat', 'dpkg-dev', 'expect', 'file', 'g++', 'gcc', 'gettext', 'gfortran',
+      'gnu-standards', 'intltool', 'libacl1', 'libarchive13', 'libc6', 'libc6-dev', 'libcurl4', 'libdpkg-perl', 'libelf1', 'libexpat1',
+      'libgcc-s1', 'libjsoncpp25', 'libltdl-dev', 'libpkgconf3', 'librhash0', 'libselinux1', 'libstdc++6', 'libtcl8.6', 'libtool', 'libtool-doc',
+      'libunwind8', 'libuv1', 'libxml-parser-perl', 'ltrace', 'm4', 'make', 'ninja-build', 'patch', 'pcc', 'perl', 'pkg-config',
+      'procps', 'sed', 'strace', 'tcc', 'tcl-expect', 'tcl8.6', 'tk8.6', 'zlib1g']
+    btop_config_path: /root/.config/btop
+
+  handlers:
+    - name: Make btop
+      listen: btop_make_tasks
+      community.general.make:
+        target: "{{ item }}"
+        chdir: /opt/btop
+      register: make_result
+      loop:
+        - all
+        - install
+      loop_control:
+        label: "{{ item }}"
+      notify: assertion_task
+
+    - name: Validate 'make' tasks
+      listen: assertion_task
+      ansible.builtin.assert:
+        that:
+          - make_result is not failed
+        success_msg: |
+          Success: {{ make_result.msg }}
+          Debug: {{ item.stdout | default("") | to_json(ensure_ascii=False) | regex_replace('(?m)(\[[0-9;]+m)', '') }}
+        fail_msg: |
+          Failed: {{ make_result.msg }}
+          Debug: {{ item.stderr | default("") | to_json(ensure_ascii=False) | regex_replace('(?m)(\[[0-9;]+m)', '') }}
+        quiet: true
+      loop: "{{ make_result.results }}"
+      loop_control:
+        label: "{{ item.command }}"
+
+  tasks:
+    - name: Install prereqs
+      ansible.builtin.package:
+        name: "{{ btop_build_prereqs_debian if ansible_os_family == 'Debian' else btop_build_prereqs_rhel if ansible_os_family == 'RedHat' }}"
+        state: present
+      tags:
+        - always
+
+    - name: Remove repo dir
+      ansible.builtin.file:
+        path: /opt/btop
+        state: absent
+      tags:
+        - never
+        - btop-repo-rm
+
+    - name: Check out git repo for btop
+      ansible.builtin.git:
+        dest: /opt/btop
+        repo: https://github.com/aristocratos/btop.git
+        single_branch: true
+        version: v{{ btop_version }}
+      register: btop_repo_clone
+      notify: btop_make_tasks
+      tags:
+        - btop-repo-clone
+
+    - name: Copy btop configs
+      ansible.builtin.copy:
+        dest: "{{ btop_config_path }}"
+        group: root
+        mode: "0755"
+        owner: root
+        src: "{{ playbook_dir }}/../include/btop"
+      tags:
+        - btop-config-files

@@ -1,0 +1,69 @@
+---
+docker_install_community_edition: true
+docker_install_nvidia: true
+docker_nvidia_gpu_ids: all
+docker_nvidia_gpu_caps: all
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"
+  - name: nvidia_smi
+
+plex:
+  version: latest
+
+docker_compose_projects:
+  - project_name: plex
+    pull: "{{ docker_recreate | default(False) }}"
+    recreate: "{{ docker_recreate | default(False) }}"
+    definition:
+      version: "3.9"
+      x-logging: &default-logging
+        driver: journald
+      services:
+        plex:
+          hostname: plex
+          container_name: plex
+          image: lscr.io/linuxserver/plex:{{ plex.version }}
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/plex:/config
+            - "{{ media_root }}/ssl:/ssl"
+            - "{{ media_root }}/tv:/tvshows"
+            - "{{ media_root }}/movies:/movies"
+            - "{{ media_root }}/images:/photos"
+            - /dev/shm:/transcode
+          devices:
+            - /dev/dri/card0:/dev/dri/card0
+            - /dev/dri/renderD128:/dev/dri/renderD128
+          network_mode: host
+          environment:
+            TZ: "{{ timezone }}"
+            NVIDIA_DRIVER_CAPABILITIES: "{{ docker_nvidia_gpu_caps }}"
+            NVIDIA_VISIBLE_DEVICES: "{{ docker_nvidia_gpu_ids }}"
+            PLEX_UID: "{{ media_user_uid }}"
+            PUID: "{{ media_user_uid }}"
+            PLEX_GID: "{{ media_user_gid }}"
+            PGID: "{{ media_user_gid }}"
+            ALLOWED_NETWORKS: 10.0.0.0/8,172.16.0.0/16,192.168.0.0/16
+            CHANGE_CONFIG_DIR_OWNERSHIP: "false"
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:plex
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+            TP_ADDON: overseerr-side-menu
+          privileged: true
+          logging:
+            <<: *default-logging
+            options:
+              tag: plex
+
+ceph_repository: default

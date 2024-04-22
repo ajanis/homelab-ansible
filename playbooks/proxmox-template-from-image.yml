@@ -1,0 +1,215 @@
+---
+- name: Prompt for new template image
+  ansible.builtin.pause:
+    prompt: |
+      Enter the numeric value for NEW Template OS/Release:
+      {% for template in proxmox_new_template_list | dict2items %}
+      {{ loop.index }} : {{ template.value.dist_name ~ '-' ~ template.value.dist_release ~ ' (' ~ template.value.dist_arch ~ ')' }}
+      {% endfor %}
+  register: new_template_selection
+
+- name: Set Template # noqa no-free-form
+  ansible.builtin.set_fact:
+    proxmox_selected_template: "{{ (proxmox_new_template_list | dict2items)[new_template_selection.user_input | int - 1] }}"
+
+- name: Print Template Selection
+  ansible.builtin.debug:
+    msg: "Selection: {{ proxmox_selected_template.key }}"
+
+# Begin Current Template Info
+
+- name: Retrieve information for proxmox_template_name
+  community.general.proxmox_kvm:
+    name: "{{ proxmox_selected_template.key }}-template"
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token_secret }}"
+    api_host: "{{ proxmox_api_host }}"
+    node: "{{ proxmox_pve_node }}"
+    state: current
+  register: current_template_info
+  failed_when: false
+
+- name: Set facts for current template # noqa no-handler
+  ansible.builtin.set_fact:
+    proxmox_current_template_vmid: "{{ current_template_info.vmid }}"
+  when:
+    - current_template_info.vmid is defined
+
+- name: Print details for current template
+  ansible.builtin.debug:
+    msg: |
+      Existing Template VMID: {{ proxmox_current_template_vmid }}
+  when:
+    - proxmox_current_template_vmid is defined
+
+# End Current Template Info
+
+- name: Set facts for new template # noqa no-free-form
+  ansible.builtin.set_fact:
+    proxmox_template_name: "{{ proxmox_selected_template.key }}-template"
+    proxmox_temporary_vm_name: "{{ proxmox_selected_template.key }}-template-builder"
+    proxmox_cloud_image_url: "{{ proxmox_selected_template.value.dist_url }}"
+    proxmox_cloud_image_file: "{{ proxmox_selected_template.value.dist_url | basename }}"
+    proxmox_cloud_image_path: /tmp/{{ proxmox_selected_template.value.dist_url | basename }}
+    proxmox_template_file: "{{ (proxmox_selected_template.value.dist_url | basename) | regex_replace('(^.*)\\..+$', '\\1.img') }}"
+    proxmox_template_path: "{{ proxmox_iso_directory }}/{{ (proxmox_selected_template.value.dist_url | basename) | regex_replace('(^.*)\\..+$', '\\1.img') }}"
+  when:
+    - proxmox_selected_template is defined
+    - proxmox_selected_template != ''
+
+- name: Print facts for new template
+  ansible.builtin.debug:
+    msg: |
+      Template Name: {{ proxmox_template_name }}
+      Download URL: {{ proxmox_cloud_image_url }}
+      Cloud Image File Name: {{ proxmox_cloud_image_file }}
+      Cloud Image Full Path: {{ proxmox_cloud_image_path }}
+      Raw Image File Name: {{ proxmox_template_file }}
+      Raw Image Full Path: {{ proxmox_template_path }}
+      Temporary VM Name: {{ proxmox_temporary_vm_name }}
+  when:
+    - proxmox_selected_template is defined
+    - proxmox_selected_template != ''
+
+- name: Download cloud image
+  ansible.builtin.get_url:
+    url: "{{ proxmox_cloud_image_url }}"
+    dest: /tmp/
+    mode: "0744"
+  register: cloud_image_download
+
+- name: Print download details
+  ansible.builtin.debug:
+    msg: "{{ cloud_image_download }}"
+    verbosity: 1
+
+- name: Convert image to raw
+  ansible.builtin.command:
+    cmd: qemu-img convert -f qcow2 -O raw {{ proxmox_cloud_image_path }} {{ proxmox_template_path }}
+    creates: "{{ proxmox_template_path }}"
+  register: image_conversion
+
+- name: Image conversion results
+  ansible.builtin.debug:
+    msg: "{{ image_conversion.stdout }}"
+    verbosity: 1
+  when:
+    - image_conversion is changed
+
+- name: Run libguestfs commands against image # noqa no-changed-when no-handler
+  ansible.builtin.command:
+    cmd: "{{ proxmox_libguestfs_command }}"
+  register: libguestfs_commands
+  when:
+    - image_conversion is changed
+  loop_control:
+    loop_var: proxmox_libguestfs_command
+  loop:
+    - virt-customize -a {{ proxmox_template_path }} --root-password 'password:tmpRootPass'
+    - virt-customize -a {{ proxmox_template_path }} --run-command 'mkdir -p /root/.ssh'
+    - virt-customize -a {{ proxmox_template_path }} --run-command 'touch /root/.ssh/authorized_keys'
+    - virt-customize -a {{ proxmox_template_path }} --copy-in '/etc/systemd/system/data.mount:/etc/systemd/system/'
+    - virt-customize -a {{ proxmox_template_path }} --copy-in '/etc/systemd/system/media.mount:/etc/systemd/system/'
+    - virt-customize -a {{ proxmox_template_path }} --run-command 'systemctl daemon-reload'
+    - virt-customize -a {{ proxmox_template_path }} --run-command 'systemctl enable data.mount'
+    - virt-customize -a {{ proxmox_template_path }} --run-command 'systemctl enable media.mount'
+    - "virt-edit -a {{ proxmox_template_path }} /etc/cloud/cloud.cfg -e 's/disable_root: true/disable_root: false/'"
+    - "virt-edit -a {{ proxmox_template_path }} /etc/cloud/cloud.cfg -e 's/disable_root: True/disable_root: False/'"
+    - "virt-edit -a {{ proxmox_template_path }} /etc/cloud/cloud.cfg -e 's/disable_root: 1/disable_root: 0/'"
+    - "virt-edit -a {{ proxmox_template_path }} /etc/cloud/cloud.cfg -e 's/lock_passwd: True/lock_passwd: False/'"
+    - "virt-edit -a {{ proxmox_template_path }} /etc/cloud/cloud.cfg -e 's/lock_passwd: true/lock_passwd: false/'"
+    - "virt-edit -a {{ proxmox_template_path }} /etc/cloud/cloud.cfg -e 's/lock_passwd: 1/lock_passwd: 0/'"
+    - "virt-edit -a {{ proxmox_template_path }} /etc/cloud/cloud.cfg -e 's/ssh_pwauth: False/ssh_pwauth: True/'"
+    - "virt-edit -a {{ proxmox_template_path }} /etc/cloud/cloud.cfg -e 's/ssh_pwauth: false/ssh_pwauth: true/'"
+    - "virt-edit -a {{ proxmox_template_path }} /etc/cloud/cloud.cfg -e 's/ssh_pwauth: 0/ssh_pwauth: 1/'"
+
+- name: Print results of libguestfs commands
+  ansible.builtin.debug:
+    msg: |
+      {{ libguestfs_commands }}
+    verbosity: 1
+  when: libguestfs_commands is changed
+
+- name: Create proxmox_temporary_vm_name VM from disk image
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_password }}"
+    api_host: "{{ proxmox_api_host }}"
+    node: "{{ proxmox_pve_node }}"
+    name: "{{ proxmox_temporary_vm_name }}"
+    state: present
+    autostart: false
+    ciuser: root
+    cipassword: "{{ proxmox_ci_password }}"
+    nameservers:
+      - 10.0.10.222
+      - 192.168.1.1
+    searchdomains:
+      - home.prettybaked.com
+    sshkeys: "{{ proxmox_ci_ssh_keys }}"
+    cpu: host,flags=+md-clear;+pcid;+spec-ctrl;+ssbd;+pdpe1gb;+aes
+    sockets: 2
+    cores: 2
+    vcpus: 4
+    memory: 4096
+    balloon: 0
+    numa_enabled: true
+    net:
+      net0: virtio,bridge=vmbr0,mtu=9000,queues=4
+    ipconfig:
+      ipconfig0: ip={{ proxmox_temporary_vm_cidr }},gw={{ proxmox_temporary_vm_cidr | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}
+    scsi:
+      scsi0: ceph-rbd:0,import-from={{ proxmox_template_path }},backup=0,discard=on,replicate=0,ssd=1,iothread=1
+    sata:
+      sata0: ceph-rbd:cloudinit,media=cdrom
+    scsihw: virtio-scsi-single
+    storage: ceph-rbd
+    boot: order=scsi0;net0
+    ostype: l26
+    machine: q35
+    bios: seabios
+    acpi: true
+    hotplug: disk,network,usb,memory,cpu,cloudinit
+    kvm: true
+    agent: enabled=1,fstrim_cloned_disks=1
+    pool: Templates
+    timeout: 600
+  register: temporary_vm_info
+  retries: 0
+  timeout: 630
+  until: temporary_vm_info is not failed
+
+- name: Verify that proxmox_temporary_vm_name was succesfully created
+  ansible.builtin.assert:
+    fail_msg: |
+      Failed: {{ temporary_vm_info.msg }}
+      Debug: {{ temporary_vm_info }}
+    quiet: false
+    success_msg: |
+      Success: {{ temporary_vm_info.msg }}
+      Debug: {{ temporary_vm_info }}
+    that:
+      - temporary_vm_info is not failed
+
+- name: Grow VM disk to 15GB # noqa command-instead-of-shell no-changed-when run-once
+  ansible.builtin.shell:
+    cmd: qm resize {{ temporary_vm_info.vmid }} scsi0 15G
+  delegate_to: pve01.home.prettybaked.com
+  run_once: true
+  register: temporary_vm_disk_resize
+  retries: 0
+  timeout: 630
+  until: temporary_vm_disk_resize is not failed
+
+- name: Verify that disk resize was successful
+  ansible.builtin.assert:
+    fail_msg: |
+      Failed: {{ temporary_vm_disk_resize.msg }}
+      Debug: {{ temporary_vm_disk_resize }}
+    quiet: false
+    success_msg: |
+      Success: {{ temporary_vm_disk_resize.msg }}
+      Debug: {{ temporary_vm_disk_resize }}
+    that:
+      - temporary_vm_disk_resize is not failed

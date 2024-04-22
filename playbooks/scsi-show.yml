@@ -1,0 +1,66 @@
+---
+- name: Show SCSI devices
+  hosts: scsi
+  become: true
+  remote_user: root
+
+  vars:
+    scsi_pkgs:
+      - lsscsi
+      - git
+      - dstat
+
+  handlers:
+    - name: Restart rsyslogd
+      ansible.builtin.service:
+        name: rsyslog
+        state: restarted
+
+  tasks:
+    - name: Install scsi packages
+      ansible.builtin.package:
+        name: "{{ scsi_pkgs }}"
+        state: present
+
+    - name: List all block devices
+      ansible.builtin.shell: set -o pipefail && lsscsi | awk '{print $1}' | sed -r 's/\[(.*)\]/\1/'
+      register: scsi_result
+      changed_when: false
+
+    - name: Print scsi_result
+      ansible.builtin.debug:
+        msg: "Found Existing SCSI Device: {{ item }}"
+      with_items: "{{ scsi_result.stdout_lines }}"
+      changed_when: false
+      when: scsi_result.stdout_lines is defined and scsi_result.stdout_lines != None
+
+    - name: Delete devices
+      ansible.builtin.shell: echo 1 > "/sys/class/scsi_device/{{ item }}/device/delete"
+      with_items: "{{ scsi_result.stdout_lines }}"
+      when: scsi_result.stdout_lines is defined and scsi_result.stdout_lines != None
+      register: deleted_devices
+
+    - name: Print deleted devices
+      ansible.builtin.debug:
+        msg: "Deleted SCSI Device: {{ item.item }}"
+      with_items: "{{ deleted_devices.results }}"
+      when: deleted_devices.stdout_lines is defined and deleted_devices.stdout_lines != None
+
+    # - meta: end_play
+
+    - name: Rescan devices
+      ansible.builtin.shell: echo "- - -" > /sys/class/scsi_host/host2/scan
+      when: deleted_devices is defined
+      notify: restart rsyslogd
+
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: List all block devices
+      ansible.builtin.shell: set -o pipefail && lsscsi | awk '{print $1}' | sed -r 's/\[(.*)\]/\1/'
+      register: scsi_result
+      changed_when: false
+    - name: Print scsi_result
+      ansible.builtin.debug:
+        msg: "Found new SCSI Device: {{ item }}"
+      with_items: "{{ scsi_result.stdout_lines }}"

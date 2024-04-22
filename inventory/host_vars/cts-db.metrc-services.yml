@@ -1,0 +1,39 @@
+---
+docker_containers:
+  postgres:
+    description: Cannabis Transport - Metrc Automation DB
+    container_name: postgres
+    image: postgres:16.0
+    restart: unless_stopped
+    ports:
+      - 5432:5432
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/configs/postgres:/var/lib/postgresql/data
+    env:
+      PUID: "999"
+      PGID: "999"
+      VERSION: latest
+      POSTGRES_USER: "{{ db_username }}"
+      POSTGRES_PASSWORD: "{{ db_password }}"
+      POSTGRES_DB: "{{ db_name }}"
+    logging:
+      driver: journald
+      options:
+        tag: postgres
+
+  mqtt:
+    description: Cannabis Transport - MQTT Broker
+    container_name: mqtt
+    image: eclipse-mosquitto:latest
+    restart: unless_stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /opt/configs/mqtt:/mosquitto/config
+    env:
+      PUID: "1883"
+      GUID: "1883"
+    logging:
+      driver: journald
+      options:
+        tag: mqtt

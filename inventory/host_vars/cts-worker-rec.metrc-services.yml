@@ -1,0 +1,27 @@
+docker_containers:
+  worker-med:
+    description: Cannabis Transport - Metrc Automation Worker - Rec
+    container_name: worker-rec
+    image: 785623647738.dkr.ecr.us-east-1.amazonaws.com/cts-manifests:latest
+    restart: unless_stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    memory: 1.2G
+    env:
+      SCREEN_GEOMETRY: 1200x1200x8
+      DEBUG: "1"
+      USE_SECRETS_MANAGER: "true"
+      METRC_URL: "{{ metric_url }}"
+      METRC_FACILITY_ID: 406R-00012
+      MQTT_BROKER: "{{ mqtt_broker }}"
+      MQTT_CLIENT_ID: metrc-worker-med
+      PAGE_SIZE: "{{ page_size }}"
+      UPLOAD_PDF: "{{ upload_pdf }}"
+      POSTGRES_HOST: "{{ db_host }}"
+      POSTGRES_DB: "{{ db_name }}"
+    logging:
+      driver: journald
+      options:
+        tag: worker-rec

@@ -1,0 +1,68 @@
+- name: Deploy ceph
+  hosts: ceph
+  become: true
+  gather_facts:
+    true
+
+    # Ceph group_vars used to generate minimal ceph.conf needed to mount cephfs
+
+  tasks:
+    - name: Create Ceph config directory
+      ansible.builtin.file:
+        path: "{{ ceph_conf_directory }}"
+        state: directory
+        owner: "{{ ceph_fs_config_owner }}"
+        group: "{{ ceph_fs_config_group }}"
+        mode: "0644"
+      tags:
+        - cephfs-confdir
+        - cephfs-conf
+        - cephfs-keyring
+
+    - name: Generate Ceph config file from template
+      ansible.builtin.template:
+        src: ceph.conf.j2
+        dest: "{{ ceph_conf_directory }}/{{ cephactual_mount_opts.fsid }}.conf"
+        mode: "0644"
+        owner: "{{ ceph_fs_config_owner }}"
+        group: "{{ ceph_fs_config_group }}"
+      tags:
+        - cephfs-conf
+
+    - name: Copy CephFS User Key
+      ansible.builtin.template:
+        src: test.secret.j2
+        dest: "{{ ceph_conf_directory }}/{{ ceph_fsid }}-{{ ceph_cephfs_user }}.secret"
+        mode: "{{ ceph_keyring_permissions }}"
+        owner: "{{ ceph_fs_config_owner }}"
+        group: "{{ ceph_fs_config_group }}"
+      when:
+        - cephx
+        - cephfs_copy_user_key
+      tags:
+        - cephfs-keyring
+      # loop: '{{ ceph_mount }}'
+      # loop_control:
+      #   label: '{{ ceph_mount.mount }}'
+      #   loop_var: ceph_mount
+
+      # - name: Copy Ceph client.admin keyring
+      #   ansible.builtin.template:
+      #     src: ceph.client.admin.keyring.j2
+      #     dest: "{{ ceph_conf_directory }}/{{ item.fsid }}.{{ item.user }}.secret"
+      #     mode: "{{ ceph_keyring_permissions }}"
+      #     owner: "{{ ceph_fs_config_owner }}"
+      #     group: "{{ ceph_fs_config_group }}"
+      #   when:
+      #     - cephx
+      #     - ceph_copy_admin_key
+      #   tags:
+      #     - cephfs-keyring
+
+    - name: Add Ceph Authorized Key
+      ansible.posix.authorized_key:
+        user: root
+        key: "{{ ceph_root_ssh_key }}"
+        state: present
+      when:
+        - "'mons' in group_names"

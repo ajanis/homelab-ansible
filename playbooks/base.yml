@@ -1,0 +1,42 @@
+---
+- name: Deploy all common base server roles and configurations
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+- name: Include Common playbook
+  ansible.builtin.import_playbook: common.yml
+  tags:
+    - common
+
+- name: Include OpenLDAP playbook
+  ansible.builtin.import_playbook: openldap.yml
+  tags:
+    - ldap
+
+  when: openldap_server_ip is defined and openldap_server_ip != None
+- name: Include CephFS playbook
+  ansible.builtin.import_playbook: ceph-fs.yml
+  tags:
+    - ceph
+
+- name: Include Docker playbook
+  ansible.builtin.import_playbook: docker.yml
+  tags:
+    - never
+    - docker
+
+- name: Include Telegraf playbook
+  ansible.builtin.import_playbook: telegraf.yml
+  tags:
+    - never
+    - telegraf
+
+- name: Include Prometheus playbook
+  ansible.builtin.import_playbook: prometheus.yml
+  tags:
+    - never
+    - prometheus

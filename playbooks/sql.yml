@@ -1,0 +1,33 @@
+---
+- name: Relational DB Configs
+  hosts: all
+  become: true
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Import common role
+      ansible.builtin.import_role:
+        name: common
+    - name: Import openldap role
+      ansible.builtin.include_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    - name: Include cephfs role
+      ansible.builtin.include_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"
+    - name: Include NFS role
+      ansible.builtin.include_role:
+        name: nfs
+      when:
+        - shared_storage
+        - storage_backend == "nfs"
+    - name: Include docker role
+      ansible.builtin.include_role:
+        name: docker
+    - name: Include telegraf role
+      ansible.builtin.include_role:
+        name: telegraf
+      when: "'telegraf' in group_names"

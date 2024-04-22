@@ -1,0 +1,68 @@
+---
+- name: Deploy rclone to sync /data/configs to cloud storage
+  hosts: webservices
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+    - name: Add openldap role
+      ansible.builtin.import_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    - name: Add ceph-fs role
+      ansible.builtin.import_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"
+
+    - name: Install rclone package and set up cron jobs to back up cephfs directories to a public cloud
+      block:
+        - name: Add rclone role
+          ansible.builtin.import_role:
+            name: rclone
+          tags: rclone-install
+        - name: Create daily cron job to synchronize cephfs configs directory to public cloud
+          ansible.builtin.cron:
+            name: cephfs-config-rsync
+            cron_file: cephfs-config-rsync
+            user: root
+            minute: "0"
+            hour: "8"
+            day: "*"
+            job: >
+              "/usr/local/bin/rclone --filter-from /data/configs/rclone/rclone-filter-file.conf
+              --delete-excluded --ignore-errors --fast-list --progress --syslog --config
+              /data/configs/rclone/rclone.conf --dropbox-chunk-size 100M --copy-links sync
+              /data/configs dropbox:configs"
+            state: present
+          tags:
+            - rclone-cron
+        - name: Create daily cron job to synchronize cephfs backups directory to public cloud
+          ansible.builtin.cron:
+            name: cephfs-config-rsync
+            cron_file: cephfs-backups-rsync
+            user: root
+            minute: "0"
+            hour: "7"
+            day: "*"
+            job: >
+              "/usr/local/bin/rclone --fast-list --progress --syslog --config
+              /data/configs/rclone/rclone.conf --dropbox-chunk-size 100M --copy-links sync
+              /data/backups dropbox:backups"
+            state: present
+          tags:
+            - rclone-cron
+
+    - name: Add telegraf role
+      ansible.builtin.import_role:
+        name: telegraf
+      when: "'telegraf' in group_names"
+    - name: Run setup
+      ansible.builtin.setup:

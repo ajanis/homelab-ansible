@@ -1,0 +1,35 @@
+---
+- name: Deploy containerized Ubiquiti UNMS Stack and Unifi-Admin Server
+  hosts:
+    - unifi
+    - unms
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add rsyslog role
+      ansible.builtin.import_role:
+        name: rsyslog
+      tags:
+        - rsyslog
+    - name: Add unifi role
+      ansible.builtin.import_role:
+        name: unifi
+    - name: Add docker role
+      ansible.builtin.import_role:
+        name: docker
+      tags:
+        - docker
+    - name: Add unifi role
+      ansible.builtin.import_role:
+        name: unifi
+        tasks_from: unifi_admin_ssl
+    - name: Add telegraf role
+      ansible.builtin.import_role:
+        name: telegraf
+      when: "'telegraf' in group_names"
+    - name: Run setup
+      ansible.builtin.setup:

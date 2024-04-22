@@ -1,0 +1,22 @@
+---
+# defines if rsyslog should be configured to listen on tcp/514
+rsyslog_allow_tcp: true
+# sets the TCP port rsyslog should listen on if TCP is enabled. 514 is the IANA assigned port
+rsyslog_tcp_port: "514"
+# defines if rsyslog should be configured to listen on udp/514
+rsyslog_allow_udp: true
+# sets the UDP port rsyslog should listen on if UDP is enabled. 514 is the IANA assigned port
+rsyslog_udp_port: "514"
+# remote rsyslog server configs
+rsyslog_servers:
+  - name: (o)127.0.0.1
+    proto: tcp
+    port: "6514"
+    format: RSYSLOG_SyslogProtocol23Format
+    selectors:
+      - "*.*"
+
+telegraf_plugins_extra:
+  - name: syslog
+    options:
+      server: tcp://:6514

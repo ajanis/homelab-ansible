@@ -1,0 +1,156 @@
+---
+aws_key: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  66323339346537333535383039313165653566386336313331323466663730656162623137656566
+  6132303737383662383134653830653765346537663834620a663439376335303733383331636364
+  31653264643332353962303534613336656666353330306364323962316163383264626463616364
+  3432343365396162340a326236363763633036613832396266623438623463383330643235633261
+  37316466333833323265316566373364343532366639336462636532636264343739
+aws_secret: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  36323333623537623536336262383830393234313131336165626437636266613164303432646236
+  3561623139613138653438313832656433376266356539310a313661646534323836623531346138
+  32303539323565303235356238326265373036346639646664353338316538306238393630303965
+  6566313135633663300a383466663162383262323537636265313432376534386134333437303130
+  39336437333962303935303264363737343761353734653039643939663064626364366464383930
+  3965643530303637306436636239323631363035663366616565
+
+telegraf_plugins_extra:
+  - name: syslog
+    options:
+      server: tcp://:6514
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+
+docker_compose_projects:
+  - project_name: cts-metrc-manifests
+
+    pull: false
+
+    definition:
+      version: "3.8"
+
+      x-logging:
+        driver: journald
+
+      services:
+        # metrc-rec-worker:
+        #   container_name: metrc-rec-worker
+        #   image: metrc-worker
+        #   deploy:
+        #     resources:
+        #       limits:
+        #         memory: 1.2G
+        # # build:
+        # #   context: .
+        # #   dockerfile: Dockerfile.worker
+        # #   tags:
+        # #     - cts-metrc-worker:dev
+        # #     - 785623647738.dkr.ecr.us-east-1.amazonaws.com/cts-metrc-manifests:dev-latest
+        #   hostname: rec-worker
+        #   environment:
+        #     METRC_FACILITY_ID: 406R-00012
+        #     METRC_URL: https://co.metrc.com/log-in
+        #     MQTT_BROKER: mqtt://mqtt:1883
+        #     MQTT_CLIENT_ID: metrc-worker-rec
+        #     PAGE_SIZE: "100"
+        #     UPLOAD_PDF: "false"
+        #     USE_SECRETS_MANAGER: "true"
+        #     AWS_REGION: us-east-1
+        #     AWS_KEY: "{{ aws_key }}"
+        #     AWS_SECRET: "{{ aws_secret }}"
+        #   links:
+        #     - mqtt
+        #   volumes:
+        #     - /etc/localtime:/etc/localtime:ro
+        #     - /dev/shm:/dev/shm
+        #   logging:
+        #     driver: journald
+        #     options:
+        #       tag: cts-metrc-rec-worker
+
+        metrc-worker-med:
+          # build:
+          #   context: .
+          #   dockerfile: Dockerfile.worker
+          #   tags:
+          #     - cts-metrc-worker:dev
+          #     - 785623647738.dkr.ecr.us-east-1.amazonaws.com/cts-metrc-manifests:dev-latest
+          container_name: metrc-worker-med
+          deploy:
+            resources:
+              limits:
+                memory: 1.2G
+          image: metrc-worker
+          hostname: worker-med
+          environment:
+            METRC_FACILITY_ID: 406-00008
+            METRC_URL: https://co.metrc.com/log-in
+            MQTT_BROKER: mqtt://mqtt:1883
+            MQTT_CLIENT_ID: metrc-worker-med
+            PAGE_SIZE: "100"
+            UPLOAD_PDF: "false"
+            USE_SECRETS_MANAGER: "true"
+            AWS_REGION: us-east-1
+            AWS_KEY: "{{ aws_key }}"
+            AWS_SECRET: "{{ aws_secret }}"
+          links:
+            - mqtt
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /dev/shm:/dev/shm
+          logging:
+            driver: journald
+            options:
+              tag: metrc-worker-med
+
+        metrc-api:
+          # build:
+          #   context: .
+          #   target: api-base
+          #   tags:
+          #     - cts-metrc-api:dev
+          #     - 785623647738.dkr.ecr.us-east-1.amazonaws.com/cts-metrc-api:dev-latest
+          container_name: metrc-api
+          image: metrc-api
+          hostname: metrc-api
+          environment:
+            MQTT_BROKER: mqtt://mqtt:1883
+            MQTT_CLIENT_ID: metrc-api
+            USE_SECRETS_MANAGER: "true"
+            AWS_REGION: us-east-1
+            AWS_KEY: "{{ aws_key }}"
+            AWS_SECRET: "{{ aws_secret }}"
+            API_URL: http://10.0.10.205
+            API_ENVIRONMENT: ""
+          depends_on:
+            - mqtt
+          ports:
+            - 80:3000
+          links:
+            - mqtt
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+          logging:
+            driver: journald
+            options:
+              tag: metrc-api
+
+        mqtt:
+          image: eclipse-mosquitto:latest
+          container_name: mqtt
+          hostname: mqtt
+          environment:
+            PUID: "1883"
+            GUID: "1883"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/mqtt:/mosquitto/config
+          logging:
+            driver: journald
+            options:
+              tag: cts-metrc-mqtt

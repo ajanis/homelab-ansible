@@ -1,0 +1,33 @@
+---
+- name: "Deploy / Update Foreman Services"
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add isc_dhcp_server role
+      ansible.builtin.import_role:
+        name: isc_dhcp_server
+      tags:
+        - dhcpd
+      when: foreman_proxy_dhcp
+    - name: Add isc_bind_server role
+      ansible.builtin.import_role:
+        name: isc_bind_server
+      tags:
+        - named
+      when: foreman_proxy_dns
+    - name: Add tftp role
+      ansible.builtin.import_role:
+        name: tftp
+      tags:
+        - tftpd
+      when: foreman_proxy_tftp
+    - name: Add foreman role
+      ansible.builtin.import_role:
+        name: foreman
+      tags:
+        - foreman

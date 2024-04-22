@@ -1,0 +1,21 @@
+---
+- name: Configure Telegraf metrics collection/transport service
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add rsyslog role
+      ansible.builtin.import_role:
+        name: rsyslog
+      tags:
+        - rsyslog
+
+    - name: Include telegraf
+      ansible.builtin.import_role:
+        name: telegraf
+      tags:
+        - telegraf

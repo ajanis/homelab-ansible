@@ -1,0 +1,31 @@
+---
+- name: Deploy cron jobs to remote hosts
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Install cron
+      ansible.builtin.package:
+        name: cron
+        state: present
+
+    - name: Create cron job
+      ansible.builtin.cron:
+        name: "{{ job.name }}"
+        cron_file: "{{ job.file | default(job.name) }}"
+        user: "{{ job.user | default('root') }}"
+        minute: "{{ job.minute | default('0') }}"
+        hour: "{{ job.hour | default('0') }}"
+        day: "{{ job.day | default('*') }}"
+        weekday: "{{ job.weekday | default('*') }}"
+        backup: "{{ job.backup | default(False) }}"
+        job: '/bin/bash -c "{{ job.template }}"'
+        state: present
+      loop: "{{ cron_jobs | default([]) }}"
+      loop_control:
+        loop_var: job
+        label: "{{ job.name }}"

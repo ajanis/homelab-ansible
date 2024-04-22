@@ -1,0 +1,39 @@
+global:
+  scrape_interval:     10s
+  evaluation_interval: 10s
+
+scrape_configs:
+
+{% if has_proxmox | default(False) %}
+  - job_name: 'node-exporter'
+    static_configs:
+    - targets:
+      - localhost:9100
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '.*'
+        target_label: instance
+        replacement: '{{ ansible_hostname }}'
+  - job_name: 'ceph'
+    honor_labels: true
+    static_configs:
+    - targets:
+      - localhost:9283
+      labels: {}
+{% endif %}
+{% if 'metrics' in group_names %}
+  - job_name: 'pihole'
+    static_configs:
+    - targets:
+      - localhost:9617
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '.*'
+        target_label: instance
+        replacement: 'pihole'
+{% endif %}
+remote_write:
+  - url: "http://10.0.10.8:9201/write"
+remote_read:
+  - url: "http://10.0.10.8:9201/read"
+    read_recent: true

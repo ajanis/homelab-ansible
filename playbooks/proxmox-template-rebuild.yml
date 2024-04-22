@@ -1,0 +1,99 @@
+---
+- name: Get list of all templates # noqa command-instead-of-shell no-changed-when run-once
+  ansible.builtin.shell: |
+    set -o pipefail
+    pvesh get /pools/Templates --output-format json |
+    jq '.members | .[].name | (select( . | contains("lxc") | not) |
+    select( . | contains("builder") | not ))'
+  args:
+    executable: /bin/bash
+  register: template_list
+
+- name: Select template for update
+  ansible.builtin.pause:
+    prompt: |-
+      Enter the numeric value for the EXISTING template you wish to update:
+      {% for template in template_list.stdout_lines | list %}
+      {{ loop.index }} : {{ template }}
+      {% endfor %}
+  register: selection
+
+- name: Set Template # noqa no-free-form
+  ansible.builtin.set_fact:
+    proxmox_selected_template: "{{ (template_list.stdout_lines[selection.user_input | int - 1]) | replace('\"', '') }}"
+
+- name: Print Template Selection
+  ansible.builtin.debug:
+    msg: "Selection: {{ proxmox_selected_template }}"
+
+- name: Retrieve information for proxmox_template_name
+  community.general.proxmox_kvm:
+    name: "{{ proxmox_selected_template }}"
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token_secret }}"
+    api_host: "{{ proxmox_api_host }}"
+    node: "{{ proxmox_pve_node }}"
+    state: current
+  register: current_template_info
+
+- name: Set facts for current template # noqa no-handler
+  ansible.builtin.set_fact:
+    proxmox_current_template_vmid: "{{ current_template_info.vmid }}"
+    proxmox_template_name: "{{ proxmox_selected_template }}"
+  when:
+    - current_template_info.vmid is defined
+
+- name: Print details for current template
+  ansible.builtin.debug:
+    msg: |
+      Template Name: {{ proxmox_template_name }}
+      Current Template VMID: {{ proxmox_current_template_vmid }}
+
+- name: Set facts for temporary template-builder VM # noqa no-handler
+  ansible.builtin.set_fact:
+    proxmox_temporary_vm_name: "{{ proxmox_template_name }}-builder"
+  when:
+    - current_template_info.vmid is defined
+
+- name: Print details for temporary template-builder VM
+  ansible.builtin.debug:
+    msg: |
+      Temporary template-builder VM Name: {{ proxmox_temporary_vm_name }}
+
+- name: Create a full clone of of proxmox_template_name to proxmox_temporary_vm_name
+  community.general.proxmox_kvm:
+    api_user: "{{ proxmox_api_user }}"
+    api_token_id: "{{ proxmox_api_token_id }}"
+    api_token_secret: "{{ proxmox_api_token_secret }}"
+    api_host: "{{ proxmox_api_host }}"
+    node: "{{ proxmox_pve_node }}"
+    target: "{{ proxmox_pve_node }}"
+    name: "{{ proxmox_temporary_vm_name }}"
+    pool: Templates
+    state: present
+    clone: "{{ proxmox_template_name }}"
+    full: true
+    storage: "{{ proxmox_vm_storage }}"
+    format: raw
+    ipconfig:
+      ipconfig0: ip={{ proxmox_temporary_vm_cidr }},gw={{ proxmox_temporary_vm_cidr | ansible.utils.ipaddr('1') | ansible.utils.ipaddr('address') }}
+    net:
+      net0: virtio,bridge=vmbr0,mtu=9000,queues=4
+    timeout: 300
+  register: temporary_vm_info
+  retries: 0
+  timeout: 330
+  until: temporary_vm_info is not failed
+
+- name: Verify that proxmox_template_name was succesfully cloned to proxmox_temporary_vm_name
+  ansible.builtin.assert:
+    fail_msg: |
+      Failed: {{ temporary_vm_info.msg }}
+      Debug: {{ temporary_vm_info }}
+    quiet: false
+    success_msg: |
+      Success: {{ temporary_vm_info.msg }}
+      Debug: {{ temporary_vm_info }}
+    that:
+      - temporary_vm_info is not failed

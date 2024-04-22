@@ -1,0 +1,12 @@
+- name: Wipe MBR on target host and force boot from network
+  hosts: all
+  remote_user: root
+  tasks:
+    - name: Add common role
+      ansible.builtin.include_role:
+        name: common
+        tasks_from: reload_os
+    - name: Add common role
+      ansible.builtin.include_role:
+        name: common
+        tasks_from: reboot_os

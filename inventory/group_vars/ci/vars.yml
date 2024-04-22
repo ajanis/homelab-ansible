@@ -1,0 +1,10 @@
+---
+jenkins_config_directory: "{{ data_mount_root }}/{{ configs_directory }}/jenkins/"
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"

@@ -1,0 +1,11 @@
+---
+### Global configurations
+www_domain: home.prettybaked.com
+timezone: US/Central
+
+### Shared storage configuation
+shared_storage: true
+storage_backend: cephfs
+data_mount_root: /data
+imagebuilder_output_directory: "{{ data_mount_root }}/live-image"
+imagebuilder_work_directory: /opt/live-images

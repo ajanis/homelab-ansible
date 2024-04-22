@@ -1,0 +1,68 @@
+---
+- name: Ceph Orch Add Host
+  hosts: ceph_reef
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Add a new Ceph node
+      run_once: true
+      delegate_to: localhost
+      block:
+        - name: Prompt for new Ceph node hostname
+          ansible.builtin.pause:
+            prompt: |
+              Enter the 'hostname' for the new Ceph node:
+          register: ceph_new_hostname
+
+        - name: Prompt for new Ceph node IP address
+          ansible.builtin.pause:
+            prompt: |
+              Enter the 'ipv4 address' for the new Ceph node:
+          register: ceph_new_ipv4
+
+        - name: Prompt for new Ceph 'admin' status
+          ansible.builtin.pause:
+            prompt: |
+              Will this Ceph node act as a  'cluster admin' node?:
+              [1]: Yes
+              [2]: No
+          register: ceph_new_admin_node
+
+        - name: Prompt for new Ceph node labels
+          ansible.builtin.pause:
+            prompt: |
+              Enter the 'labels' for the new Ceph node (comma separated):
+          register: ceph_new_labels
+
+        - name: Set new Ceph node facts
+          ansible.builtin.set_fact:
+            ceph_host_add_hostname: "{{ ceph_new_hostname }}"
+            ceph_host_add_ipv4: "{{ ceph_new_ipv4 }}"
+            ceph_host_add_labels: "{{ ceph_new_labels }}"
+            ceph_host_add_admin_node: "{{ true if ceph_new_admin_node == 1 else false }}"
+          register: ceph_new_host_configured
+
+        - name: Validate new Ceph node facts
+          ansible.builtin.pause:
+            prompt: |
+              Validate new host configs:
+                {{ ceph_host_add_hostname }}
+                {{ ceph_host_add_ipv4 }}
+                {{ ceph_host_add_labels }}
+                {{ ceph_host_add_admin_node }}
+          register: ceph_new_host_validated
+          when: ceph_new_host_configured is defined
+
+        - name: Add new Ceph node via 'ceph orch'
+          ceph_orch_host:
+            name: "{{ ceph_host_add_hostname }}"
+            address: "{{ ceph_host_add_ipv4 }}"
+            set_admin_label: "{{ ceph_host_add_admin_node | bool }}"
+            labels: "{{ ceph_host_add_labels }}"
+            fsid: "{{ fsid }}"
+          register: ceph_new_host_orch_added
+          until: ceph_new_host_orch_added is defined
+          retries: 10
+          delay: 30
+          timeout: 30
+          when: ceph_new_host_validated is not failed

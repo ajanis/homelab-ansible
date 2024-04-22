@@ -1,0 +1,255 @@
+---
+- name: Gather facts and prepare system for cephadm
+  hosts:
+    - mons
+    - mgrs
+    - osds
+  become: true
+  gather_facts: true
+  tags:
+    - cephadm-prepare
+  tasks:
+    - name: Import ceph_defaults role
+      ansible.builtin.import_role:
+        name: ceph_defaults
+
+    - name: Gather and delegate facts # noqa run-once
+      ansible.builtin.setup: {}
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      loop: "{{ groups['mons'] }}"
+      run_once: true
+      when: delegate_facts_host | bool
+
+- name: Run pre-flight playbook
+  ansible.builtin.import_playbook: cephadm-preflight.yml
+  tags:
+    - cephadm-preflight
+
+- name: Bootstrap the cluster
+  hosts: admin[0]
+  become: true
+  gather_facts: true
+  tags:
+    - never
+    - cephadm-bootstrap
+  tasks:
+    - name: Import ceph_defaults role
+      ansible.builtin.import_role:
+        name: ceph_defaults
+
+    - name: Bootstrap initial cluster
+      cephadm_bootstrap:
+        mon_ip: 10.0.10.101
+        fsid: "{{ fsid if fsid is defined else omit }}"
+        pull: "{{ cephadm_pull }}"
+        dashboard: "{{ cephadm_dashboard }}"
+        dashboard_user: "{{ cephadm_dashboard_user }}"
+        dashboard_password: "{{ cephadm_dashboard_password }}"
+        monitoring: "{{ cephadm_monitoring }}"
+        firewalld: "{{ cephadm_firewalld }}"
+        allow_overwrite: "{{ cephadm_allow_overwrite }}"
+        ssh_user: "{{ cephadm_ssh_user }}"
+        ssh_config: "{{ cephadm_ssh_config }}"
+        allow_fqdn_hostname: "{{ cephadm_allow_fqdn_hostname }}"
+        cluster_network: 10.0.10.0/24
+      register: bootstrap_details
+
+# - name: Bootstrap initial cluster
+#   ansible.builtin.command:
+#     cmd: >
+#       cephadm bootstrap
+#       --config /root/initial-ceph.conf
+#       --fsid {{ fsid }}
+#       --mon-ip 10.0.10.101
+#       --mon-id ceph001
+#       --output-keyring /etc/ceph/ceph.client.admin.keyring
+#       --output-config /etc/ceph/ceph.conf
+#       --output-pub-ssh-key /etc/ceph/ceph.pub
+#       --initial-dashboard-user {{ cephadm_dashboard_user }}
+#       --initial-dashboard-password {{ cephadm_dashboard_password }}
+#       --ssh-config /root/.ssh/config
+#       --ssh-private-key /root/.ssh/id_ecdsa
+#       --ssh-public-key /root/.ssh/id_ecdsa.pub
+#       --ssh-user {{ cephadm_ssh_user }}
+#       --allow-overwrite
+#       --with-centralized-logging
+#       --cluster-network 10.0.10.0/24
+#   register: bootstrap_details
+
+- name: Import cephadm-distribute-ssh-key playbook
+  ansible.builtin.import_playbook: cephadm-distribute-ssh-key.yml
+  vars:
+    admin_node: "{{ groups.get('admin')[0] }}"
+  tags:
+    - cephadm-ssh-key
+- name: Add the other nodes
+  hosts: admin[0]
+  become: true
+  gather_facts: true
+  tags:
+    - cephadm-hosts-labels
+  tasks:
+    - name: Import ceph_defaults role
+      ansible.builtin.import_role:
+        name: ceph_defaults
+
+    - name: Run cephadm prepare-host
+      ansible.builtin.command:
+        cmd: cephadm prepare-host
+      changed_when: false
+    - name: Debug add hosts
+      ansible.builtin.debug:
+        msg: |
+          name: "{{ hostvars[item]['ansible_hostname'] }}"
+          address: "{{  hostvars[item]['ansible_host'] }}"
+          set_admin_label: "{{ true if item in groups.get('admin', []) else omit }}"
+          labels: "{{  hostvars[item]['labels'] }}"
+          state: present
+      loop: "{{ groups.get('admin') }}"
+
+    - name: Add hosts
+      ceph_orch_host:
+        name: "{{ hostvars[item]['ansible_hostname'] }}"
+        address: "{{  hostvars[item]['ansible_host'] }}"
+        set_admin_label: "{{ true if item in groups.get('admin', []) else omit }}"
+        labels: "{{  hostvars[item]['labels'] }}"
+        state: present
+      loop: "{{ groups.get('admin') }}"
+
+- name: Cluster configuration options
+  hosts: admin[0]
+  become: true
+  gather_facts: false
+  tags:
+    - cephadm-cluster-settings
+  tasks:
+    - name: Import ceph_defaults role
+      ansible.builtin.import_role:
+        name: ceph_defaults
+
+    - name: Set ceph configs
+      ansible.builtin.template:
+        owner: ceph
+        group: ceph
+        mode: "0644"
+        src: "{{ local_client_dir }}/ceph.conf.j2"
+        dest: "{{ item }}"
+      loop:
+        - /etc/ceph/ceph.conf
+
+    - name: Debug print vars for {{ cephadm_config_options }}
+      ansible.builtin.debug:
+        msg: |
+          {{ item.0.key ~ ' : ' ~ item.1.name ~ ' = ' ~ item.1.value }}
+      loop: "{{ (cephadm_config_options | dict2items) | subelements('value') }}"
+      loop_control:
+        label: "{{ item.1.name ~ ' : ' ~ item.1.value }}"
+
+    - name: Set ceph configuration {{ conf }}
+      ceph_config:
+        fsid: "{{ fsid }}"
+        action: set
+        who: "{{ item.0.key }}"
+        option: "{{ item.1.name }}"
+        value: "{{ item.1.value }}"
+      loop: "{{ (cephadm_config_options | dict2items) | subelements('value') }}"
+      loop_control:
+        label: "{{ item.1.name ~ ' : ' ~ item.1.value }}"
+
+- name: Adjust service placement
+  hosts: admin[0]
+  become: true
+  tags:
+    - cephadm-service-placement
+  gather_facts: true
+  tasks:
+    - name: Import ceph_defaults role
+      ansible.builtin.import_role:
+        name: ceph_defaults
+
+    - name: Update the placement of monitor hosts
+      ceph_orch_apply:
+        spec: |
+          ---
+          service_type: mon
+          service_name: mon
+          placement:
+            host_pattern: '*'
+      register: monitor_update
+
+    - name: Waiting for the monitor to join the quorum # noqa no-handler no-changed-when
+      ansible.builtin.command:
+        cmd: cephadm shell ceph quorum_status --format json
+      register: ceph_health_raw
+      until: (ceph_health_raw.stdout | from_json)['quorum_names'] | length == groups.get('mons', []) | length
+      retries: 300
+      delay: 1
+      when:
+        - monitor_update is changed
+
+    - name: Run Ceph [config set|orch apply|mgr module enable] commands # noqa no-changed-when
+      ansible.builtin.command:
+        cmd: "{{ item }}"
+      loop: "{{ cephadm_enables }}"
+      when:
+        - cephadm_enables is defined
+        - cephadm_enables | length > 0
+
+    - name: Update service placements
+      ceph_orch_apply:
+        spec: |
+          {{ cephadm_service_specs }}
+
+- name: Print cluster info
+  hosts: admin[0]
+  become: true
+  gather_facts: true
+  tags:
+    - cephadm-orch-output
+
+  tasks:
+    - name: Import ceph_defaults role
+      ansible.builtin.import_role:
+        name: ceph_defaults
+
+    - name: Print bootstrap details
+      ansible.builtin.debug:
+        msg: "{{ bootstrap_details | default(None) }}"
+
+    # TODO(guits): address the following tasks:
+    - name: Get ceph orchestrator services
+      ansible.builtin.command:
+        cmd: "{{ cephadm_cmd }} --cluster {{ cluster }} orch ls --refresh"
+      register: ceph_orch_ls
+      changed_when: false
+
+    - name: Print ceph orchestrator results
+      ansible.builtin.debug:
+        msg: |
+          Ceph Orch LS output:
+          {{ ceph_orch_ls.stdout }}
+
+    - name: Get ceph orchestrator daemons
+      ansible.builtin.command:
+        cmd: "{{ cephadm_cmd }} --cluster {{ cluster }} orch ps --refresh"
+      register: ceph_orch_ps
+      changed_when: false
+
+    - name: Print ceph orchestrator results
+      ansible.builtin.debug:
+        msg: |
+          Ceph Orch PS output:
+          {{ ceph_orch_ps.stdout }}
+
+    - name: Get Ceph health status
+      ansible.builtin.command:
+        cmd: "{{ cephadm_cmd }} --cluster {{ cluster }} status"
+      register: ceph_status
+      changed_when: false
+
+    - name: Print ceph status results
+      ansible.builtin.debug:
+        msg: |
+          Ceph Status output:
+          {{ ceph_status.stdout }}

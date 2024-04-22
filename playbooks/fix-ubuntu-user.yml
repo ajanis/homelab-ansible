@@ -1,0 +1,10 @@
+- name: Fix root
+  hosts: all
+  remote_user: ubuntu
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+        tasks_from: fix-login.yml

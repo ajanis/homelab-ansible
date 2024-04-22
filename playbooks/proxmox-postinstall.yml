@@ -1,0 +1,452 @@
+---
+- name: Proxmox Playbooks
+  hosts: proxmox
+  gather_facts: true
+  become: true
+
+  vars_files:
+    - vault.yml
+  vars:
+    pve_debian_target_version:
+      major: 8
+      release: bookworm
+
+  handlers:
+    - name: Execute Server Reboot
+      ansible.builtin.reboot:
+        connect_timeout: 10
+        reboot_timeout: 600
+        msg: Rebooting system via Ansible
+      listen: restart server
+
+    - name: Restart pveproxy
+      ansible.builtin.systemd:
+        name: pveproxy
+        state: reloaded
+        enabled: true
+        daemon_reload: true
+
+    - name: Restart pve-patcher
+      ansible.builtin.systemd:
+        name: pve-patcher
+        state: reloaded
+        enabled: true
+        daemon_reload: true
+
+    - name: Wait for server to come back online
+      ansible.builtin.wait_for_connection:
+        delay: 30
+      listen: restart server
+
+    - name: Perform Grub Rebuild
+      ansible.builtin.command:
+        cmd: update-grub
+      listen: update grub
+      register: grub_update_result
+      changed_when:
+        - grub_update_result.rc == 0
+      notify: update initramfs
+
+    - name: Rebuild InitramFS
+      ansible.builtin.command:
+        cmd: update-initramfs -u -k all
+      listen: update initramfs
+      register: initramfs_update_result
+      changed_when:
+        - initramfs_update_result.rc == 0
+
+  tasks:
+    - name: Base role imports
+      tags:
+        - never
+        - base
+      block:
+        - name: Add common role
+          ansible.builtin.import_role:
+            name: common
+          tags:
+            - common
+        - name: Add openldap role
+          ansible.builtin.import_role:
+            name: openldap
+          tags:
+            - openldap
+          when: openldap_server_ip is defined and openldap_server_ip != None
+        - name: Add ceph-fs role
+          ansible.builtin.import_role:
+            name: ceph-fs
+          when:
+            - shared_storage
+            - storage_backend == "cephfs"
+          tags: -cephfs
+        - name: Add rsyslog role
+          ansible.builtin.import_role:
+            name: rsyslog
+          tags: rsyslog
+        - name: Add telegraf role
+          ansible.builtin.import_role:
+            name: telegraf
+          when: "'telegraf' in group_names"
+          tags: telegraf
+
+    - name: Tuning parameters
+      tags:
+        - never
+        - proxmox-tuning
+      block:
+        - name: Kernel modules and parameters
+          community.general.system.modprobe:
+            name: "{{ item }}"
+            state: "{{ item.value.state }}"
+            params: "{{ item.value.params }}"
+          loop: "{{ pve_kmod_tuning_parameters | dict2items }}"
+
+        - name: Set sysctl tuning parameters
+          ansible.posix.sysctl:
+            name: "{{ item }}"
+            value: "{{ item.value }}"
+            state: present
+            ignoreerrors: false
+            reload: true
+            sysctl_file: /etc/sysctl.conf
+            sysctl_set: true
+          loop: "{{ pve_sysctl_tuning_parameters }}"
+
+        - name: KVM sysfs tuning parameters
+          ansible.builtin.command:
+            cmd: echo {{ item.value }} > {{ item.path }}
+            creates: "{{ item.path }}"
+          loop: "{{ pve_sysfws_tuning_parameters }}"
+
+    - name: GPU Package Installation
+      tags:
+        - never
+        - proxmox-gpu-packages
+      block:
+        - name: Ensure Proxmox Community Repository Is Present
+          ansible.builtin.apt_repository:
+            repo: deb http://download.proxmox.com/debian/pve {{ pve_debian_version }} pve-no-subscription
+            filename: pve-community.list
+            state: present
+
+        - name: Ensure Proxmox Enterprise Repository Is Absent
+          ansible.builtin.file:
+            path: /etc/apt/sources.list.d/pve-enterprise.list
+            state: absent
+
+        - name: Ensure Packages Are Installed
+          ansible.builtin.apt:
+            name:
+              - git
+              - build-essential
+              - dkms
+              - pve-headers
+              - mdevctl
+            state: present
+            update_cache: true
+
+        - name: Check If cargo Is Installed
+          ansible.builtin.command:
+            cmd: command -v cargo
+          changed_when: false
+          register: cargo_exists
+          ignore_errors: true
+
+        - name: Download Rust Compiler Installer
+          ansible.builtin.get_url:
+            url: https://sh.rustup.rs
+            dest: /tmp/sh.rustup.rs
+            mode: "0755"
+            force: true
+          when:
+            - cargo_exists is failed
+
+        - name: Install Rust/cargo
+          ansible.builtin.command:
+            cmd: /tmp/sh.rustup.rs -y
+          register: rust_install_command
+          changed_when: rust_install_command == 0
+          when:
+            - cargo_exists is failed
+
+        - name: Clone vGPU-Proxmox Repository
+          ansible.builtin.git:
+            dest: /root/vgpu-proxmox
+            repo: https://gitlab.com/polloloco/vgpu-proxmox.git
+            clone: true
+            version: d1009fd47a5f683348c14a240c082eef1e265cde
+
+        - name: Clone vGPU Unlock Rust Repository
+          ansible.builtin.git:
+            dest: /opt/vgpu_unlock-rs
+            repo: https://github.com/mbilker/vgpu_unlock-rs.git
+            clone: true
+            version: master
+
+    - name: Build proxmox GPU requirements
+      tags:
+        - never
+        - proxmox-gpu-build
+      block:
+        - name: Build the vGPU Unlocker
+          ansible.builtin.shell:
+            cmd: . /root/.cargo/env && cargo build --release
+            chdir: /opt/vgpu_unlock-rs/
+          register: vgpu_unlock_result
+          changed_when: vgpu_unlock_result.rc == 0
+
+        - name: Ensure vGPU Unlocker Profile Config Directory Exists
+          ansible.builtin.file:
+            path: /etc/vgpu_unlock
+            state: directory
+            mode: "0744"
+
+        - name: Ensure vGPU Unlocker Profile Config Exists
+          ansible.builtin.file:
+            path: /etc/vgpu_unlock/profile_override.toml
+            state: touch
+            mode: "0744"
+
+        - name: Ensure vGPU Unlocker systemd Service Config Directories Exists
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: directory
+            mode: "0744"
+          with_items:
+            - /etc/systemd/system/nvidia-vgpud.service.d
+            - /etc/systemd/system/nvidia-vgpu-mgr.service.d
+
+        - name: Create vGPU Unlocker systemd Service Unit Config
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/nvidia-vgpud.service.d/vgpu_unlock.conf
+            mode: "0744"
+            content: |-
+              [Service]
+              Environment=LD_PRELOAD=/opt/vgpu_unlock-rs/target/release/libvgpu_unlock_rs.so
+
+        - name: Create vGPU Unlocker systemd Service Manager Unit Config
+          ansible.builtin.copy:
+            dest: /etc/systemd/system/nvidia-vgpu-mgr.service.d/vgpu_unlock.conf
+            mode: "0744"
+            content: |-
+              [Service]
+              Environment=LD_PRELOAD=/opt/vgpu_unlock-rs/target/release/libvgpu_unlock_rs.so
+
+        - name: Ensure IOMMU Enabled In Grub
+          ansible.builtin.replace:
+            regexp: ^GRUB_CMDLINE_LINUX_DEFAULT="quiet"$
+            replace: GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt"
+            path: /etc/default/grub
+          notify: update grub
+
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
+
+        - name: Ensure Required Kernel Modules
+          ansible.builtin.blockinfile:
+            path: /etc/modules
+            block: |
+              vfio
+              nvfio_iommu_type1
+              nvfio_pci
+              nvfio_virqfd
+            state: present
+          notify: update initramfs
+
+        - name: Ensure Blacklisted Kernel Modules
+          community.general.kernel_blacklist:
+            name: nouveau
+            blacklist_file: /etc/modprobe.d/blacklist.conf
+            state: present
+          notify: update initramfs
+
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
+
+    - name: Install updated PVE headers
+      tags:
+        - never
+        - proxmox-gpu-build
+      block:
+        - name: Upgrade pve-headers
+          ansible.builtin.apt:
+            name: pve-headers
+            state: present
+            update_cache: true
+          notify: restart server
+
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
+
+    - name: Build proxmox GPU requirements
+      tags:
+        - never
+        - nvidia-driver-patch
+      block:
+        - name: Copy Patched NVidia Driver Script
+          ansible.builtin.copy:
+            dest: /opt/NVIDIA-Linux-x86_64-525.60.12-vgpu-kvm-custom.run
+            src: /data/NVIDIA-Linux-x86_64-525.60.12-vgpu-kvm-custom.run
+            mode: "0777"
+            remote_src: true
+
+        - name: Run NVidia Driver Script
+          ansible.builtin.command:
+            cmd: ./NVIDIA-Linux-x86_64-525.60.12-vgpu-kvm-custom.run --dkms -q -s
+            chdir: /opt
+          register: nvidia_driver
+          changed_when: false
+
+        - name: Assert Driver Script Success
+          ansible.builtin.assert:
+            that:
+              - nvidia_driver is not failed
+          notify: restart server
+
+        - name: Flush handlers
+          ansible.builtin.meta: flush_handlers
+
+    - name: Mediated Device Setup
+      tags:
+        - never
+        - nvidia-mediated-driver
+      block:
+        - name: Gather mdevctl Types
+          ansible.builtin.command:
+            cmd: mdevctl types
+          register: mdevctl_types
+          when: not ansible_check_mode
+          changed_when: mdevctl_types.rc == 0
+
+        - name: Assert Mediated Device Types Exist
+          ansible.builtin.assert:
+            that:
+              - mdevctl_types.stdout_lines | length > 0
+          when: not ansible_check_mode
+
+    - name: Disable subscription nag window
+      tags:
+        - never
+        - subscription
+      block:
+        - name: Install fake subscription service
+          ansible.builtin.apt:
+            deb: https://github.com/Jamesits/pve-fake-subscription/releases/download/v0.0.9/pve-fake-subscription_0.0.9+git-1_all.deb
+
+    - name: Proxmox Upgrades
+      tags:
+        - never
+        - pveupgrade
+      block:
+        - name: Remove unused apt files
+          # Comment
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - /etc/apt/sources.list.d/cuda-debian11-x86_64.list
+
+        - name: Modify OS version in apt repository files
+          # Comment
+          ansible.builtin.replace:
+            path: /etc/apt/sources.list
+            regexp: "{{ ansible_distribution_release }}"
+            replace: "{{ pve_debian_target_version.release }}"
+          register: apt_sources_update
+
+        - name: Update contents of ceph repo file
+          # Comment
+          ansible.builtin.copy:
+            backup: false
+            dest: /etc/apt/sources.list.d/ceph.list
+            content: |
+              deb http://download.proxmox.com/debian/ceph-reef bookworm no-subscription
+            mode: "0644"
+            owner: root
+          register: apt_ceph_sources_update
+
+        - name: Update apt cache
+          # Comment
+          ansible.builtin.apt:
+            update_cache: true
+          register: apt_cache_update
+          when:
+            - apt_sources_update is changed
+            - apt_ceph_sources_update is changed
+
+        - name: Print results of apt update
+          # Commentv
+          ansible.builtin.debug:
+            var: apt_cache_update.stdout
+          when:
+            - apt_cache_update is succeeded
+        - name: Simulate apt dist upgrade
+          # Comment
+          ansible.builtin.command:
+            cmd: apt full-upgrade --simulate
+          register: apt_dist_upgrade_simulate
+          changed_when: false
+          when:
+            - apt_cache_update is succeeded
+
+        - name: Print results of simulated apt dist upgrade
+          # Comment
+          ansible.builtin.debug:
+            var: apt_dist_upgrade_simulate.stdout
+          when: apt_dist_upgrade_simulate is succeeded
+        - name: Apt dist upgrade
+          # Comment
+          ansible.builtin.apt:
+            update_cache: true
+            upgrade: dist
+          register: apt_dist_upgrade_real
+          when:
+            - apt_dist_upgrade_simulate is succeeded
+
+        - name: Print results of apt dist upgrade
+          # Comment
+          ansible.builtin.debug:
+            var: apt_dist_upgrade_real.stdout
+          when:
+            - apt_dist_upgrade_real is succeeded
+
+        - name: Clean up apt packages
+          # Comment
+          ansible.builtin.apt:
+            autoclean: true
+            autoremove: true
+          when:
+            - "'apt autoremove' in apt_dist_upgrade_real.stdout"
+## Manual shit
+
+# - name: "Create pve-patcher service file"
+#   ansible.builtin.copy:
+#     dest: /etc/systemd/system/pve-patcher.service
+#     content:  |
+#       [Unit]
+#       Description=PVE subscription popup disabler
+
+#       [Service]
+#       Type=oneshot
+#       RemainAfterExit=yes
+#       ExecStart=sed -Ezi.bak "s/(Ext.Msg.show\(\{\s+title: gettext\('No valid sub)/void\(\{ \/\/\1/g" \
+# /usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+
+#       [Install]
+#       WantedBy=pveproxy.service
+
+# - name: Enable pve-patcher service
+#   ansible.builtin.systemd:
+#     name:  pve-patcher
+#     enabled: yes
+#     daemon_reload: True
+#   notify: Restart pveproxy
+
+# - name: "Update proxmoxlib.js"
+#   ansible.builtin.replace:
+#     path: "/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"
+#     regexp: "^.*(Ext.Msg.show\\(\\{).*(\\n\\s+title:\\sgettext\\('No valid subscription'\\),)"
+#     replace: '                         void({ //\1\2'
+#     backup: True
+#   notify:
+#      - Restart pveproxy

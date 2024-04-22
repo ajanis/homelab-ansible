@@ -1,0 +1,34 @@
+---
+- name: Deploy tftpserver
+  hosts: tftpserver
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Add common role
+      ansible.builtin.include_role:
+        name: common
+    - name: Add openldap role
+      ansible.builtin.include_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    - name: Add ceph-fs role
+      ansible.builtin.include_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"
+    - name: Add nfs role
+      ansible.builtin.include_role:
+        name: nfs
+      when:
+        - shared_storage
+        - storage_backend == "nfs"
+    - name: Add dnsmasq role
+      ansible.builtin.include_role:
+        name: dnsmasq
+    - name: Add tftpserver role
+      ansible.builtin.include_role:
+        name: tftpserver
+      tags:
+        - build_images
+        - tftp_config

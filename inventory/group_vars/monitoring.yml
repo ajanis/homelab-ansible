@@ -1,0 +1,79 @@
+---
+shared_storage: true
+storage_backend: cephfs
+enable_mdns_reflection: true
+openldap_server_dc: dc={{ ',dc='.join(openldap_server_domain_name.split('.')) }}
+
+monitoring_config_directory: "{{ data_mount_root }}/{{ configs_directory }}/monitoring"
+
+rsyslog_config: true
+rsyslog_pri_domain_name: "{{ www_domain }}"
+rsyslog_servers:
+  - name: (o)127.0.0.1
+    proto: tcp
+    port: "6514"
+    format: RSYSLOG_SyslogProtocol23Format
+    selectors:
+      - "*.*"
+
+rsyslog_options:
+  - $ActionQueueType LinkedList # use asynchronous processing
+  - $ActionQueueFileName srvrfwd # set file name, also enables disk mode
+  - $ActionResumeRetryCount -1 # infinite retries on insert failure
+  - $ActionQueueSaveOnShutdown on # save in-memory data if rsyslog shuts down
+
+telegraf_plugins_extra:
+  - name: bond
+    options:
+      host_proc: /proc
+      bond_interfaces:
+        - bond0
+  - name: ipmi_sensor
+    options:
+      interval: 30s
+      metric_version: 2
+  - name: smart
+    options:
+      use_sudo: "true"
+  - name: temp
+  - name: sensors
+  - name: syslog
+    options:
+      server: tcp://:6514
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+
+power_panel_version: "470"
+
+docker_build_images:
+  power_panel_remote_{{ power_panel_version }}:
+    repo: https://github.com/constructorfleet/powerpanel-business-docker.git
+    version: master
+    dockerfile: Dockerfile.remote
+    buildargs:
+      PPB_VERSION: "{{ power_panel_version }}"
+
+docker_containers:
+  power_panel:
+    image: power_panel_remote_{{ power_panel_version }}
+    description: CyberPower PowerPanel Business UPS Remote Management Controller
+    container_name: cyberpower_powerpanel
+    restart: unless-stopped
+    network_mode: host
+    privileged: true
+    ports:
+      - 3052:3052
+      - 53568:53568
+    volumes:
+      - "{{ monitoring_config_directory }}/powerpanel/local:/usr/local/ppbe/db_local/"
+      - "{{ monitoring_config_directory }}/powerpanel/remote:/usr/local/ppbe/db_remote/"
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    logging:
+      driver: journald
+      options:
+        tag: cyberpower_powerpanel

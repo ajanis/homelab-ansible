@@ -1,0 +1,69 @@
+---
+vault_mysql_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  34663762316561343331373365663236393331373861666133323433316335363866386431356637
+  3133306633616664636439663163666366373636616466640a646635343637306338356636613035
+  65343263633137646363336234366666383136633662353962303863626137396237663839303239
+  3933346665396566370a653936666464616564633132626364373130646130313036343064636564
+  62383030643261393530636331303231326335383164356534363065396462346634
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"
+  - name: postgresql
+    options:
+      address: postgres://postgres:{{ vault_postgres_password }}@localhost
+      ignored_databases:
+        - template0
+        - template1
+
+docker_containers:
+  postgres:
+    description: Postgres DB
+    image: postgres
+    restart_poligy: unless-stopped
+    env:
+      PUID: "0"
+      PGID: "0"
+      VERSION: latest
+      POSTGRES_PASSWORD: "{{ vault_postgres_password }}"
+      POSTGRES_DB: "{{ postgres_default_db }}"
+    ports:
+      - 5432:5432
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/lib/postgresql/postgresql-common:/etc/postgresql-common
+      - /var/lib/postgresql:/var/lib/postgresql
+      - /var/lib/postgresql/data:/var/lib/postgresql/data
+
+  mysql:
+    description: MySQL DB
+    image: mysql:8.0.25
+    restart_policy: unlies-stopped
+    ports:
+      - 3306:3306
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/lib/mysql/data:/var/lib/mysql
+      - /var/lib/mysql/etc:/etc/mysql
+    env:
+      MYSQL_PASSWORD: "{{ vault_mysql_password }}"
+      PGID: "0"
+      MYSQL_ROOT_PASSWORD: "{{ vault_mysql_password }}"
+      MYSQL_USER: mysql
+      PUID: "0"
+      MYSQL_DATABASE: almond
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      GOSU_VERSION: "1.12"
+      MYSQL_MAJOR: "8.0"
+      SECURE_FILE_PRIV: ""
+      MYSQL_VERSION: 8.0.25-1debian10

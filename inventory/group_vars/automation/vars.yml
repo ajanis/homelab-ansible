@@ -1,0 +1,390 @@
+---
+edgetpu_pcie: true
+docker_install_nvidia: true
+docker_install_community_edition: true
+
+shared_storage: true
+storage_backend: cephfs
+
+enable_mdns_reflection: true
+
+object_detections_grok_pattern: '^.*%{TIMESTAMP_ISO8601:timestamp}.*Detection Complete.*"package": "%{NOTSPACE:package}".*"name": "%{NOTSPACE:detector}".*"duration":
+  %{NUMBER:duration}.*"detections": %{NUMBER:detections}.*("device".*"Path":"%{NOTSPACE:device}").*$'
+object_detection_requests_grok_pattern: '^.*%{TIMESTAMP_ISO8601:timestamp}.*HTTP Request.*"took": %{NUMBER:duration}.*"remote": "%{HOSTPORT:source}".*$'
+
+postgres_connection_string: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  37363665373432346135343830316162393136636335356239366338643062393136303165613662
+  3462343936333861626166383863336163323062373630610a316237653631323361306563613130
+  34343965633635386166373063646334663234373162653738623133343664353139343731333062
+  6332633530656666660a373432363265643734646437383430646662343162326533396532653234
+  31373637376264346366666637653230383061363433333033303232616431323333326437346633
+  63386536376531366439393362383236313536636463613562333834383966363264626636323032
+  32323031633665376135323534333562373438323539356637633962383862356462363661333236
+  66383635373163336465
+frigate_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  66373363376637656166653464313935353732316365373836626531653635663964353065616564
+  3033313436636663313336363639613030656137316237310a656638336236363066373566613462
+  33376538313733373034363363353231333665346639333731326434323063316265343038663864
+  3566363166323062350a306337616262363239376530363063663338663862616330343936623263
+  61656163613462633939346232386139623830613866663261306265303434393930
+scrypted_auth_token: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  36376637616166346633376539313432303761643164636136613765343936386639653631616133
+  6439656166613836316636663638363838636239663035630a373134613961343866643131613039
+  32333962336336356165653661353332303138343762306533613563643666343537313734616566
+  3636643336303533330a326161356432633663316231316137383264303337313437363938643138
+  39326632653865383434343265396430663564313161623439303139386262653937333364373932
+  38343165653632316230393839326137396632323238613538643364393365336231653932306134
+  30303935353335646631343737386338333232643936386535623631343533653161303731313134
+  33663839303437613632393735353261316564373364633662653161643164636138646262616537
+  65313566326337386535613836633265363966303633373233663839333166366231
+compreface_db_user: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  30666561613565376434373133616334393031643938633166653261636166663564663662343139
+  3836303861396633313534373233323035386331633964610a316537386264313561326562346565
+  64636137323031383762373037376163303735636436366234643732613530356264653937636261
+  6338356434616436350a653962616563363735633736636466613766626237343435333561666461
+  6665
+compreface_db_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  35646562653062373966383431616433346663366365653737616231633862646565376666373537
+  3238313134616164326435313137633161646661623261330a383532333162363930346634393565
+  66363235356632326137306264373532363539653266373361393330303161316331633862643937
+  6433643533383238640a656663353835393262363266383638366532356439356664613736353132
+  3232
+frigate_plus_api_key: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  36343331383130646335346636393430633636333166653639633664353731643330663462356537
+  6139666661623731383337636336633266343239653133640a383932323638303932323936616565
+  37323761633063313030623562656463326430393934323765376630616138376163326366316330
+  6263316664323332650a313532623935333033633839306334616663616336373262313565303962
+  66626534666562663534303263633061313964353862373236363835623137653631303630323434
+  35346638313938636132623638656462343562353362323236333061656161653365633730363131
+  63643237663536333332343633623964303331636564386134633539373234626261623665363164
+  62633139663637373733
+
+
+telegraf_plugins_extra:
+  - name: bond
+    options:
+      host_proc: /proc
+      bond_interfaces:
+        - bond0
+  - name: ipmi_sensor
+    options:
+      interval: 30s
+      metric_version: 2
+  - name: smart
+    options:
+      use_sudo: "true"
+  - name: temp
+  - name: sensors
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"
+  - name: nvidia_smi
+
+scrypted:
+  mount_dir: /opt/scrypted
+  version: latest
+frigate:
+  mount_dir: /opt/frigate
+  version: "0.13.2"
+  ports:
+    api: 1984:1984
+    web_ui: 5000:5000
+    rtsp_feeds: 8554:8554 # RTSP feeds
+    webrtc_feeds: 8555:8555 # WebRTC over tcp
+    # webrtc_udp: 8555:8555/udp
+codeproject:
+  mount_dir: /opt/codeproject
+  version: cuda12_2
+  ports:
+    web_ui: 32168:32168
+frigate_alpr:
+  mount_dir: /opt/frigate_alpr
+  version: latest
+watchtower:
+  mount_dir: /opt/watchtower
+  version: latest
+  ports:
+    web_ui: 8080:8080
+compreface:
+  mount_dir: /opt/compreface
+  version: latest
+  ports:
+    web_ui: 80:80
+doubletake:
+  mount_dir: /opt/double-take
+  version: latest
+  ports:
+    web_ui: 3000:3000
+
+_1password:
+  mount_dir: /opt/1password
+  version: latest
+  ports:
+    api: 7080:8080
+    sync: 7081:8080
+
+cvat_root_dir: /opt/cvat
+cvat:
+  db:
+    version: 15-alpine
+    mount_dir: "{{ cvat_root_dir }}/db/data"
+  redis:
+    verion: x86_64_v6.3.4
+    mount_dir: "{{ cvat_root_dir }}/db/cache"
+  server:
+    version: v2.9.1
+    mount_dir: "{{ cvat_root_dir }}/server"
+  ui:
+    version: v2.9.1
+    mount_dir: "{{ cvat_root_dir }}/ui"
+  traefik:
+    version: v2.10
+    ports:
+      entry: 6080:8080
+      dashboard: 6090:8090
+  clickhouse:
+    version: 22.3-alpine
+    mount_dir: "{{ cvat_root_dir }}/clickhouse"
+  vector:
+    version: "0.26.0-alpine"
+    mount_dir: "{{ cvat_root_dir }}/vector"
+  opa:
+    version: "0.45.0-rootless"
+
+docker_compose_projects:
+  - project_name: authentication
+    pull: true
+    definition:
+      version: "3.4"
+
+      services:
+        op-connect-api:
+          container_name: 1password-api
+          hostname: 1password-api
+          image: 1password/connect-api:{{ _1password.version }}
+          restart: unless-stopped
+          ports:
+            - "{{ _1password.ports.api }}"
+          volumes:
+            - "{{ _1password.mount_dir }}/1password-credentials.json:/home/opuser/.op/1password-credentials.json"
+            - "{{ _1password.mount_dir }}/data:/home/opuser/.op/data"
+          environment:
+            PUID: 999
+            GUID: 999
+          logging:
+            driver: journald
+            options:
+              tag: 1password-api
+
+        op-connect-sync:
+          container_name: 1password-sync
+          hostname: 1password-sync
+          image: 1password/connect-sync:{{ _1password.version }}
+          restart: unless-stopped
+          ports:
+            - "{{ _1password.ports.sync }}"
+          volumes:
+            - "{{ _1password.mount_dir }}/1password-credentials.json:/home/opuser/.op/1password-credentials.json"
+            - "{{ _1password.mount_dir }}/data:/home/opuser/.op/data"
+          environment:
+            PUID: 999
+            GUID: 999
+          logging:
+            driver: journald
+            options:
+              tag: 1password-sync
+
+  - project_name: ml_pipeline
+    pull: true
+    definition:
+      version: "3.8"
+
+      x-logging: &default-logging
+        driver: journald
+
+      networks:
+        default:
+          driver: bridge
+
+      services:
+        scrypted:
+          container_name: scrypted
+          hostname: scrypted
+          image: koush/scrypted:{{ scrypted.version }}
+          restart: unless-stopped
+          network_mode: host
+          runtime: nvidia
+          volumes:
+            - "{{ scrypted.mount_dir }}/config/server/volume:/server/volume"
+            - "{{ scrypted.mount_dir }}/data/nvr:/nvr"
+            - /data/nvr:/nvr/high-res
+          devices:
+            - /dev/bus/usb:/dev/bus/usb
+          environment:
+            NVIDIA_DRIVER_CAPABILITIES: all
+            NVIDIA_VISIBLE_DEVICES: all
+            SCRYPTED_WEBHOOK_UPDATE_AUTHORIZATION: Bearer {{ scrypted_auth_token }}
+            SCRYPTED_WEBHOOK_UPDATE: http://watchtower:8080/v1/update
+          labels:
+            com.centurylinklabs.watchtower.scope: scrypted
+          logging:
+            <<: *default-logging
+            options:
+              tag: scrypted
+
+        frigate:
+          container_name: frigate
+          hostname: frigate
+          privileged: true # this may not be necessary for all setups
+          restart: unless-stopped
+          image: ghcr.io/blakeblackshear/frigate:{{ frigate.version }}
+          shm_size: 400mb
+          networks:
+            - default
+          runtime: nvidia
+          links:
+            - codeproject
+          ports:
+            - "{{ frigate.ports.api }}"
+            - "{{ frigate.ports.web_ui }}"
+            - "{{ frigate.ports.rtsp_feeds }}"
+            - "{{ frigate.ports.webrtc_feeds }}"
+          devices:
+            - /dev/apex_0:/dev/apex_0
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - "{{ frigate.mount_dir }}/config:/config"
+            - "{{ frigate.mount_dir }}/data/media:/media/frigate"
+            - "{{ frigate.mount_dir }}/custom_ffmpeg:/usr/lib/btbn-ffmpeg"
+          environment:
+            NVIDIA_DRIVER_CAPABILITIES: all
+            NVIDIA_VISIBLE_DEVICES: all
+            PLUS_API_KEY: "{{ frigate_plus_api_key }}"
+          logging:
+            <<: *default-logging
+            options:
+              tag: frigate
+
+        codeproject:
+          container_name: codeproject
+          hostname: codeproject
+          privileged: true
+          restart: unless-stopped
+          image: codeproject/ai-server
+          networks:
+            - default
+          runtime: nvidia
+          ports:
+            - "{{ codeproject.ports.web_ui }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - "{{ codeproject.mount_dir }}/config:/etc/codeproject/ai"
+            - "{{ codeproject.mount_dir }}/modules:/app/modules"
+          environment:
+            TZ: America/Denver
+            NVIDIA_DRIVER_CAPABILITIES: all
+            NVIDIA_VISIBLE_DEVICES: all
+            PLATE_CONFIDENCE: "0.5"
+            AUTO_PLATE_ROTATE: "true"
+            PLATE_RESCALE_FACTOR: "6"
+          logging:
+            <<: *default-logging
+            options:
+              tag: codeproject
+
+        watchtower:
+          container_name: scrypted_watchtower
+          hostname: scrypted_watchtower
+          image: containrrr/watchtower:{{ watchtower.version }}
+          privileged: true
+          restart: unless-stopped
+          networks:
+            default:
+              aliases:
+                - watchtower
+                - scrypted_watchtower
+                - scryped_webhook_update
+                - scrypted_webhook
+                - webhook
+          ports:
+            - "{{ watchtower.ports.web_ui }}"
+          volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+          environment:
+            WATCHTOWER_HTTP_API_TOKEN: "{{ scrypted_auth_token }}"
+            WATCHTOWER_HTTP_API_UPDATE: "true"
+            WATCHTOWER_SCOPE: scrypted
+            WATCHTOWER_HTTP_API_PERIODIC_POLLS: "true"
+          labels:
+            com.centurylinklabs.watchtower.scope: scrypted
+          command: --interval 3600 --cleanup
+          logging:
+            <<: *default-logging
+            options:
+              tag: scrypted_watchtower
+
+        compreface:
+          image: exadel/compreface:{{ compreface.version }}
+          container_name: compreface
+          hostname: compreface
+          privileged: true
+          restart: unless-stopped
+          runtime: nvidia
+          networks:
+            - default
+          ports:
+            - "{{ compreface.ports.web_ui }}"
+          volumes:
+            - "{{ compreface.mount_dir }}/data/postgresql:/var/lib/postgresql/data"
+            - /etc/localtime:/etc/localtime:ro
+          environment:
+            API_JAVA_OPTS: -Xmx8g
+            NVIDIA_DRIVER_CAPABILITIES: all
+            NVIDIA_VISIBLE_DEVICES: all
+            UWSGI_ESSES: "2"
+            UWSGI_THREADS: "1"
+          logging:
+            driver: journald
+            options:
+              tag: compreface
+
+        double-take:
+          container_name: double_take
+          hostname: double_take
+          image: jakowenko/double-take:{{ doubletake.version }}
+          privileged: true
+          restart: unless-stopped
+          networks:
+            default:
+              aliases:
+                - double-take
+                - doubletake
+          links:
+            - codeproject
+            - frigate
+            - compreface
+          ports:
+            - "{{ doubletake.ports.web_ui }}"
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - "{{ doubletake.mount_dir }}/data:/.storage"
+          depends_on:
+            - compreface
+          logging:
+            driver: journald
+            options:
+              tag: double-take

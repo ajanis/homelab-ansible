@@ -1,0 +1,38 @@
+---
+shared_storage: false
+use_ldap_automount: false
+docker_install_community_edition: true
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"
+docker_containers:
+  coral:
+    description: Real-time RTSP object detection
+    image: coral
+    network_mode: host
+    env:
+      PUID: "0"
+      PGUID: "0"
+      version: latest
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 5000
+    privileged: true
+
+docker_build_images:
+  coral:
+    repo: https://github.com/robmarkcole/coral-pi-rest-server.git
+    branch: master

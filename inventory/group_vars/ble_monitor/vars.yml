@@ -1,0 +1,20 @@
+---
+report_device_tracker: "true"
+ble_report_alias: "true"
+report_scan_messages: "true"
+rssi_delta_report_trigger: -1
+cooperative_scan_confidence_threshold: 95
+confidence_reporting_threshold: 85
+minimum_scan_interval: 5
+
+service_options:
+  repeat: true
+#  beacons: true
+#  report_all: true
+service_trigger_options: {}
+
+known_devices:
+  - name: Teagan Presence
+    mac: F8:10:93:71:16:54
+  - name: Alan Presence
+    mac: 5C:87:30:61:74:92

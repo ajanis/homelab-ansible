@@ -1,0 +1,49 @@
+---
+- name: Deploy InfluxDB
+  hosts:
+    - influxdb
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+      tags:
+        - common
+    - name: Add openldap role
+      ansible.builtin.import_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+      tags:
+        - openldap
+    - name: Add ceph-fs role
+      ansible.builtin.import_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"
+      tags:
+        - ceph-fs
+    - name: Add docker role
+      ansible.builtin.import_role:
+        name: docker
+      tags:
+        - docker
+    - name: Add influxdb role
+      ansible.builtin.import_role:
+        name: influxdb
+      when: "'influxdb' in group_names"
+    - name: Add telegraf role
+      ansible.builtin.import_role:
+        name: telegraf
+      when: "'telegraf' in group_names"
+      tags:
+        - telegraf
+    - name: Run setup
+      ansible.builtin.setup:
+      tags:
+        - setup
+        - always

@@ -1,0 +1,218 @@
+- name: Restart all docker containers across network
+  hosts: all,!opnsense,!ble_monitor,!automation
+  remote_user: root
+  vars:
+    restart_services:
+      - docker
+      - nginx
+      - foreman
+      - foreman-proxy
+      - autofs
+      - nscd
+      - nslcd
+      - ffmpeg_transcode
+
+  tasks:
+    - name: Verify hosts are online to avoide false-positive job failures
+      block:
+        - name: Determine hosts that are up
+          ansible.builtin.wait_for_connection:
+            connect_timeout: 5
+      rescue:
+        - name: Create host group for failed hosts
+          ansible.builtin.group_by:
+            key: unreachable_hosts
+
+    - name: "Check for datahealth.txt file on cephfs"
+      when:
+        - "'unreachable_hosts' not in group_names"
+      block:
+        - name: Stat datahealth.txt file on cephfs directory
+          ansible.builtin.stat:
+            path: "{{ data_mount_root }}/datahealth.txt"
+          register: cephfs_health
+      rescue:
+        - name: Create host group for hosts requiring data mount repair
+          ansible.builtin.group:
+            key: hosts_require_repair
+
+        - name: "Validate datahealth.txt file on cephfs string is 'OK'"
+          ansible.builtin.command:
+            cmd: "cat {{ data_mount_root }}/datahealth.txt"
+          register: datahealth_contents
+          when:
+            - "'hosts_require_repair' not in group_names"
+
+        - name: "Assert datahealth.txt contents read 'OK'"
+          ansible.builtin.assert:
+            that:
+              - datahealth_contents['stdout']|trim == 'OK'
+            success_msg: "{{ datahealth_contents['stdout'] | trim }} reads 'OK'"
+            fail_msg: |
+              {% if not cephfs_health.stat.readable | default(False) %}
+              File unreadable
+              {% elif datahealth_contents['stdout'] | trim != "OK" %}
+              Invalid file contents
+              {% endif %}
+          when:
+            - "'hosts_require_repair' not in group_names"
+
+        - name: Print stat error
+          ansible.builtin.debug:
+            msg: "{{ cephfs_health.stat | default('STAT ERROR UNKNOWN') }}"
+            verbosity: 1
+          when:
+            - "'hosts_require_repair' in group_names"
+
+        - name: Print datahealth.txt content
+          ansible.builtin.debug:
+            msg: "{{ datahealth_contents['stdout'] | trim }}"
+            verbosity: 1
+          when:
+            - "'hosts_require_repair' not in group_names"
+
+        - name: Populate service facts
+          ansible.builtin.service_facts:
+          when:
+            - "'hosts_require_repair' in group_names"
+
+        - name: List service facts
+          ansible.builtin.debug:
+            var: ansible_facts.services
+            verbosity: 1
+          when:
+            - "'hosts_require_repair' in group_names"
+
+        - name: List cephfs dependent services
+          ansible.builtin.debug:
+            msg:
+              - "name: {{ item }}"
+            verbosity: 0
+          loop: "{{ restart_services }}"
+          when:
+            - "'hosts_require_repair' in group_names"
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - item | regex_search('^'~item~'(?:\\.service)?') in
+              hostvars[inventory_hostname]['ansible_facts']['services']
+
+        - name: Stop cephfs dependent services
+          ansible.builtin.service:
+            name: "{{ item }}"
+            state: stopped
+          loop: "{{ restart_services }}"
+          when:
+            - "'hosts_require_repair' in group_names"
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - item | regex_search('^'~item~'(?:\\.service)?') in
+              hostvars[inventory_hostname]['ansible_facts']['services']
+
+        - name: List docker container services
+          ansible.builtin.debug:
+            msg:
+              - name: "{{ item.value.name }}"
+              - state: "{{ item.value.state | default('') }}"
+            verbosity: 0
+          loop:
+            "{{ hostvars[inventory_hostname]['ansible_facts']['services'] | default({}) | dict2items
+            }}"
+          register: docker_services_present
+          when:
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - "'hosts_require_repair' in group_names"
+            - item.value.name | regex_search('^(docker-\\w+(?:\\.service)?)$', '\\1')
+
+        - name: Stop container services
+          ansible.builtin.service:
+            name: "{{ item.value.name }}"
+            state: stopped
+          loop:
+            "{{ hostvars[inventory_hostname]['ansible_facts']['services'] | default({}) | dict2items
+            }}"
+          when:
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - "'hosts_require_repair' in group_names"
+            - item.value.name | regex_search('^(docker-\\w+(?:\\.service)?)$','\\1')
+
+        - name: Stop docker service
+          ansible.builtin.service:
+            name: "{{ item.value.name }}"
+            state: stopped
+          loop:
+            "{{ hostvars[inventory_hostname]['ansible_facts']['services'] | default({}) | dict2items
+            }}"
+          when:
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - "'hosts_require_repair' in group_names"
+            - item.value.name | regex_search('^(docker(?:\\.service)?)$','\\1')
+          failed_when: false
+        - name: Force data umount
+          ansible.builtin.command:
+            cmd: "umount -lf {{ data_mount_root }}"
+          when:
+            - "'hosts_require_repair' in group_names"
+
+        - name: Stop cephfs mount service
+          ansible.builtin.service:
+            name: "{{ data_mount_root | regex_replace('^\\/', '') }}.mount"
+            state: stopped
+          register: mount_stopped
+          when:
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - "'hosts_require_repair' in group_names"
+
+        - name: List mount stop stdout
+          ansible.builtin.debug:
+            var: mount_stopped
+            verbosity: 0
+          when:
+            - "'hosts_require_repair' in group_names"
+
+        - name: Start cephfs mount service
+          ansible.builtin.service:
+            name: "{{ data_mount_root | regex_replace('^\\/', '') }}.mount"
+            state: started
+          register: mount_started
+          when:
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - "'hosts_require_repair' in group_names"
+
+        - name: List mount start stdout
+          ansible.builtin.debug:
+            var: mount_started
+            verbosity: 0
+          when:
+            - "'hosts_require_repair' in group_names"
+
+        - name: Restart cephfs dependent services
+          ansible.builtin.service:
+            name: "{{ item }}"
+            state: started
+          loop: "{{ restart_services }}"
+          when:
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - "'hosts_require_repair' in group_names"
+            - item | regex_search('^'~item~'(?:\\.service)?') in
+              hostvars[inventory_hostname]['ansible_facts']['services']
+
+        - name: Start docker service
+          ansible.builtin.service:
+            name: "{{ item.value.name }}"
+            state: started
+          loop:
+            "{{ hostvars[inventory_hostname]['ansible_facts']['services'] | default({}) | dict2items
+            }}"
+          when:
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - "'hosts_require_repair' in group_names"
+            - item.value.name | regex_search('^(docker(?:\\.service)?)$','\\1')
+        - name: Start container services
+          ansible.builtin.service:
+            name: "{{ item.value.name }}"
+            state: started
+          loop:
+            "{{ hostvars[inventory_hostname]['ansible_facts']['services'] | default({}) | dict2items
+            }}"
+          when:
+            - hostvars[inventory_hostname]['ansible_facts']['services'] is defined
+            - "'hosts_require_repair' in group_names"
+            - item.value.name | regex_search('^(docker-\\w+(?:\\.service)?)$','\\1')

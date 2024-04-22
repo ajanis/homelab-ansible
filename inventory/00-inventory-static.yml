@@ -1,0 +1,80 @@
+---
+all:
+  children:
+    ceph_reef: {}
+    automation:
+      hosts:
+        deepthought:
+          ansible_host: 10.0.12.66
+    docker:
+      children:
+        automation: {}
+    proxmox:
+      hosts:
+        pve01:
+          ansible_host: 10.0.10.201
+        pve02:
+          ansible_host: 10.0.10.202
+        pve03:
+          ansible_host: 10.0.10.203
+        pve04:
+          ansible_host: 10.0.10.204
+    ldapservers:
+      hosts:
+        ldap01: {}
+    proxmox__nodes:
+      hosts:
+        pve01: {}
+        pve02: {}
+        pve03: {}
+        pve04: {}
+    proxmox__all_lxc: {}
+    proxmox__all_qemu: {}
+    proxmox__all_running: {}
+    proxmox__all_stopped: {}
+    proxmox__pool_templates: {}
+    proxmox__pool_coreservices:
+      children:
+        ldapservers: {}
+        ldap_test: {}
+        pihole: {}
+        webservers: {}
+        openldap: {}
+    proxmox__pool_media:
+      children:
+        download_clients: {}
+        media_services: {}
+        mediaservers: {}
+        tdarr: {}
+    proxmox__pool_metrics:
+      children:
+        metrics_collectors: {}
+        grafana: {}
+        promscale: {}
+        influxdb_oss: {}
+    proxmox__pve01_lxc: {}
+    proxmox__pve01_qemu: {}
+    proxmox__pve02_qemu: {}
+    proxmox__pve02_lxc: {}
+    proxmox__pve03_lxc: {}
+    proxmox__pve03_qemu: {}
+    proxmox__pve04_lxc: {}
+    proxmox__pve04_qemu: {}
+    rsyslog_server: {}
+    tdarr:
+      children:
+        tdarr_node: {}
+        tdarr_server: {}
+    telegraf:
+      children:
+        automation: {}
+        ceph_reef: {}
+        cts: {}
+        proxmox: {}
+    template_builder:
+      hosts:
+        pve01: {}
+    user:
+      children:
+        alan: {}
+        teagan: {}

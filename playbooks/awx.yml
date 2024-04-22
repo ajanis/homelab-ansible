@@ -1,0 +1,23 @@
+---
+- name: Deploy / Update Ansible Tower Services
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add awx role
+      ansible.builtin.import_role:
+        name: awx
+
+    - name: Add awx role
+      ansible.builtin.import_role:
+        name: awx
+        tasks_from: container-tasks.yml
+
+    - name: Add awx role
+      ansible.builtin.import_role:
+        name: awx
+        tasks_from: awx-configuration.yml

@@ -1,0 +1,13 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{% for section in (cephadm_config_options|dict2items) %}
+[{{ section.key }}]
+  {% if section.key == 'global' %}
+  fsid = {{ fsid }}
+  mon_host = {{ mon_host }}
+  {% endif %}
+  {% for opt in section.value %}
+  {% if opt.name | regex_search('((.*_network|auth.*|.*autotune|.*autoscale.*|.*delete))') %}
+  {{ opt.name }} = {{ opt.value }}
+  {% endif %}
+  {% endfor %}
+{% endfor %}

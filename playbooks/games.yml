@@ -1,0 +1,19 @@
+---
+- name: Game Server Configs
+  hosts: games
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add docker role
+      ansible.builtin.include_role:
+        name: docker
+        public: true
+    - name: Add telegraf role
+      ansible.builtin.include_role:
+        name: telegraf
+        public: true
+      when: "'telegraf' in group_names"

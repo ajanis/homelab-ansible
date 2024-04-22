@@ -1,0 +1,76 @@
+---
+game_config_directory: games
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      from_beginning: "true"
+      timeout: 5s
+
+docker_compose_projects:
+  - project_name: game-servers
+    pull: true
+    definition:
+      version: "3.5"
+
+      networks:
+        game-servers:
+          name: game-servers
+          driver: bridge
+
+      services:
+        factorio:
+          image: factoriotools/factorio:0.17.79
+          networks:
+            game-servers:
+              aliases:
+                - factorio
+          container_name: factorio
+          environment:
+            PUID: "0"
+            PGUID: "0"
+            version: latest
+          volumes:
+            - "{{ data_mount_root }}/{{ configs_directory  }}/{{ game_config_directory  }}/factorio:/factorio"
+            - /etc/localtime:/etc/localtime:ro
+          ports:
+            - 34197:34197/udp
+            - 27015:27015/tcp
+
+  - project_name: voice-chat
+    pull: true
+    definition:
+      version: "3.5"
+
+      networks:
+        voice-chat:
+          name: voice-chat
+          driver: bridge
+
+      services:
+        teamspeak:
+          container_name: teamspeak
+          networks:
+            voice-chat:
+              aliases:
+                - ts3server
+          image: teamspeak
+          environment:
+            PUID: "0"
+            PGUID: "0"
+            version: latest
+            TS3SERVER_LICENSE: accept
+          volumes:
+            - "{{ data_mount_root }}/{{ configs_directory  }}/{{ game_config_directory  }}/teamspeak:/var/ts3server"
+            - /etc/localtime:/etc/localtime:ro
+          ports:
+            - 9987:9987/udp
+            - 10011:10011
+            - 30033:30033

@@ -1,0 +1,18 @@
+---
+- name: Collect KVM guests and create inventory file
+  hosts:
+    - kvm
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+    - name: Add kvm role
+      ansible.builtin.include_role:
+        name: kvm
+        tasks_from: guests.yml

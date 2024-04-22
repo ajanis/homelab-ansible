@@ -1,0 +1,60 @@
+---
+# Deploy Plex Media Server; NZB Services (Sonarr, Radarr, SABnzbd, OMBI);
+# Apache webserver (vhosts + reverse proxy configs for media services); Samba and Apple File Protocol file sharing services
+# Optionally deploy with NFS or CephFS storage backends (requires openldap role)
+
+- name: Deploy media, nzb, ceph, telegraf
+  hosts:
+    - plexservers
+  remote_user: root
+  gather_facts: true
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+      tags:
+        - common
+    - name: Add openldap role
+      ansible.builtin.import_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+      tags:
+        - openldap
+    - name: Add ceph-fs role
+      ansible.builtin.import_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"
+      tags:
+        - cephfs
+    - name: Add mediaserver role
+      ansible.builtin.import_role:
+        name: mediaserver
+      when: "'mediaservers' in group_names"
+      tags:
+        - mediaservers
+    - name: Add docker role
+      ansible.builtin.import_role:
+        name: docker
+      when: "'mediaservers' in group_names"
+      tags:
+        - docker
+    - name: Add nginx role
+      ansible.builtin.import_role:
+        name: nginx
+      when: "'webservices' in group_names"
+      tags:
+        - nginx
+    - name: Add telegraf role
+      ansible.builtin.import_role:
+        name: telegraf
+      when: "'telegraf' in group_names"
+      tags:
+        - telegraf
+    - name: Run setup
+      ansible.builtin.setup:
+      tags:
+        - always

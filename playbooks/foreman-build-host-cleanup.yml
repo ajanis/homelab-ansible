@@ -1,0 +1,11 @@
+---
+- name: "Remove hosts from local build server"
+  hosts: all
+  remote_user: root
+  vars_files:
+    - vault.yml
+  tasks:
+    - name: Add foreman role
+      ansible.builtin.import_role:
+        name: foreman
+        tasks_from: foreman-host-cleanup.yml

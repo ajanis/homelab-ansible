@@ -1,0 +1,11 @@
+---
+dummy:
+ceph_mgr_modules:
+  - status
+  - dashboard
+  - influx
+  - telegraf
+  - prometheus
+  - iostat
+  - selftest
+  - pg_autoscaler

@@ -1,0 +1,50 @@
+---
+- name: Ceph Orch Add Host
+  hosts: ceph_reef
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Add a new Ceph node
+      run_once: true
+      delegate_to: localhost
+      block:
+        - name: Prompt for Ceph node to remove from existing host list
+          ansible.builtin.pause:
+            prompt: |
+              Enter the 'hostname' for the Ceph node you are removing:
+          register: host_removal_selection
+
+        - name: Validate that the correct Ceph node has been selected for removal
+          ansible.builtin.pause:
+            prompt: |
+              Validate Ceph node for removal is correct:
+                {{ host_removal_selection }}
+              Is this correct }}
+          register: ceph_old_node_validated
+
+        - name: Draining Ceph node via 'ceph orch'
+          ceph_orch_host:
+            name: "{{ host_removal_selection }}"
+            fsid: "{{ fsid }}"
+            state: drain
+          register: ceph_orch_host_drain
+          until: ceph_orch_host_drain is not failed
+          retries: 5
+          delay: 30
+          timeout: 30
+          when: ceph_old_node_validated is defined
+          changed_when: ceph_orch_host_drain is not failed
+          failed_when: false
+
+        - name: Remove old Ceph node via 'ceph orch'
+          ceph_orch_host:
+            name: "{{ host_removal_selection }}"
+            fsid: "{{ fsid }}"
+            state: absent
+          register: ceph_orch_host_removed
+          until: ceph_orch_host_removed is not failed
+          retries: 5
+          delay: 30
+          timeout: 30
+          changed_when: ceph_host_removed is not failed
+          when: ceph_orch_host_drain is defined

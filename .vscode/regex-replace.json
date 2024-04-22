@@ -1,0 +1,11 @@
+[{
+  "command": "regex.replace",
+  "args": {
+      "info": "Replace Ansible Module with Fully-Qualified Module Name, keeping appropriate indentatons and line breaks.  The 'Block' keyword is ignored",
+      "find": "(^.+name:\\s)(?:\\?.)(.+)(?:\\?.)($\n)(^\\s+?)((?!block)[a-z]+:$)",
+      "replace": "$1$2ansible.builtin.$3",
+      "all": true,
+      "reg": true,
+      "flag": "gm"
+  }
+}]

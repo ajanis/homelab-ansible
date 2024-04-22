@@ -1,0 +1,431 @@
+---
+grafana_admin_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  34626237306536396132363932383761333963313130353866343963313236653731626134653364
+  6232353331393838343434393637396263633135663063650a653932636163633266626431666661
+  34643965373665303632383032303563633865653838343365616366303765616636366265393335
+  3763356266613539340a666462613931323861363934343939616536383762643361663731316432
+  3564
+
+grafana_pg_pass: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  66306438383234343465306537323532636366633364303938366464346165663966613632666164
+  6339313936353334386134313164373661626336333965310a393637343363383334313939373539
+  30626532333137386166313830383130343031343932313863613137376232323461303662636332
+  6362303633343635380a613665616363666337313637656131393061376337633532643263623063
+  3135
+
+grafana_default_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  34626237306536396132363932383761333963313130353866343963313236653731626134653364
+  6232353331393838343434393637396263633135663063650a653932636163633266626431666661
+  34643965373665303632383032303563633865653838343365616366303765616636366265393335
+  3763356266613539340a666462613931323861363934343939616536383762643361663731316432
+  3564
+
+grafana_api_token: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  39383366616235656462613965343934386137646364393438616466306361356234313336323432
+  6661336366336531323434373833336233333336643236320a376636303639633761636636393664
+  32323161303239343465326332326537316533653161303330656563663764306539353661623439
+  6163663434636430370a373737303436623631333936656234333337623563396463366565633263
+  38396131623838656136333934356433653534313361306335613936633030643937316632373461
+  3461336366633761623632653337373762363831343937306238
+
+docker_install_community_edition: true
+
+### Grafana Configurations
+grafana_enable_auth_ldap: true
+grafana_enable_auth_anonymous: false
+grafana_enable_smtp: true
+grafana_smtp_host: smtp.gmail.com
+grafana_smtp_port: "587"
+grafana_smtp_user: eddie.heartofgold.galaxy@gmail.com
+grafana_smtp_password: "{{ vault_eddie_gmail_password }}"
+grafana_smtp_from_address: eddie.heartofgold.galaxy@gmail.com
+grafana_smtp_from_name: Grafana Alerts
+grafana_install_release: latest
+grafana_database_host: "{{ ansible_default_ipv4.address | default('postgres') }}"
+grafana_database_type: postgres
+grafana_database_user: postgres
+grafana_database_name: grafana
+grafana_database_user_password: "{{ vault_grafana_pg_pass }}"
+grafana_database_log_queries: false
+grafana_remote_cache: redis
+grafana_cache_connstr: addr=redis:6379,pool_size=100,db=0,ssl=insecure
+grafana_postgres_ssl_mode: disable
+grafana_session_provider: redis
+grafana_provider_config: addr=redis:6379,pool_size=100,db=grafana,ssl=insecure
+grafana_database_max_idle_conn: "25"
+grafana_database_max_open_conn: "300"
+
+# Docker Compose Project for Grafana Ecosystem
+docker_compose_projects:
+  - project_name: metrics
+    pull: "{{ docker_recreate | default(False) }}"
+    build: "{{ docker_recreate | default(False) }}"
+    nocache: "{{ docker_recreate | default(False) }}"
+    recreate: "{{ docker_recreate | default(False) }}"
+    remove_orphans: "{{ docker_recreate | default(False) }}"
+    debug: true
+    definition:
+      version: "3.9"
+
+      x-logging: &default-logging
+        driver: journald
+
+      networks:
+        metrics:
+          name: metrics
+          driver: bridge
+
+      services:
+        # Mimir Container
+        mimir:
+          hostname: mimir
+          container_name: mimir
+          privileged: true
+          restart: unless-stopped
+          image: grafana/mimir:latest
+          volumes:
+            - /opt/mimir/config:/etc/mimir-config
+            - /opt/mimir/data:/var/lib/mimir
+            - /opt/mimir/logs:/var/log/mimir
+            - /etc/localtime:/etc/localtime:ro
+          entrypoint:
+            - /bin/mimir
+            - -config.file=/etc/mimir-config/mimir.yaml
+          networks:
+            metrics:
+              aliases:
+                - mimir
+          ports:
+            - 9009:9009
+          logging:
+            <<: *default-logging
+            options:
+              tag: mimir
+        # Loki Container
+        loki:
+          container_name: loki
+          hostname: loki
+          image: grafana/loki:latest
+          restart: unless-stopped
+          privileged: true
+          networks:
+            metrics:
+              aliases:
+                - loki
+          ports:
+            - 3100:3100
+            - 7946
+            - 9095
+          volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/loki/log:/var/log/loki
+            - /opt/loki/config:/etc/loki
+            - /opt/loki/data:/var/lib/loki
+          command: -config.file=/etc/loki/config.yaml
+          healthcheck:
+            test:
+              - CMD-SHELL
+              - wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1
+            interval: 10s
+            timeout: 5s
+            retries: 5
+          logging:
+            <<: *default-logging
+            options:
+              tag: loki # Alert Manager Container
+        alertmanager:
+          container_name: alertmanager
+          hostname: alertmanager
+          image: prom/alertmanager:latest
+          restart: unless-stopped
+          privileged: true
+          networks:
+            metrics:
+              aliases:
+                - alertmanager
+          ports:
+            - 9093:9093
+          volumes:
+            - /opt/alertmanager/config:/config
+            - /opt/alertmanager/data:/data
+          command: --config.file=/config/alertmanager.yml --log.level=debug
+          logging:
+            <<: *default-logging
+            options:
+              tag: alertmanager
+        # Grafana Container
+        grafana:
+          hostname: grafana
+          container_name: grafana
+          privileged: true
+          restart: unless-stopped
+          networks:
+            metrics:
+              aliases:
+                - grafana
+                - grafana-server
+          ports:
+            - 3000:3000
+          image: grafana/grafana-oss:latest
+          depends_on:
+            - redis
+            - postgres
+          volumes:
+            - /opt/grafana/data:/var/lib/grafana
+            - /opt/grafana/config:/etc/grafana
+            - /opt/grafana/log:/var/log/grafana
+            - /etc/localtime:/etc/localtime:ro
+          environment:
+            GF_PATHS_CONFIG: /etc/grafana/grafana.ini
+            GF_PATHS_DATA: /var/lib/grafana
+            GF_PATHS_HOME: /usr/share/grafana
+            GF_PATHS_LOGS: /var/log/grafana
+            GF_PATHS_PLUGINS: /var/lib/grafana/plugins
+            GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+            GF_DATABASE_TYPE: postgres
+            GF_USERS_DEFAULT_THEME: dark
+            GF_LOG_LEVEL: info
+            PUID: "0"
+            PGID: "0"
+            GF_REMOTE_CACHE_TYPE: redis
+            GF_REMOTE_CACHE_CONNSTR: addr=redis:6379,pool_size=100,db=0,ssl=insecure
+            GF_SESSION_PROVIDER: redis
+            GF_SESSION_PROVIDER_CONFIG: addr=redis:6379,pool_size=100,db=grafana,ssl=insecure
+            GF_SESSION_SESSION_LIFE_TIME: "86400"
+            GF_SESSION_COOKIE_NAME: grafana_session
+            GF_SESSION_COOKIE_SECURE: "false"
+            VERSION: latest
+            GF_DATABASE_HOST: postgres:5432
+            GF_DATABASE_SSL_MODE: disable
+            GF_DATABASE_NAME: grafana
+            GF_DATABASE_USER: "{{ grafana_database_user | default('admin') }}"
+            GF_DATABASE_PASSWORD: "{{ grafana_database_user_password | default('admin') }}"
+            GF_AUTH_ANONYMOUS_ENABLED: "true"
+            GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+            GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-polystat-panel,grafana-piechart-panel,grafana-worldmap-panel
+            GF_SECURITY_ALLOW_EMBEDDING: "true"
+            GF_SECURITY_COOKIE_SECURE: "true"
+            GF_SECURITY_COOKIE_SAMESITE: none
+            GF_SECURITY_LOGIN_REMEMBER_DAYS: "587"
+            GF_SECURITY_COOKIE_USERNAME: grafana_user
+            GF_SECURITY_COOKIE_REMEMBER_NAME: grafana_remember
+            DOCKER_MODS: ghcr.io/gilbn/theme.park:grafana
+            TP_THEME: "{{ tp_theme }}"
+            TP_COMMUNITY_THEME: "{{ tp_community_theme | default('false') }}"
+            TP_ADDON: overseerr-side-menu
+          entrypoint:
+            - /run.sh
+          healthcheck:
+            test:
+              - CMD-SHELL
+              - wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+            interval: 10s
+            timeout: 5s
+            retries: 5
+          logging:
+            <<: *default-logging
+            options:
+              tag: grafana
+        # Redis Container
+        redis:
+          hostname: redis
+          container_name: redis
+          privileged: true
+          restart: unless-stopped
+          image: redis:latest
+          networks:
+            metrics:
+              aliases:
+                - redis
+          ports:
+            - 6379:6379
+          volumes:
+            - /opt/redis/data:/data
+            - /opt/redis/config:/etc/redis
+          environment:
+            DOCKER_CLIENT_TIMEOUT: "300"
+          logging:
+            <<: *default-logging
+            options:
+              tag: redis
+        # Postgres Container
+        postgres:
+          hostname: postgres
+          container_name: postgres
+          privileged: true
+          restart: unless-stopped
+          image: postgres:15
+          networks:
+            metrics:
+              aliases:
+                - postgres
+                - postgresql
+          ports:
+            - 5432:5432
+          environment:
+            PUID: 0
+            PGID: 0
+            VERSION: latest
+            POSTGRES_PASSWORD: "{{ grafana_database_user_password | default('admin') }}"
+            POSTGRES_DB: grafana
+            POSTGRES_USER: postgres
+          volumes:
+            - /opt/postgresql/data:/var/lib/postgresql
+            - /opt/postgresql/etc:/etc/postgresql
+            - /opt/postgresql/logs:/var/log/postgresql
+            - /etc/localtime:/etc/localtime:ro
+          logging:
+            <<: *default-logging
+            options:
+              tag: postgres
+
+repositories:
+  maas_loki_alert_rules: https://github.com/canonical/maas-loki-alert-rules.git
+
+docker_config_files:
+  - path: /opt/loki/config/config.yaml
+    config: |
+      {% raw %}
+      auth_enabled: false
+      server:
+        http_listen_port: 3100
+        grpc_listen_port: 9095
+      common:
+        path_prefix: /var/lib/loki/
+        storage:
+          filesystem:
+            chunks_directory: /var/lib/loki/chunks
+            rules_directory: /var/lib/loki/rules
+        replication_factor: 1
+        ring:
+          instance_addr: 127.0.0.1
+          kvstore:
+            store: inmemory
+      schema_config:
+        configs:
+          - from: 2020-10-24
+            store: boltdb-shipper
+            object_store: filesystem
+            schema: v11
+            index:
+              prefix: index_
+              period: 24h
+      ruler:
+        alertmanager_url: http://alertmanager:9093
+        evaluation_interval: 15s
+        poll_interval: 1m
+        storage:
+          type: local
+          local:
+            directory: /var/lib/loki/rules
+        enable_api: true
+      {% endraw %}
+
+  - path: /opt/grafana/config/provisioning/ds.yaml
+    config: |
+      {% raw %}
+      apiVersion: 1
+      datasources:
+        - name: Mimir
+          type: prometheus
+          access: proxy
+          uid: mimir
+          url: http://mimir:9009/prometheus
+        - name: Loki
+          type: loki
+          access: proxy
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: false
+          version: 1
+          editable: true
+        - name: Alertmanager
+          type: alertmanager
+          url: http://alertmanager:9093
+          access: proxy
+          jsonData:
+            # Valid options for implementation include mimir, cortex and prometheus
+            implementation: prometheus
+            # Whether or not Grafana should send alert instances to this Alertmanager
+            handleGrafanaManagedAlerts: true
+      {% endraw %}
+  - path: /opt/mimir/config/mimir.yaml
+    config: |
+      {% raw %}
+      multitenancy_enabled: false
+      activity_tracker: {}
+      alertmanager: {}
+      alertmanager_storage:
+        backend: local
+      server:
+        http_listen_port: 9009
+        grpc_server_max_recv_msg_size: 104857600
+        grpc_server_max_send_msg_size: 104857600
+        grpc_server_max_concurrent_streams: 1000
+      distributor:
+        pool:
+          health_check_ingesters: true
+      ingester_client:
+        grpc_client_config:
+          grpc_compression: gzip
+          max_recv_msg_size: 104857600
+          max_send_msg_size: 104857600
+      ingester:
+        ring:
+          final_sleep: 0s
+          kvstore:
+            store: inmemory
+          min_ready_duration: 0s
+          num_tokens: 512
+          replication_factor: 1
+      blocks_storage:
+        backend: filesystem
+        bucket_store:
+          sync_dir: /tmp/mimir/tsdb-sync
+        filesystem:
+          dir: /tmp/mimir/blocks
+        tsdb:
+          dir: /tmp/mimir/tsdb
+      compactor:
+        sharding_ring:
+          kvstore:
+            store: inmemory
+      ruler:
+        enable_api: true
+      ruler_storage:
+        backend: filesystem
+        local:
+          directory: /tmp/mimir/rules
+      limits:
+        ingestion_burst_size: 500000
+        ingestion_rate: 250000
+      {% endraw %}
+
+
+telegraf_plugins_extra:
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"
+  - name: postgresql
+    options:
+      address: postgres://grafana:{{ grafana_database_user_password | default('admin') }}@localhost
+      ignored_databases:
+        - template0
+        - template1
+  - name: redis
+    options:
+      servers:
+        - tcp://localhost:6379

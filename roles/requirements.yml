@@ -1,0 +1,117 @@
+---
+roles:
+  - src: https://github.com/constructorfleet/ansible-user.git
+    name: user
+    version: v2.3
+
+  - src: https://github.com/ajanis/ansible-common.git
+    name: common
+    version: v3.0.5
+
+  - src: https://github.com/ajanis/ansible-pve-template.git
+    name: common
+    version: v1.0.0
+
+  - src: https://github.com/ajanis/ansible-openldap.git
+    name: openldap
+    version: v6.0.4
+
+  - src: https://github.com/ajanis/ansible-ceph-fs.git
+    name: ceph-fs
+    version: v4.5.0
+
+  - src: https://github.com/ajanis/ansible-docker.git
+    name: docker
+    version: v9.6.5
+
+  - src: https://github.com/ajanis/ansible-telegraf.git
+    name: telegraf
+    version: v2.6.3
+
+  - src: https://github.com/ajanis/ansible-nginx.git
+    name: nginx
+    version: v2.7.1
+
+  - src: https://github.com/constructorfleet/ansible-grafana.git
+    name: grafana
+    version: v1.4
+
+  - src: https://github.com/ajanis/ansible-influxdb.git
+    name: influxdb
+    version: v1.9
+
+  - src: https://github.com/ajanis/ansible-chronograf.git
+    name: chronograf
+    version: master
+
+  - src: https://github.com/ajanis/ansible-kapacitor.git
+    name: kapacitor
+    version: master
+
+  - src: https://github.com/ajanis/ansible-rsyslog.git
+    name: rsyslog
+    version: v1.1
+
+  - src: https://github.com/stefangweichinger/ansible-rclone.git
+    name: rclone
+    version: main
+
+  - src: https://github.com/ajanis/ansible-ilo.git
+    name: ilo
+    version: master
+
+  - src: https://github.com/constructorfleet/ansible-netplan.git
+    name: netplan
+    version: v0.5
+
+  - src: https://github.com/constructorfleet/ansible-edgetpu.git
+    name: edgetpu
+    version: master
+
+  # - src: https://github.com/constructorfleet/ansible-nvidia-docker.git
+  #   name: nvidia-docker
+  #   version: master
+
+  # - src: https://github.com/constructorfleet/ansible-nvidia-cuda.git
+  #   name: nvidia-cuda
+  #   version: master
+
+  # - src: https://github.com/ajanis/ansible-unifi.git
+  #   name: unifi
+  #   version: master
+
+  # - src: https://github.com/ajanis/ansible-mediaserver.git
+  #   name: mediaserver
+  #   version: v1.3
+
+  # - src: https://github.com/ajanis/ansible-kvm.git
+  #   name: kvm
+  #   version: v1.2
+
+  # - src: https://github.com/constructorfleet/ansible-awx.git
+  #   name: awx
+  #   version: v0.5.2
+
+  # - src: https://github.com/ajanis/ansible-foreman.git
+  #   name: foreman
+  #   version: master
+
+  # - src: https://github.com/ajanis/ansible-isc_dhcp_server.git
+  #   name: isc_dhcp_server
+  #   version: master
+
+  # - src: https://github.com/ajanis/ansible-isc_bind_server.git
+  #   name: isc_bind_server
+  #   version: master
+
+  # - src: https://github.com/ajanis/ansible-tftp.git
+  #   name: tftp
+  #   version: master
+
+  # - src: https://github.com/constructorfleet/ansible-iot_firewall_allow.git
+  #   name: iot_firewall_allow
+  #   version: master
+
+  #  - src: https://github.com/custom-components/ble_monitor.git
+  #    name: ble_monitor
+  #    version: master

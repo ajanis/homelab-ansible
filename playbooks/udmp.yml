@@ -1,0 +1,39 @@
+---
+- name: Create backup script for udmpro
+  hosts: webservices
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add common role
+      ansible.builtin.import_role:
+        name: common
+    - name: Add openldap role
+      ansible.builtin.import_role:
+        name: openldap
+      when: openldap_server_ip is defined and openldap_server_ip != None
+    - name: Add ceph-fs role
+      ansible.builtin.import_role:
+        name: ceph-fs
+      when:
+        - shared_storage
+        - storage_backend == "cephfs"
+    - name: Create backup script for udmpro
+      ansible.builtin.cron:
+        name: "udmpro-config-rsync"
+        minute: "45"
+        hour: "*"
+        day: "*"
+        job: "/usr/bin/scp -r root@192.168.1.2:/data/unifi/data/backup /data/configs/udmpro/"
+        state: present
+      tags:
+        - udmp-cron
+    - name: Add telegraf role
+      ansible.builtin.import_role:
+        name: telegraf
+      when: "'telegraf' in group_names"
+    - name: Run setup
+      ansible.builtin.setup:

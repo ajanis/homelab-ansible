@@ -1,0 +1,59 @@
+---
+docker_install_community_edition: true
+
+docker_compose_projects:
+  - project_name: dashy
+    pull: "{{ docker_recreate | default(False) }}"
+    definition:
+      version: "3.9"
+      x-logging: &default-logging
+        driver: journald
+      networks:
+        default:
+          driver: bridge
+      services:
+        dashy:
+          image: lissy93/dashy:latest
+          hostname: dashy
+          container_name: dashy
+          volumes:
+            - /opt/dashy:/app/public
+          ports:
+            - 80:80
+          environment:
+            NODE_ENV: production
+            UID: 0
+            GID: 0
+            PUID: 0
+            PGID: 0
+          restart: unless-stopped
+          healthcheck:
+            test: [CMD, node, /app/services/healthcheck]
+            interval: 1m30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+          logging:
+            <<: *default-logging
+            options:
+              tag: dashy
+          networks:
+            default:
+              aliases:
+                - dashy
+
+telegraf_plugins_extra:
+  - name: syslog
+    options:
+      server: tcp://:6514
+  - name: docker
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      perdevice: "true"
+      total: "true"
+  - name: docker_log
+    options:
+      endpoint: unix:///var/run/docker.sock
+      timeout: 5s
+      source_tag: "true"

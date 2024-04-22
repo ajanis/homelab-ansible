@@ -1,0 +1,10 @@
+---
+- name: Deploy nvmesh telegraf
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Add telegraf role
+      ansible.builtin.import_role:
+        name: telegraf
+        tasks_from: nvmesh-plugin.yml

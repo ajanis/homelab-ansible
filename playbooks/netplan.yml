@@ -1,0 +1,13 @@
+---
+- name: Update network configuration via netplan
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add netplan role
+      ansible.builtin.import_role:
+        name: netplan

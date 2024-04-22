@@ -1,0 +1,93 @@
+---
+- name: Deploy Foreman and AWX/Tower Services
+  hosts:
+    - foreman
+    - webservices
+  remote_user: root
+  gather_facts: true
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Deploy common, openldap-client, and ceph-fs services
+      block:
+        - name: Add common role
+          ansible.builtin.import_role:
+            name: common
+          tags:
+            - common
+        - name: Add openldap role
+          ansible.builtin.import_role:
+            name: openldap
+          when: openldap_server_ip is defined and openldap_server_ip != None
+          tags:
+            - openldap
+        - name: Add ceph-fs role
+          ansible.builtin.import_role:
+            name: ceph-fs
+          tags:
+            - cephfs
+        - name: Add nginx role
+          ansible.builtin.import_role:
+            name: nginx
+          tags:
+            - nginx
+
+    - name: Deploy Foreman, AWX/Tower, TFTP and DHCP Services
+      when: "'foreman' in group_names"
+      block:
+        - name: Add isc_dhcp_server role
+          ansible.builtin.import_role:
+            name: isc_dhcp_server
+          tags:
+            - dhcpd
+          when: foreman_proxy_dhcp
+        - name: Add isc_bind_server role
+          ansible.builtin.import_role:
+            name: isc_bind_server
+          tags:
+            - named
+          when: foreman_proxy_dns
+        - name: Add tftp role
+          ansible.builtin.import_role:
+            name: tftp
+          tags:
+            - tftpd
+          when: foreman_proxy_tftp
+        - name: Add awx role
+          ansible.builtin.import_role:
+            name: awx
+          tags:
+            - awx
+        - name: Add docker role
+          ansible.builtin.import_role:
+            name: docker
+          tags:
+            - docker
+        - name: Add awx role
+          ansible.builtin.import_role:
+            name: awx
+            tasks_from: container-tasks.yml
+          tags:
+            - awx
+        - name: Add foreman role
+          ansible.builtin.import_role:
+            name: foreman
+          tags:
+            - foreman
+        - name: Add awx role
+          ansible.builtin.import_role:
+            name: awx
+            tasks_from: awx-configuration.yml
+          tags:
+            - awx
+
+    - name: Configure Telegraf
+      block:
+        - name: Add telegraf role
+          ansible.builtin.import_role:
+            name: telegraf
+          tags:
+            - telegraf
+        - name: Run setup
+          ansible.builtin.setup:

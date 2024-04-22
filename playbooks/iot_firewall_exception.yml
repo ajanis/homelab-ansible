@@ -1,0 +1,13 @@
+---
+- name: Add IOT host to PFSense Allow-Ceph and Allow-LDAP Rules
+  hosts: all
+  remote_user: root
+  gather_facts: true
+
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Add iot_firewall_allow role
+      ansible.builtin.import_role:
+        name: iot_firewall_allow

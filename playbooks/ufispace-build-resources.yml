@@ -1,0 +1,17 @@
+- name: Deploy Ufispace build scripts and images
+  hosts: siad
+  become: true
+  remote_user: root
+
+  tasks:
+    - name: Add ansible role
+      ansible.builtin.include_role:
+        name: ansible
+    - name: Add siad role
+      ansible.builtin.include_role:
+        name: siad
+        tasks_from: ufispace_build_resources.yml
+      tags:
+        - images
+        - scripts
+        - rsyslog

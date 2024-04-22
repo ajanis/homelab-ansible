@@ -1,0 +1,6 @@
+---
+# Telegraf
+
+telegraf_timescale_tags_as_foreignkeys: "false"
+telegraf_timescale_tags_as_jsonb: "false"
+telegraf_timescale_fields_as_jsonb: "false"

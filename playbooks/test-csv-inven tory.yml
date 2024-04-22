@@ -1,0 +1,38 @@
+- name: "Csv inventory"
+  hosts: localhost
+  gather_facts: true
+
+  tasks:
+    # - name: Gather facts from all servers
+    #   ansible.builtin.setup:
+    #   delegate_to: "{{ item }}"
+    #   delegate_facts: true
+    #   loop: "{{ groups['all'] }}"
+    #   run_once: true
+    #   tags:
+    #     - always
+
+    - name: Build host/group mapping file
+      ansible.builtin.template:
+        dest: ../include/list.csv
+        lstrip_blocks: false
+        mode: "0755"
+        output_encoding: utf-8
+        src: ../include/list.csv.j2
+        trim_blocks: true
+
+    - name: Print host/group mappings
+      ansible.builtin.debug:
+        msg: |
+          {%- for hostname in groups['all'] -%}
+          "{%- for group in hostvars[hostname]['group_names'] -%}
+          {{ group | replace('_',' ') | title }}{% if not loop.last %}/{% endif %}
+          {%- endfor -%}"
+          {{ hostname }}
+          "{%- for group in hostvars[hostname]['group_names'] -%}
+          {{ group | lower }}{% if not loop.last %},{% endif %}
+          {%- endfor -%}"
+          {{ hostvars[hostname]['ansible_ssh_host'] }}
+          ssh
+          22
+          {% endfor %}
